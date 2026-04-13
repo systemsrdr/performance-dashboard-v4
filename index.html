@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V4 RDR — Intelligence Dashboard</title>
+    <title>V4 RDR — High Performance Management</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { background: var(--bg); color: var(--tx); font-family: 'Inter', sans-serif; }
 
-        /* --- HOME SCREEN FIXA --- */
+        /* --- HOME STYLE (FIXO) --- */
         #home-screen { padding: 60px 20px; max-width: 1100px; margin: 0 auto; display: none; }
         .home-header { margin-bottom: 40px; text-align: left; }
         .home-header h1 { font-size: 32px; font-weight: 800; color: #1a1a1a; }
@@ -48,7 +48,6 @@
         .kpi-label { font-size: 11px; color: var(--tx2); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
         .kpi-val { font-size: 24px; font-weight: 800; color: #1a1a1a; }
 
-        /* TABLES */
         .card { background: #fff; border-radius: 10px; box-shadow: var(--sh); border: 1px solid var(--brd); margin-bottom: 24px; overflow: hidden; }
         .card-hd { padding: 16px 24px; border-bottom: 1px solid var(--brd); font-weight: 800; background: #f9fafb; font-size: 14px; }
         .tbl-wrap { overflow-x: auto; }
@@ -56,13 +55,11 @@
         .tbl th { text-align: left; padding: 14px 20px; background: #f4f6f8; color: var(--tx2); font-size: 11px; text-transform: uppercase; }
         .tbl td { padding: 14px 20px; border-bottom: 1px solid var(--brd); color: #1a1a1a; }
 
-        /* ADS GALLERY */
         .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px; }
         .ad-card { background: #fff; border-radius: 12px; border: 1px solid var(--brd); overflow: hidden; box-shadow: var(--sh); }
         .ad-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #eee; }
         .ad-body { padding: 12px; font-size: 12px; }
 
-        /* CALENDAR */
         .date-picker { display: flex; align-items: center; background: #fff; border-radius: 8px; border: 1px solid var(--brd); padding: 4px 8px; }
         .date-input { border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 700; padding: 6px; outline: none; }
         .apply-btn { background: var(--v4-red); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 800; cursor: pointer; }
@@ -134,7 +131,7 @@
                     <div class="kpi-card"><div class="kpi-label">Investimento</div><div class="kpi-val" id="k-sp">R$ 0</div></div>
                     <div class="kpi-card"><div class="kpi-label">Faturamento</div><div class="kpi-val" id="k-fat">R$ 0</div></div>
                     <div class="kpi-card"><div class="kpi-label">Vendas/Leads</div><div class="kpi-val" id="k-v">0</div></div>
-                    <div class="kpi-card"><div class="kpi-label">ROAS/CPA</div><div class="kpi-val" id="k-roas">0.0</div></div>
+                    <div class="kpi-card"><div class="kpi-label">ROI Geral</div><div class="kpi-val" id="k-roas">0.0</div></div>
                 </div>
                 <div class="card">
                     <div class="card-hd">Mix de Investimento por Canal</div>
@@ -143,15 +140,15 @@
             </div>
 
             <div id="sec-meta" class="section" style="display:none">
-                <div class="card"><div class="card-hd">Desempenho Meta Ads</div><div class="tbl-wrap"><table class="tbl" id="tb-meta"></table></div></div>
+                <div class="card"><div class="card-hd">Campanhas Meta Ads</div><div class="tbl-wrap"><table class="tbl" id="tb-meta"></table></div></div>
             </div>
 
             <div id="sec-google" class="section" style="display:none">
-                <div class="card"><div class="card-hd">Desempenho Google Ads</div><div class="tbl-wrap"><table class="tbl" id="tb-google"></table></div></div>
+                <div class="card"><div class="card-hd">Campanhas Google Ads</div><div class="tbl-wrap"><table class="tbl" id="tb-google"></table></div></div>
             </div>
 
             <div id="sec-ads" class="section" style="display:none">
-                <div id="ad-loader" style="text-align:center;padding:50px; font-weight:700; display:none">CARREGANDO...</div>
+                <div id="ad-loader" style="text-align:center;padding:50px; font-weight:700; display:none">CARREGANDO ANÚNCIOS...</div>
                 <div class="ad-grid" id="ad-box"></div>
             </div>
         </main>
@@ -189,6 +186,7 @@
             const t = document.getElementById('d-t').value;
             document.getElementById('status').textContent = "SINCRONIZANDO...";
 
+            // 1. Windsor API
             const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${f}&date_to=${t}&fields=source,account_id,spend,campaign,clicks,conversions`;
             const r = await fetch(url);
             const j = await r.json();
@@ -197,18 +195,20 @@
             j.data.forEach(row => {
                 if (C.ids.includes(String(row.account_id))) {
                     const v = parseFloat(row.spend || 0);
-                    if (row.source.includes('facebook')) { midia.m.push(row); midia.mSp += v; }
-                    else { midia.g.push(row); midia.gSp += v; }
+                    if (row.source.includes('facebook') || row.source.includes('meta')) { midia.m.push(row); midia.mSp += v; }
+                    else if (row.source.includes('google')) { midia.g.push(row); midia.gSp += v; }
                 }
             });
 
+            // 2. Planilha
             if (C.sheet) {
                 Papa.parse(C.sheet, {
                     download: true, header: true,
                     complete: (res) => {
                         const mes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(t)).toLowerCase();
                         res.data.forEach(row => {
-                            if (String(row['Mês']||'').toLowerCase().includes(mes)) {
+                            const mesRow = String(row['Mês']||row['mês']||'').toLowerCase();
+                            if (mesRow.includes(mes)) {
                                 fin.fat = parseFloat(String(row['Faturamento']||0).replace(/[R$\s.]/g,'').replace(',','.'));
                                 fin.v = parseInt(row['Vendas']||row['Vendas Totais']||0);
                             }
@@ -217,57 +217,17 @@
                     }
                 });
             } else { 
-                fin = { fat: 0, v: midia.m.reduce((a,x)=>a+parseInt(x.conversions),0) + midia.g.reduce((a,x)=>a+parseInt(x.conversions),0) };
+                fin.fat = 0;
+                fin.v = midia.m.reduce((a,x)=>a+parseInt(x.conversions||0),0) + midia.g.reduce((a,x)=>a+parseInt(x.conversions||0),0);
                 render(); 
             }
         }
 
         function render() {
-            const totalSp = midia.mSp + midia.gSp;
-            document.getElementById('k-sp').textContent = "R$ " + totalSp.toLocaleString('pt-BR');
+            document.getElementById('k-sp').textContent = "R$ " + (midia.mSp + midia.gSp).toLocaleString('pt-BR');
             document.getElementById('k-fat').textContent = "R$ " + fin.fat.toLocaleString('pt-BR');
             document.getElementById('k-v').textContent = fin.v;
-            
-            if(cid === 'starman') {
-                document.getElementById('k-roas').textContent = "R$ " + (totalSp / (fin.v || 1)).toFixed(2);
-                document.querySelector('[id="k-roas"]').previousElementSibling.textContent = "CPA";
-            } else {
-                document.getElementById('k-roas').textContent = (fin.fat / (totalSp || 1)).toFixed(2) + "x";
-            }
+            document.getElementById('k-roas').textContent = (fin.fat / (midia.mSp + midia.gSp || 1)).toFixed(2) + "x";
 
             const h = `<thead><tr><th>Campanha</th><th>Gasto</th><th>Cliques</th><th>Resultados</th></tr></thead><tbody>`;
-            document.getElementById('tb-meta').innerHTML = h + midia.m.map(r => `<tr><td style="font-weight:700">${r.campaign.substring(0,40)}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td>${r.conversions}</td></tr>`).join('') + "</tbody>";
-            document.getElementById('tb-google').innerHTML = h + midia.g.map(r => `<tr><td style="font-weight:700">${r.campaign.substring(0,40)}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td>${r.conversions}</td></tr>`).join('') + "</tbody>";
-
-            if (charts.main) charts.main.destroy();
-            charts.main = new Chart(document.getElementById('c-main'), {
-                type: 'bar',
-                data: { labels: ['Meta Ads', 'Google Ads'], datasets: [{ label: 'Investimento (R$)', data: [midia.mSp, midia.gSp], backgroundColor: '#e8000d', borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-            document.getElementById('status').textContent = "DADOS ATUALIZADOS ✓";
-        }
-
-        function tab(name, btn) {
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            document.getElementById('sec-' + name).style.display = 'block';
-            document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if (name === 'ads') loadAds();
-        }
-
-        async function loadAds() {
-            document.getElementById('ad-loader').style.display='block';
-            const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${document.getElementById('d-f').value}&date_to=${document.getElementById('d-t').value}&fields=account_id,ad_name,picture,spend,conversions`;
-            const r = await fetch(url); const j = await r.json();
-            const box = document.getElementById('ad-box'); box.innerHTML = '';
-            j.data.forEach(ad => {
-                if (C.ids.includes(String(ad.account_id)) && ad.picture) {
-                    box.innerHTML += `<div class="ad-card"><img src="${ad.picture}" class="ad-img"><div class="ad-body"><b>${ad.ad_name.substring(0,25)}</b><br>Gasto: R$ ${parseFloat(ad.spend).toFixed(0)}</div></div>`;
-                }
-            });
-            document.getElementById('ad-loader').style.display='none';
-        }
-    </script>
-</body>
-</html>
+            document.getElementById('tb-meta').innerHTML = h + midia.m.map(r => `<tr><td style="font-weight:700">${r.campaign}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td>${r.conversions}</td>
