@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V4 Company — Dashboards</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#F4F5F7;font-family:'Inter',sans-serif;min-height:100vh}
+body{display:flex;flex-direction:column;min-height:100vh}
+
+/* TOP NAV */
+.nav{background:#fff;border-bottom:1px solid #E8EAED;padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-icon{width:32px;height:32px;background:#E8000D;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-logo-text{font-size:15px;font-weight:700;color:#1A1A2E;letter-spacing:-.3px}
+.nav-logo-sub{font-size:12px;color:#6B7280;font-weight:400}
+.nav-badge{background:#F3F4F6;border:1px solid #E5E7EB;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:#6B7280}
+
+/* MAIN */
+.main{flex:1;max-width:960px;margin:0 auto;padding:48px 24px;width:100%}
+.page-header{margin-bottom:40px}
+.breadcrumb{font-size:12px;color:#9CA3AF;margin-bottom:10px}
+.page-title{font-size:28px;font-weight:700;color:#1A1A2E;margin-bottom:6px}
+.page-sub{font-size:14px;color:#6B7280}
+
+/* CARDS */
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.client-card{background:#fff;border:1px solid #E8EAED;border-radius:14px;padding:24px;cursor:pointer;transition:all .2s;text-decoration:none;display:block;position:relative;overflow:hidden}
+.client-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,#E8000D,#FF4D4D)}
+.client-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.1);border-color:#D1D5DB}
+.client-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.client-avatar{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff}
+.client-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#10B981;background:#D1FAE5;padding:3px 9px;border-radius:20px}
+.client-status::before{content:'';width:6px;height:6px;background:#10B981;border-radius:50%}
+.client-name{font-size:17px;font-weight:700;color:#1A1A2E;margin-bottom:3px}
+.client-sub{font-size:12px;color:#9CA3AF;margin-bottom:16px}
+.client-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.cm{background:#F9FAFB;border-radius:8px;padding:9px 11px}
+.cm-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#9CA3AF;margin-bottom:3px}
+.cm-value{font-size:14px;font-weight:700;color:#1A1A2E}
+.client-cta{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #F3F4F6}
+.client-cta-text{font-size:13px;font-weight:600;color:#E8000D}
+.client-cta-arrow{width:28px;height:28px;background:#E8000D;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;transition:transform .2s}
+.client-card:hover .client-cta-arrow{transform:translateX(3px)}
+
+/* PLATAFORMS */
+.plat-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.plat{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px}
+.plat-meta{background:#EBF4FF;color:#1877F2}.plat-google{background:#FEF2F2;color:#EA4335}
+
+/* STATS BAR */
+.stat-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#6B7280;padding-top:6px}
+.stat-dot{width:5px;height:5px;border-radius:50%;background:#E8000D}
+
+/* FOOTER */
+footer{text-align:center;padding:24px;font-size:11px;color:#9CA3AF;border-top:1px solid #E8EAED;background:#fff}
+footer strong{color:#1A1A2E}
+
+/* URL COPY */
+.url-box{background:#F3F4F6;border:1px solid #E5E7EB;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;margin-top:10px}
+.url-text{font-size:11px;color:#6B7280;font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.url-copy{font-size:10px;font-weight:600;color:#E8000D;cursor:pointer;padding:3px 8px;background:#fff;border:1px solid #E8000D;border-radius:5px;transition:all .15s;white-space:nowrap}
+.url-copy:hover{background:#E8000D;color:#fff}
+.url-copy.copied{background:#10B981;border-color:#10B981;color:#fff}
+
+@media(max-width:600px){.main{padding:28px 16px}.clients-grid{grid-template-columns:1fr}.nav{padding:0 20px}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M4 6l8 12 8-12H4z" fill="white"/>
+        <text x="7" y="22" fill="white" font-size="8" font-weight="700" font-family="Arial">4</text>
+      </svg>
+    </div>
+    <div>
+      <div class="nav-logo-text">V4 Company</div>
+      <div class="nav-logo-sub">Performance Dashboards</div>
+    </div>
+  </div>
+  <div class="nav-badge">Dashboards ao vivo</div>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <div class="breadcrumb">Início › Clientes</div>
+    <div class="page-title">Dashboards de Performance</div>
+    <div class="page-sub">Selecione um cliente para acessar o painel de métricas em tempo real.</div>
+  </div>
+
+  <div class="clients-grid">
+
+    <!-- ALIANÇAS CS -->
+    <div class="client-card" onclick="goTo('aliancas')">
+      <div class="client-card-header">
+        <div class="client-avatar" style="background:#C084FC">AC</div>
+        <span class="client-status">Ativo</span>
+      </div>
+      <div class="client-name">Alianças CS</div>
+      <div class="client-sub">Joalheria · E-commerce</div>
+      <div class="plat-row">
+        <span class="plat plat-meta">Meta Ads</span>
+        <span class="plat plat-google">Google Ads</span>
+      </div>
+      <div class="client-metrics">
+        <div class="cm"><div class="cm-label">Investimento</div><div class="cm-value">R$ 51k</div></div>
+        <div class="cm"><div class="cm-label">Receita</div><div class="cm-value">R$ 296k</div></div>
+        <div class="cm"><div class="cm-label">Compras</div><div class="cm-value">469</div></div>
+        <div class="cm"><div class="cm-label">ROAS</div><div class="cm-value">5.8x</div></div>
+      </div>
+      <div class="url-box">
+        <span class="url-text" id="url-aliancas">dashboard.vercel.app?cliente=aliancas</span>
+        <button class="url-copy" onclick="copyUrl(event,'aliancas')">Copiar link</button>
+      </div>
+      <div class="client-cta">
+        <span class="client-cta-text">Abrir dashboard</span>
+        <div class="client-cta-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- STAR MAN NET -->
+    <div class="client-card" onclick="goTo('starman')">
+      <div class="client-card-header">
+        <div class="client-avatar" style="background:#3B82F6">SM</div>
+        <span class="client-status">Ativo</span>
+      </div>
+      <div class="client-name">Star Man Net</div>
+      <div class="client-sub">Provedora de Internet · ISP</div>
+      <div class="plat-row">
+        <span class="plat plat-meta">Meta Ads</span>
+        <span class="plat plat-google">Google Ads</span>
+      </div>
+      <div class="client-metrics">
+        <div class="cm"><div class="cm-label">Investimento</div><div class="cm-value">R$ 43k</div></div>
+        <div class="cm"><div class="cm-label">Leads</div><div class="cm-value">277</div></div>
+        <div class="cm"><div class="cm-label">Conversões</div><div class="cm-value">277</div></div>
+        <div class="cm"><div class="cm-label">Melhor CPA</div><div class="cm-value">R$ 13</div></div>
+      </div>
+      <div class="url-box">
+        <span class="url-text" id="url-starman">dashboard.vercel.app?cliente=starman</span>
+        <button class="url-copy" onclick="copyUrl(event,'starman')">Copiar link</button>
+      </div>
+      <div class="client-cta">
+        <span class="client-cta-text">Abrir dashboard</span>
+        <div class="client-cta-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- BSC -->
+    <div class="client-card" onclick="goTo('bsc')">
+      <div class="client-card-header">
+        <div class="client-avatar" style="background:#10B981">BS</div>
+        <span class="client-status">Ativo</span>
+      </div>
+      <div class="client-name">BSC Pickup Solutions</div>
+      <div class="client-sub">Logística · B2B</div>
+      <div class="plat-row">
+        <span class="plat plat-meta">Meta Ads</span>
+        <span class="plat plat-google">Google Ads</span>
+      </div>
+      <div class="client-metrics">
+        <div class="cm"><div class="cm-label">Investimento</div><div class="cm-value">R$ 4k</div></div>
+        <div class="cm"><div class="cm-label">Receita</div><div class="cm-value">R$ 5.1k</div></div>
+        <div class="cm"><div class="cm-label">Conversões</div><div class="cm-value">12</div></div>
+        <div class="cm"><div class="cm-label">CPA médio</div><div class="cm-value">R$ 282</div></div>
+      </div>
+      <div class="url-box">
+        <span class="url-text" id="url-bsc">dashboard.vercel.app?cliente=bsc</span>
+        <button class="url-copy" onclick="copyUrl(event,'bsc')">Copiar link</button>
+      </div>
+      <div class="client-cta">
+        <span class="client-cta-text">Abrir dashboard</span>
+        <div class="client-cta-arrow">→</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <strong>V4 Company</strong> — Dashboards de Performance · Dados via Windsor.ai · Atualizado automaticamente
+</footer>
+
+<script>
+// Atualiza URLs com o domínio real do Vercel
+function getBase(){return location.origin+location.pathname.replace('home.html','');}
+
+window.addEventListener('load',()=>{
+  const base = location.hostname==='localhost'||location.hostname===''
+    ? location.href.replace('home.html','')
+    : location.origin+'/';
+  ['aliancas','starman','bsc'].forEach(c=>{
+    const el=document.getElementById('url-'+c);
+    if(el) el.textContent = base+'?cliente='+c;
+  });
+});
+
+function goTo(c){
+  const base = location.hostname==='localhost'||location.hostname===''
+    ? location.href.replace(/home\.html.*$/,'')
+    : location.origin+'/';
+  window.location.href = base+'?cliente='+c;
+}
+
+function copyUrl(e,c){
+  e.stopPropagation();
+  const el=document.getElementById('url-'+c);
+  const url=el?el.textContent:location.origin+'/?cliente='+c;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=e.target;
+    btn.textContent='Copiado ✓';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar link';btn.classList.remove('copied');},2000);
+  });
+}
+</script>
+</body>
+</html>
