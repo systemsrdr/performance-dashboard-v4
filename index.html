@@ -107,6 +107,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
 
 /* ─── 4 BOXES ────────────────────────────────────── */
 .m4grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.m4grid-8{grid-template-columns:repeat(4,minmax(0,1fr))}
 .m4{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:20px 22px;position:relative;overflow:hidden;transition:border-color .2s}
 .m4:hover{border-color:var(--brd2)}
 .m4-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
@@ -562,7 +563,7 @@ async function fetchAll(){
     };
 
     // Financeiro
-    state.fin={fat:0,v:0,ticket:0};
+    state.fin={fat:0,v:0,ticket:0,gFat:0,gV:0,gTicket:0,fatMsg:0,vMsg:0,ticketMsg:0};
     if(C.sheet){
       setL('Carregando dados financeiros...');
       await new Promise(resolve=>{
@@ -572,11 +573,20 @@ async function fetchAll(){
             const rm=String(row['Mês']||row['mes']||'').toLowerCase();
             if(rm.includes(mes)){
               const p=v=>parseFloat(String(v||0).replace(/[R$\s.]/g,'').replace(',','.'))||0;
+              // Faturamento geral (Meta)
               state.fin.fat+=p(row['Faturamento']||row['faturamento']||row['Receita']||0);
               state.fin.v+=parseInt(row['Vendas']||row['vendas']||0)||0;
+              // Google (CS planilha)
+              state.fin.gFat+=p(row['Faturamento Google']||row['Receita Google']||row['Faturamento google']||0);
+              state.fin.gV+=parseInt(row['Vendas Google']||row['vendas google']||0)||0;
+              // BSC mensagens
+              state.fin.fatMsg+=p(row['Faturamento Campanha Mensagens']||row['Faturamento Mensagens']||0);
+              state.fin.vMsg+=parseInt(row['Numero de vendas Campanha Mensagens']||row['Número de Vendas Mensagens']||row['Vendas Mensagens']||0)||0;
             }
           });
           state.fin.ticket=state.fin.v>0?state.fin.fat/state.fin.v:0;
+          state.fin.gTicket=state.fin.gV>0?state.fin.gFat/state.fin.gV:0;
+          state.fin.ticketMsg=state.fin.vMsg>0?state.fin.fatMsg/state.fin.vMsg:0;
           resolve();
         },error:resolve});
       });
@@ -624,7 +634,8 @@ const fr=n=>'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,ma
 const frr=n=>'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fn=n=>Math.round(n||0).toLocaleString('pt-BR');
 const fp=n=>(parseFloat(n)||0).toFixed(2)+'%';
-const sn=(s,l=30)=>s.replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/g,'').trim().substring(0,l);
+const sn=(s,l=999)=>s.replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/g,'').trim().substring(0,l);
+const snC=(s,l=16)=>sn(s,l); // versão curta para gráficos
 function pctChg(a,b){if(!b||b===0)return null;return((a-b)/Math.abs(b)*100);}
 function deltaHtml(curr,prev,inv=false){
   const p=pctChg(curr,prev);if(p===null)return '';
@@ -694,36 +705,84 @@ function m4(icon,label,value,sub,delta,stripe,tip){
 
 function build4(mG,gG,section){
   const isEc=C.tipo==='ec';
+  const isBsc=cid==='bsc';
   const mSp=mG.reduce((a,x)=>a+x.sp,0);
+  const gSp=gG.reduce((a,x)=>a+x.sp,0);
+  const gConv=gG.reduce((a,x)=>a+x.conv,0);
+  const totalSp=mSp+gSp;
+  const p=state.prev;
+
+  // Dados de compras Meta
   const compC=mG.filter(d=>d.type==='compra'),msgC=mG.filter(d=>d.type==='msg'),leadC=mG.filter(d=>d.type==='lead');
-  const nV=state.fin.v||compC.reduce((a,x)=>a+(x.pur||0),0);
-  const fatV=state.fin.fat||compC.reduce((a,x)=>a+(x.rev||0),0)||mG.reduce((a,x)=>a+(x.rev||0),0);
-  const spV=compC.length?compC.reduce((a,x)=>a+x.sp,0):mSp;
-  const cpaV=nV>0?spV/nV:0;
+  const metaV=state.fin.v||compC.reduce((a,x)=>a+(x.pur||0),0)||mG.reduce((a,x)=>a+(x.pur||0),0);
+  const metaRev=state.fin.fat||compC.reduce((a,x)=>a+(x.rev||0),0)||mG.reduce((a,x)=>a+(x.rev||0),0);
+  const metaCpa=metaV>0?mSp/metaV:0;
+  const metaTicket=metaV>0?metaRev/metaV:0;
+  const metaRoas=mSp>0&&metaRev>0?metaRev/mSp:0;
+
+  // Google
+  const gRev=state.fin.gFat||0;
+  const gV=state.fin.gV||Math.round(gConv);
+  const gTicket=gV>0?(gRev||gSp)/gV:0;
+  const gRoas=gSp>0&&gRev>0?gRev/gSp:0;
+  const gCpa=gV>0?gSp/gV:0;
+
+  // Total consolidado
+  const totalRev=metaRev+(gRev||0);
+  const totalV=metaV+gV;
+  const totalRoas=totalSp>0&&totalRev>0?totalRev/totalSp:0;
+  const totalTicket=totalV>0?totalRev/totalV:0;
+  const totalCpa=totalV>0?totalSp/totalV:0;
+
+  // WPP/Leads (Meta)
   const allWpp=mG.reduce((a,x)=>a+(x.wpp||0),0);
+  const allLeads=mG.reduce((a,x)=>a+(x.leads||0),0);
   const spMsg=msgC.length?msgC.reduce((a,x)=>a+x.sp,0):mSp;
   const cpaMsg=allWpp>0?spMsg/allWpp:0;
-  const nLeads=mG.reduce((a,x)=>a+(x.leads||0),0);
   const spLead=leadC.length?leadC.reduce((a,x)=>a+x.sp,0):mSp;
-  const cpaLead=nLeads>0?spLead/nLeads:0;
-  const roas=mSp>0&&fatV>0?fatV/mSp:0;
-  const ticket=nV>0?fatV/nV:0;
-  const p=state.prev;
-  if(isEc){
+  const cpaLead=allLeads>0?spLead/allLeads:0;
+
+  // BSC mensagens específicas
+  const bscFatMsg=state.fin.fatMsg||0;
+  const bscVMsg=state.fin.vMsg||0;
+  const bscRoasMsg=spMsg>0&&bscFatMsg>0?bscFatMsg/spMsg:0;
+  const bscTicketMsg=bscVMsg>0?bscFatMsg/bscVMsg:0;
+
+  if(isEc&&!isBsc){
+    // CS — Ordem: Investimento, Compras Meta, CPA Meta, Ticket Meta, ROAS Meta | Google box | Total
     return [
-      m4('🛒','Número de Vendas',fn(nV),fr(fatV)+' em receita',deltaHtml(nV,p.v),'grn','Total de compras confirmadas no período. Fonte: Planilha financeira quando disponível.'),
-      m4('💰','Valor das Vendas',fr(fatV),fn(nV)+' transações · Ticket: '+fr(ticket),deltaHtml(fatV,p.rev),'amb','Receita total gerada pelas campanhas. Ticket médio = Faturamento ÷ Vendas.'),
-      m4('💬','Mensagens (WPP)',fn(allWpp),'CPA: '+fr(cpaMsg),deltaHtml(allWpp,p.wpp),'blu','Conversas iniciadas via WhatsApp a partir dos anúncios de Meta Ads.'),
-      m4('🎯','Custo por Mensagem',fr(allWpp>0?cpaMsg:spMsg),allWpp>0?fn(allWpp)+' conversas':'','','red','Quanto custou cada conversa iniciada via WhatsApp. Menor = melhor.'),
-    ].join('');
-  }else{
-    return [
-      m4('💬','Mensagens WPP',fn(allWpp),'CPA: '+fr(cpaMsg),deltaHtml(allWpp,p.wpp),'red','Conversas iniciadas via WhatsApp no período selecionado.'),
-      m4('🎯','Custo por Mensagem',fr(allWpp>0?cpaMsg:0),allWpp>0?fn(allWpp)+' conversas':'—',''  ,'amb','Quanto custou cada conversa iniciada. Ideal: abaixo de R$15.'),
-      m4('📋','Leads (Formulário)',fn(nLeads),'CPL: '+fr(cpaLead),deltaHtml(nLeads,p.leads),'grn','Leads capturados via formulário nativo do Meta Ads.'),
-      m4('📊','Custo por Lead',fr(nLeads>0?cpaLead:0),nLeads>0?fn(nLeads)+' leads':'—','','blu','Custo por lead (CPL). Quanto menor, mais eficiente a captação.'),
+      m4('💻','Investimento Meta',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads. Google Ads e total consolidado aparecem abaixo.'),
+      m4('🛒','Compras (Meta)',fn(metaV),`Receita: ${fr(metaRev)}`,deltaHtml(metaV,p.v),'grn','Compras atribuídas ao Meta Ads no período. Fonte: Planilha financeira quando disponível.'),
+      m4('🎯','CPA Meta',fr(metaCpa),`Custo por compra`,deltaHtml(metaCpa,p.mSp>0&&p.v>0?p.mSp/p.v:null,true),'blu','Custo por Aquisição: gasto Meta ÷ compras. Menor = mais eficiente.'),
+      m4('🎫','Ticket Médio',fr(metaTicket),`${fn(metaV)} vendas`,deltaHtml(metaTicket,p.v>0&&p.rev>0?p.rev/p.v:null),'amb','Valor médio por venda. Faturamento ÷ Número de vendas.'),
+      m4('📈','ROAS Meta',metaRoas.toFixed(2)+'x',`Ret. sobre gasto`,deltaHtml(metaRoas,p.mSp>0&&p.rev>0?p.rev/p.mSp:null),'pur','ROAS = Faturamento ÷ Gasto Meta. Ex: 5x = cada R$1 gerou R$5.'),
+      m4('🌐','ROAS Google',gRoas>0?gRoas.toFixed(2)+'x':'—',gV>0?`${fn(gV)} conv · CPA ${fr(gCpa)}`:'Planilha necessária',''  ,'red','ROAS Google = Faturamento Google ÷ Gasto Google. Requer coluna "Faturamento Google" na planilha.'),
+      m4('🏷️','Ticket Médio Google',gTicket>0?fr(gTicket):'—',gV>0?`${fn(gV)} vendas`:'Planilha necessária','','grn','Ticket médio das vendas atribuídas ao Google Ads. Requer coluna "Vendas Google" na planilha.'),
+      m4('🏆','ROAS Total',totalRoas>0?totalRoas.toFixed(2)+'x':'—',`Meta + Google · ${fn(totalV)} vendas`,'','amb','ROAS consolidado de todas as plataformas. Meta + Google.'),
     ].join('');
   }
+
+  if(isEc&&isBsc){
+    // BSC — Foco mensagens assistidas + e-commerce
+    return [
+      m4('💻','Investimento Meta',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads no período selecionado.'),
+      m4('🛒','Vendas (Site)',fn(metaV),`Receita: ${fr(metaRev)}`,deltaHtml(metaV,p.v),'grn','Compras diretas no site atribuídas ao Meta Ads.'),
+      m4('🎯','CPA Compras',fr(metaCpa),`Custo por venda`,''  ,'blu','Custo por venda direta no site.'),
+      m4('🎫','Ticket Médio',fr(metaTicket),`${fn(metaV)} vendas`,'','amb','Valor médio por venda no site.'),
+      m4('💬','Vendas via WPP',fn(allWpp),`Fat. msg: ${fr(bscFatMsg)}`,deltaHtml(allWpp,p.wpp),'pur','Conversas WhatsApp iniciadas. Faturamento mensagens = dado da planilha.'),
+      m4('📲','ROAS Mensagens',bscRoasMsg>0?bscRoasMsg.toFixed(2)+'x':'—',bscVMsg>0?`${fn(bscVMsg)} vendas msg · Ticket ${fr(bscTicketMsg)}`:'Planilha necessária','','red','ROAS da campanha de mensagens: Fat. Mensagens ÷ Gasto Mensagens.'),
+      m4('🎯','CPA WPP',fr(cpaMsg),`${fn(allWpp)} conversas`,'','grn','Quanto custou cada conversa iniciada via WhatsApp.'),
+      m4('🏆','ROAS Total',totalRoas>0?totalRoas.toFixed(2)+'x':'—',`Todas plataformas`,'','amb','ROAS consolidado Meta + Google.'),
+    ].join('');
+  }
+
+  // STARMAN — IS
+  return [
+    m4('💻','Investimento Meta',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads no período.'),
+    m4('💬','Mensagens WPP',fn(allWpp),'CPA: '+fr(allWpp>0?cpaMsg:0),deltaHtml(allWpp,p.wpp),'amb','Conversas iniciadas via WhatsApp no período selecionado.'),
+    m4('📋','Leads (Formulário)',fn(allLeads),'CPL: '+fr(allLeads>0?cpaLead:0),deltaHtml(allLeads,p.leads),'grn','Leads capturados via formulário nativo do Meta Ads.'),
+    m4('🎯','Conv. Google',fn(Math.round(gConv)),'CPA: '+fr(gConv>0?gSp/gConv:0),deltaHtml(gConv,p.conv),'blu','Conversões registradas pelo Google Ads no período.'),
+  ].join('');
 }
 
 // ── VELOCÍMETRO ───────────────────────────────────────
@@ -792,10 +851,10 @@ function renderOV(){
     if(isEc){
       const topR=mG.filter(d=>d.rev>0).slice(0,5);
       document.getElementById('ov-c2t').textContent='Receita vs Gasto';document.getElementById('ov-c2s').textContent='Top 5 campanhas Meta';
-      dc('ov-c2',{type:'bar',data:{labels:topR.map(d=>sn(d.c,12)),datasets:[{label:'Receita',data:topR.map(d=>Math.round(d.rev)),backgroundColor:'rgba(0,240,119,.75)',borderRadius:5},{label:'Gasto',data:topR.map(d=>Math.round(d.sp)),backgroundColor:'rgba(255,26,38,.5)',borderRadius:5}]},options:{...bo,plugins:{legend:{display:true,labels:{color:bo.scales.x.ticks.color,font:{size:11},boxWidth:8,padding:8}},datalabels:{display:false}},scales:{x:{ticks:{color:bo.scales.x.ticks.color,font:{size:9},maxRotation:30,autoSkip:false},grid:{display:false},border:{display:false}},y:{ticks:{color:bo.scales.y.ticks.color,font:{size:9},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:bo.scales.y.grid.color},border:{display:false}}}}});
+      dc('ov-c2',{type:'bar',data:{labels:topR.map(d=>snC(d.c,16)),datasets:[{label:'Receita',data:topR.map(d=>Math.round(d.rev)),backgroundColor:'rgba(0,240,119,.75)',borderRadius:5},{label:'Gasto',data:topR.map(d=>Math.round(d.sp)),backgroundColor:'rgba(255,26,38,.5)',borderRadius:5}]},options:{...bo,plugins:{legend:{display:true,labels:{color:bo.scales.x.ticks.color,font:{size:11},boxWidth:8,padding:8}},datalabels:{display:false}},scales:{x:{ticks:{color:bo.scales.x.ticks.color,font:{size:9},maxRotation:30,autoSkip:false},grid:{display:false},border:{display:false}},y:{ticks:{color:bo.scales.y.ticks.color,font:{size:9},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:bo.scales.y.grid.color},border:{display:false}}}}});
     }else{
       document.getElementById('ov-c2t').textContent='Conversões por campanha';document.getElementById('ov-c2s').textContent='WPP + Leads';
-      dc('ov-c2',{type:'bar',data:{labels:mG.map(d=>sn(d.c,12)),datasets:[{label:'WhatsApp',data:mG.map(d=>d.wpp||0),backgroundColor:'rgba(255,26,38,.78)',borderRadius:4},{label:'Leads',data:mG.map(d=>d.leads||0),backgroundColor:'rgba(0,240,119,.78)',borderRadius:4}]},options:{...bo,plugins:{legend:{display:true,labels:{color:bo.scales.x.ticks.color,font:{size:11},boxWidth:8,padding:8}},datalabels:{display:false}},scales:{x:{ticks:{color:bo.scales.x.ticks.color,font:{size:9},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:bo.scales.y.ticks.color,font:{size:9}},grid:{color:bo.scales.y.grid.color},border:{display:false}}}}});
+      dc('ov-c2',{type:'bar',data:{labels:mG.map(d=>snC(d.c,16)),datasets:[{label:'WhatsApp',data:mG.map(d=>d.wpp||0),backgroundColor:'rgba(255,26,38,.78)',borderRadius:4},{label:'Leads',data:mG.map(d=>d.leads||0),backgroundColor:'rgba(0,240,119,.78)',borderRadius:4}]},options:{...bo,plugins:{legend:{display:true,labels:{color:bo.scales.x.ticks.color,font:{size:11},boxWidth:8,padding:8}},datalabels:{display:false}},scales:{x:{ticks:{color:bo.scales.x.ticks.color,font:{size:9},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:bo.scales.y.ticks.color,font:{size:9}},grid:{color:bo.scales.y.grid.color},border:{display:false}}}}});
     }
   },0);
 }
@@ -844,7 +903,7 @@ function renderMeta(){
   document.getElementById('meta-cwrap').style.height=h+'px';
   setTimeout(()=>{
     const bo=BO();
-    const lbl=mG.map(d=>sn(d.c,20));
+    const lbl=mG.map(d=>snC(d.c,20));
     if(isEc){
       dc('meta-c',{type:'bar',data:{labels:lbl,datasets:[{label:'Receita',data:mG.map(d=>Math.round(d.rev||0)),backgroundColor:'rgba(0,240,119,.72)',borderRadius:5,barThickness:11},{label:'Gasto',data:mG.map(d=>Math.round(d.sp)),backgroundColor:'rgba(255,26,38,.6)',borderRadius:5,barThickness:11}]},options:{...bo,indexAxis:'y',plugins:{legend:{display:true,labels:{color:bo.scales.x.ticks.color,font:{size:11},boxWidth:8,padding:8}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: R$ ${ctx.parsed.x.toLocaleString('pt-BR')}`}},datalabels:{display:false}},scales:{x:{ticks:{color:bo.scales.x.ticks.color,font:{size:9},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:bo.scales.y.grid.color},border:{display:false}},y:{ticks:{color:bo.scales.y.ticks.color,font:{size:9}},grid:{display:false},border:{display:false}}}}});
     }else{
@@ -897,8 +956,8 @@ function renderGoogle(){
   ].join('');
   setTimeout(()=>{
     const bo=BO();
-    dc('g-c1',{type:'doughnut',data:{labels:gG.map(d=>sn(d.c,18)),datasets:[{data:gG.map(d=>Math.round(d.sp)),backgroundColor:['rgba(255,26,38,.85)','rgba(77,159,255,.85)','rgba(0,240,119,.85)','rgba(255,190,0,.85)'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{color:bo.scales.x.ticks.color,font:{size:11,family:'Sora'},boxWidth:10,padding:7}},datalabels:{display:false}}}});
-    dc('g-c2',{type:'bar',data:{labels:gG.map(d=>sn(d.c,14)),datasets:[{data:gG.map(d=>Math.round(d.cpa)),backgroundColor:gG.map(d=>d.cpa===0?'rgba(255,255,255,.1)':(d.cpa<50?'rgba(0,240,119,.82)':(d.cpa<200?'rgba(255,190,0,.82)':'rgba(255,26,38,.82)'))),borderRadius:9,barThickness:38}]},options:{...bo,scales:{x:{ticks:{color:bo.scales.x.ticks.color,font:{size:10},maxRotation:20},grid:{display:false},border:{display:false}},y:{ticks:{color:bo.scales.y.ticks.color,font:{size:9},callback:v=>'R$'+v},grid:{color:bo.scales.y.grid.color},border:{display:false}}}}});
+    dc('g-c1',{type:'doughnut',data:{labels:gG.map(d=>snC(d.c,18)),datasets:[{data:gG.map(d=>Math.round(d.sp)),backgroundColor:['rgba(255,26,38,.85)','rgba(77,159,255,.85)','rgba(0,240,119,.85)','rgba(255,190,0,.85)'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{color:bo.scales.x.ticks.color,font:{size:11,family:'Sora'},boxWidth:10,padding:7}},datalabels:{display:false}}}});
+    dc('g-c2',{type:'bar',data:{labels:gG.map(d=>snC(d.c,16)),datasets:[{data:gG.map(d=>Math.round(d.cpa)),backgroundColor:gG.map(d=>d.cpa===0?'rgba(255,255,255,.1)':(d.cpa<50?'rgba(0,240,119,.82)':(d.cpa<200?'rgba(255,190,0,.82)':'rgba(255,26,38,.82)'))),borderRadius:9,barThickness:38}]},options:{...bo,scales:{x:{ticks:{color:bo.scales.x.ticks.color,font:{size:10},maxRotation:20},grid:{display:false},border:{display:false}},y:{ticks:{color:bo.scales.y.ticks.color,font:{size:9},callback:v=>'R$'+v},grid:{color:bo.scales.y.grid.color},border:{display:false}}}}});
   },0);
   const tb=document.getElementById('google-tb');tb.innerHTML='';
   gG.forEach(d=>{
