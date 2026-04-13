@@ -657,62 +657,7 @@ function showSec(id,btn){
 // ══════════════════════════════════════════════════════
 // 4 BOXES
 // ══════════════════════════════════════════════════════
-function m4box(icon,label,value,sub,cpa,stripe){
-  const colors={red:'var(--red)',green:'var(--green)',amber:'var(--amber)',blue:'var(--blue)',purple:'var(--purple)'};
-  const c=colors[stripe]||'var(--red)';
-  return `<div class="m4">
-    <div class="m4-stripe" style="background:${c}"></div>
-    <div class="m4-icon">${icon}</div>
-    <div class="m4-label">${label}</div>
-    <div class="m4-value">${value}</div>
-    <div class="m4-sub">${sub||''}</div>
-    ${cpa?`<div class="m4-cpa">${cpa}</div>`:''}
-  </div>`;
-}
 
-function build4boxes(mG,gG,section){
-  const isEc=C.tipo==='ec';
-  const mSp=mG.reduce((a,x)=>a+x.sp,0),gSp=gG.reduce((a,x)=>a+x.sp,0);
-
-  // Dados de compras (excluindo msg)
-  const compCamp=mG.filter(d=>d.type==='compra');
-  const msgCamp=mG.filter(d=>d.type==='msg');
-  const leadCamp=mG.filter(d=>d.type==='lead');
-
-  const nVendas=state.fin.v||compCamp.reduce((a,x)=>a+(x.pur||0),0);
-  const spVendas=compCamp.reduce((a,x)=>a+x.sp,0);
-  const cpaVendas=nVendas>0?spVendas/nVendas:0;
-
-  const nMsg=msgCamp.reduce((a,x)=>a+(x.wpp||0),0)||mG.reduce((a,x)=>a+(x.wpp||0),0);
-  const spMsg=msgCamp.length>0?msgCamp.reduce((a,x)=>a+x.sp,0):mG.reduce((a,x)=>a+x.sp,0);
-  const cpaMsg=nMsg>0?spMsg/nMsg:0;
-
-  const nLeads=leadCamp.reduce((a,x)=>a+(x.leads||0),0);
-  const spLeads=leadCamp.reduce((a,x)=>a+x.sp,0);
-  const cpaLeads=nLeads>0?spLeads/nLeads:0;
-
-  const fatVendas=state.fin.fat||compCamp.reduce((a,x)=>a+(x.rev||0),0);
-
-  if(isEc){
-    // EC: Vendas · CPA vendas · Mensagens · CPA mensagens
-    return [
-      m4box('🛒','Número de Vendas',fn(nVendas),fr(fatVendas)+' em receita','CPA: '+fr(cpaVendas),'green'),
-      m4box('💰','Valor das Vendas',fr(fatVendas),fn(nVendas)+' transações',nVendas>0?'Ticket: '+fr(fatVendas/nVendas):'','amber'),
-      m4box('💬','Número de Mensagens',fn(nMsg),'Conversas iniciadas','','blue'),
-      m4box('🎯','Custo das Mensagens',nMsg>0?fr(cpaMsg):fr(spMsg),nMsg>0?fn(nMsg)+' conversas':'Gasto: '+fr(spMsg),'','red'),
-    ].join('');
-  }else{
-    // IS: Mensagens · CPA mensagens · Formulário/Leads · CPA leads
-    return [
-      m4box('💬','Mensagens (WPP)',fn(nMsg),'Conversas iniciadas via Meta',nMsg>0?'CPA: '+fr(cpaMsg):'',"red"),
-      m4box('🎯','Custo por Mensagem",fr(cpaMsg||spMsg),nMsg>0?fn(nMsg)+' conversas':'','','amber'),
-      m4box('📋','Formulário / Leads',fn(nLeads),'Leads capturados via Meta',nLeads>0?'CPL: '+fr(cpaLeads):'',"green"),
-      m4box('📊','Custo por Lead',fr(cpaLeads||spLeads),nLeads>0?fn(nLeads)+' leads':'','','blue'),
-    ].join('');
-  }
-}
-
-// Fix typo in template literal
 function m4box(icon,label,value,sub,cpa,stripe){
   const colors={red:'var(--red)',green:'var(--green)',amber:'var(--amber)',blue:'var(--blue)',purple:'var(--purple)'};
   const c=colors[stripe]||'var(--red)';
