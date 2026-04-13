@@ -26,7 +26,7 @@ body{min-height:100vh}
 .nav-logo-mark{width:28px;height:28px;background:#111;border-radius:5px;display:flex;align-items:center;justify-content:center}
 .nav-brand{font-size:13px;font-weight:700;color:#111}
 .nav-sep{width:1px;height:20px;background:var(--brd2)}
-.nav-client{font-size:13px;font-weight:600;color:var(--tx)}
+.nav-client{font-size:13px;font-weight:600;color:var(--tx);white-space:nowrap}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .date-input{background:var(--card);border:1px solid var(--brd2);border-radius:var(--rs);padding:5px 9px;color:var(--tx);font-size:11px;font-weight:500;font-family:'Inter',sans-serif}
 .qbtn{padding:5px 11px;border-radius:20px;border:1px solid var(--brd2);background:var(--card);font-size:11px;font-weight:600;cursor:pointer;color:var(--tx2);transition:all .15s;font-family:'Inter',sans-serif;white-space:nowrap}
@@ -140,6 +140,7 @@ body{min-height:100vh}
 .lb-stat-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:3px}
 .lb-stat-v{font-size:17px;font-weight:700;color:var(--tx)}
 .lb-close{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);border:1px solid var(--brd);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--tx2)}
+.lb-close:hover{background:var(--red2);color:var(--red)}
 
 /* 404 */
 #nf{display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center}
@@ -180,9 +181,10 @@ window.onerror = function(msg, url, line) {
       <input type="date" id="d-from" class="date-input">
       <span style="color:var(--tx3);font-size:11px">—</span>
       <input type="date" id="d-to" class="date-input">
+      <button class="qbtn" onclick="setQ('this_month',this)">Este mês</button>
+      <button class="qbtn" onclick="setQ('prev_month',this)">Mês anterior</button>
       <button class="qbtn on" id="qbtn-30" onclick="setQ('30d',this)">30 dias</button>
       <button class="qbtn" onclick="setQ('7d',this)">7 dias</button>
-      <button class="btn-apply" onclick="renderAll()">Aplicar →</button>
     </div>
   </header>
 
@@ -319,76 +321,72 @@ window.onerror = function(msg, url, line) {
 </div>
 
 <script>
-// ── DADOS POR CLIENTE ──────────────────────────
+// ── BANCO DE DADOS (Agora serve apenas como estrutura base e fallback) ──
 const DB = {
-
-aliancas:{
-  nome:"Alianças CS", tipo:"ec",
-  meta:[
-    {c:"FAST-TRAFFIC 07/25",   sp:545.18, imp:47219,  clk:490,  ctr:1.04,cpc:1.11,pur:3,  msg:3},
-    {c:"ESTÁTICOS 08/07",      sp:701.46, imp:74793,  clk:1648, ctr:2.20,cpc:0.43,pur:29, msg:3},
-    {c:"VÍDEOS 08/07",         sp:1857.25,imp:107830, clk:1880, ctr:1.74,cpc:0.99,pur:27, msg:4},
-    {c:"REMARKETING 09-08",    sp:1147.44,imp:58147,  clk:889,  ctr:1.53,cpc:1.29,pur:18, msg:3},
-    {c:"ESTÁTICOS Preços",     sp:1160.42,imp:103683, clk:1803, ctr:1.74,cpc:0.64,pur:9,  msg:1},
-    {c:"CATÁLOGO #10",         sp:1874.76,imp:110671, clk:3205, ctr:2.90,cpc:0.58,pur:49, msg:3},
-    {c:"CATÁLOGO #12",         sp:1802.20,imp:123412, clk:3029, ctr:2.45,cpc:0.60,pur:34, msg:1},
-    {c:"LOJA FÍSICA 11/11",    sp:1939.49,imp:178410, clk:2274, ctr:1.27,cpc:0.85,pur:3,  msg:330},
-    {c:"CATÁLOGO 31/03",       sp:1597.03,imp:9264114,clk:76998,ctr:0.83,cpc:0.02,pur:29, msg:11},
-    {c:"VENDAS ABRIL",         sp:1848.87,imp:68574,  clk:892,  ctr:1.30,cpc:2.07,pur:17, msg:5},
-  ],
-  google:[
-    {c:"SEARCH CAD1",  sp:7753.08, imp:82173,  clk:6886,ctr:8.38,cpc:1.13,conv:61.0, cpa:127.08},
-    {c:"PMAX MERCHANT",sp:6725.76, imp:673084, clk:8295,ctr:1.23,cpc:0.81,conv:47.7, cpa:141.14},
-    {c:"DEMAND GEN",   sp:201.34,  imp:32711,  clk:451, ctr:1.38,cpc:0.45,conv:0,    cpa:0},
-  ],
-  creatives:[
-    {n:"AD2 [VD] CELEBRE O AMOR",      camp:"VÍDEOS 08/07",   sp:1857.25,pur:27,msg:4,  ctr:1.74,cpc:0.99,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t15.5256-10/516196334_731658266359464_4343151900587336754_n.jpg?_nc_cat=105&ccb=1-7&_nc_ohc=NFB89vE88n4Q7kNvwHYy091&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af19F_0sq_80mq6iNsL_Z4hZR9pnJe8umGVTBPyQAjnO7g&oe=69E214DE"},
-    {n:"CATÁLOGO #10 Lookalike",       camp:"CATÁLOGO #10",   sp:716.86, pur:25, msg:2,  ctr:3.25,cpc:0.56,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=1&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af04ULlk6_Q_KMz3y1eJGCE8CrHvQVPMVQ0jQj8R2N213A&oe=69E20744"},
-    {n:"CATÁLOGO #12",                 camp:"CATÁLOGO #12",   sp:1802.20,pur:34,msg:1,  ctr:2.45,cpc:0.60,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=1&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0UvHR7-LF36uqzh8X5MkanDNH7IjObjrhWKV71f6m4aA&oe=69E20744"},
-    {n:"AD1 [IU] BRINDE",              camp:"REMARKETING",    sp:1147.44,pur:18,msg:3,  ctr:1.53,cpc:1.29,img:"https://scontent-fra5-1.xx.fbcdn.net/v/t45.1600-4/528542561_24169252426071646_6377900815693527292_n.png?_nc_cat=100&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0XWkpvqe3XybKrrXw48hfB79HLdN_rlUxEll57cHcXRw&oe=69E213B2"}
-  ]
-},
-
-starman:{
-  nome:"Star Man Net", tipo:"is",
-  meta:[
-    {c:"DISNEY+ 04/25",         sp:504.51, imp:62414,  clk:790,  ctr:1.27,cpc:0.64,wpp:1,  leads:45},
-    {c:"NOVOS CRIATIVOS 07/25", sp:946.60, imp:162250, clk:1224, ctr:0.75,cpc:0.77,wpp:0,  leads:50},
-    {c:"MELHORES CRIATIVOS WPP",sp:584.54, imp:43033,  clk:332,  ctr:0.77,cpc:1.76,wpp:48, leads:25}
-  ],
-  google:[
-    {c:"SEARCH LEADS LP-3", sp:1239.03,imp:1730, clk:256,ctr:14.80,cpc:4.84,conv:87, cpa:14.24},
-    {c:"PMAX CAD5 LEADS",   sp:554.36, imp:2942, clk:247,ctr:8.40, cpc:2.24,conv:55, cpa:10.08}
-  ],
-  creatives:[
-    {n:"[260501] Conexão que entende você",   camp:"NOVOS CRIATIVOS",   sp:662.83,wpp:0, leads:35,ctr:0.76,cpc:0.79,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t45.1600-4/609200886_880497691125961_94343582644873557_n.png?_nc_cat=101&ccb=1-7&_nc_ohc=VKbqWo7pybIQ7kNvwELOggN&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1nE0bM-MJ_LzM0r74BEE_gJxmYlx0U1JwW8bsWwJSN_g&oe=69E21FB7"},
-    {n:"[260406] 620 MB fibra óptica",        camp:"MELHORES CRIATIVOS", sp:241.46,wpp:24,leads:11,ctr:0.75,cpc:1.62,img:"https://scontent-fra5-2.xx.fbcdn.net/v/t45.1600-4/667663505_122164318334819198_5424263271839853047_n.png?_nc_cat=106&ccb=1-7&_nc_ohc=HMWRqPnthb4Q7kNvwFNLO8i&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af2ox8w2Ls8_ap54zeNe3d24BFFwg0Z-Df9t3BYPvkBbew&oe=69E21885"},
-    {n:"[260202] Ultra Velocidade",            camp:"MELHORES CRIATIVOS", sp:283.27,wpp:10,leads:5, ctr:0.72,cpc:2.07,img:"https://scontent-fra5-2.xx.fbcdn.net/v/t45.1600-4/625004739_122235895688119390_3696865388472116081_n.png?_nc_cat=109&ccb=1-7&_nc_ohc=papGCxojtrYQ7kNvwFcKYS7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0svKoSW7ny2hAnUS_hQdMmZp70Lm4_4Ou9ZNI_ANhQfQ&oe=69E2118C"}
-  ]
-},
-
-bsc:{
-  nome:"BSC Pickup Solutions", tipo:"ec",
-  meta:[
-    {c:"MENSAGEM VENDAS",    sp:1213.48,imp:97208, clk:1381,ctr:1.42,cpc:0.88,pur:0,      msg:304},
-    {c:"SEGMENTAÇÃO+ 16/10", sp:189.36, imp:6203,  clk:126, ctr:2.03,cpc:1.50,pur:0,      msg:2},
-    {c:"ADVANTAGE+ 11/24",   sp:240.65, imp:9437,  clk:240, ctr:2.54,cpc:1.00,pur:2,msg:4},
-    {c:"CATÁLOGO 04/26",     sp:1342.93,imp:74210, clk:1382,ctr:1.86,cpc:0.97,pur:4,msg:2},
-    {c:"ADVANTAGE+ 04/26",   sp:154.33, imp:65292, clk:3177,ctr:4.87,cpc:0.05,pur:0,      msg:0},
-    {c:"SEGMENTAÇÃO+ 04/26", sp:156.72, imp:8178,  clk:162, ctr:1.98,cpc:0.97,pur:1,msg:1}
-  ],
-  google:[
-    {c:"PMAX MOT6 VENDAS",sp:990.59,imp:42124,clk:791,ctr:1.88,cpc:1.25,conv:3.98,cpa:248.89}
-  ],
-  creatives:[
-    {n:"Catálogo BSC",               camp:"CATÁLOGO 04/26",    sp:1342.93,pur:4,msg:2, ctr:1.86,cpc:0.97,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.30808-1/221539717_181680720608029_8920442178720579329_n.png?stp=dst-png_s200x200&_nc_cat=111&ccb=1-7&oh=00_Af3oP1BM03GiPSzSK2qAfOJ6N9tBTtCu-dL92PSSSeCmOg&oe=69E0E9E6"},
-    {n:"AD1 VÍDEO COM PREÇO BSC",    camp:"SEGMENTAÇÃO+ 04/26",sp:156.72, pur:1,msg:0, ctr:1.98,cpc:0.97,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=108&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0oOIsorMS1JCUQimT7zvRoJsK407XBrGJw6XZjHSB1ag&oe=69E0EE04"},
-    {n:"ADVANTAGE+ ABERTO",          camp:"ADVANTAGE+ 11/24",  sp:240.65, pur:2,msg:4, ctr:2.54,cpc:1.00,img:null},
-    {n:"MENSAGEM FONTE VERDE",       camp:"MENSAGEM VENDAS",    sp:1213.48,pur:0,      msg:304,ctr:1.42,cpc:0.88,img:null}
-  ]
-}
-
+  aliancas:{ nome:"Alianças CS", tipo:"ec", meta:[], google:[], creatives:[] },
+  starman:{ nome:"Star Man Net", tipo:"is", meta:[], google:[], creatives:[] },
+  bsc:{ nome:"BSC Pickup Solutions", tipo:"ec", meta:[], google:[], creatives:[] }
 };
+
+const WINDSOR_API_KEY = "2d4d1d577551f238260e5e6e150a4d7b4f24";
+
+// ── FUNÇÃO QUE BUSCA OS DADOS REAIS DO WINDSOR ────────────────────────
+async function puxarDadosWindsor(dataInicio, dataFim) {
+  const fields = "source,campaign,spend,clicks,impressions,conversions,revenue";
+  const url = `https://connectors.windsor.ai/all?api_key=${WINDSOR_API_KEY}&date_from=${dataInicio}&date_to=${dataFim}&fields=${fields}`;
+
+  try {
+    document.getElementById('nav-client').textContent = C.nome + " (Puxando dados... ⏳)";
+    document.getElementById('nav-client').style.color = "#CC0000"; // Fica vermelho enquanto carrega
+
+    const resposta = await fetch(url);
+    const json = await resposta.json();
+
+    if (json && json.data) {
+      // Limpa os dados antigos para não duplicar
+      C.meta = [];
+      C.google = [];
+
+      json.data.forEach(row => {
+        const plataforma = (row.source || "").toLowerCase();
+        
+        // Verifica se a campanha tem algum identificador do cliente para não misturar dados
+        // (Por enquanto, vai puxar tudo da conta que estiver no Windsor)
+        const metricas = {
+          c: row.campaign || "Campanha sem nome",
+          sp: parseFloat(row.spend) || 0,
+          imp: parseInt(row.impressions) || 0,
+          clk: parseInt(row.clicks) || 0,
+          ctr: parseFloat(row.impressions) > 0 ? (parseFloat(row.clicks) / parseFloat(row.impressions) * 100) : 0,
+          cpc: parseFloat(row.clicks) > 0 ? (parseFloat(row.spend) / parseFloat(row.clicks)) : 0,
+          pur: parseInt(row.conversions) || 0, 
+          wpp: parseInt(row.conversions) || 0, 
+          leads: parseInt(row.conversions) || 0, 
+          rev: parseFloat(row.revenue) || 0,
+          msg: parseInt(row.conversions) || 0 // Usando conversions provisoriamente como mensagens
+        };
+
+        if(metricas.sp === 0 && metricas.imp === 0) return; // Ignora lixo
+
+        if (plataforma.includes('facebook') || plataforma.includes('instagram') || plataforma.includes('meta')) {
+          C.meta.push(metricas);
+        } else if (plataforma.includes('google')) {
+          C.google.push(metricas);
+        }
+      });
+
+      // Volta a cor normal e manda desenhar a tela
+      document.getElementById('nav-client').textContent = C.nome;
+      document.getElementById('nav-client').style.color = "var(--tx)";
+      renderAll();
+    }
+  } catch (erro) {
+    console.error("Erro na API do Windsor:", erro);
+    document.getElementById('nav-client').textContent = C.nome + " (Erro de conexão ❌)";
+    // Se der erro, ele vai desenhar o painel zerado para não bugar
+    renderAll(); 
+  }
+}
 
 // ── HELPERS ───────────────────────────────────────────────────────────
 const charts={};
@@ -408,6 +406,7 @@ function dBadge(p,inv=false){
 const TK='#888',GK='rgba(0,0,0,.05)';
 const BO={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:TK,font:{size:11,family:'Inter'}},grid:{display:false},border:{display:false}},y:{ticks:{color:TK,font:{size:11,family:'Inter'}},grid:{color:GK},border:{display:false}}}};
 
+// ── CONTROLE DE DATAS (O GATILHO) ─────────────────────────────────────
 function setQ(preset,btn){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth();
   let f,t=new Date(now);
@@ -415,12 +414,17 @@ function setQ(preset,btn){
   else if(preset==='prev_month'){f=new Date(y,m-1,1);t=new Date(y,m,0);}
   else if(preset==='7d'){f=new Date(now);f.setDate(f.getDate()-7);}
   else{f=new Date(now);f.setDate(f.getDate()-30);}
+  
   document.getElementById('d-from').value=iso(f);
   document.getElementById('d-to').value=iso(t);
   document.querySelectorAll('.nav-right .qbtn').forEach(b=>b.classList.remove('on'));
   if(btn)btn.classList.add('on');
+  
   const opts={day:'2-digit',month:'short'};
   document.getElementById('sb-period').textContent=f.toLocaleDateString('pt-BR',opts)+' – '+t.toLocaleDateString('pt-BR',opts);
+
+  // Aqui está a mágica: Sempre que muda a data, puxa do Windsor!
+  puxarDadosWindsor(iso(f), iso(t));
 }
 
 function showSec(id,btn){
@@ -643,6 +647,10 @@ function renderMeta(){
 // ── CRIATIVOS ─────────────────────────────────────────────────────────
 function renderCri(sk){
   const cri=C.creatives;
+  if(!cri || cri.length === 0) {
+    document.getElementById('cri-grid').innerHTML = '<div style="padding:20px;color:#888;">Nenhum criativo encontrado (Windsor não enviou imagens).</div>';
+    return;
+  }
   const isEc=C.tipo==='ec';
   if(isEc){
     const tpur=cri.reduce((a,x)=>a+(x.pur||0),0);
@@ -775,8 +783,9 @@ if(!C){
 } else {
   document.getElementById('nav-client').textContent=C.nome;
   document.title='V4 Company — '+C.nome;
+  
+  // Isso aqui é o gatilho inicial que vai disparar a primeira busca no Windsor
   setQ('30d',document.getElementById('qbtn-30'));
-  renderAll();
 }
 </script>
 </body>
