@@ -3,155 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V4 RDR — Gestão de Performance</title>
+<title>V4 RDR — Intelligence Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F3F4F6;--card:#ffffff;--tx:#111827;--tx2:#4B5563;--tx3:#9CA3AF;
-  --brd:#E5E7EB;--v4-red:#E8000D;--v4-dark:#111111;
-  --green:#10B981;--blue:#2563EB;--tt:#000000;
-  --sh:0 4px 6px -1px rgba(0,0,0,0.05);--r:14px
+  --bg:#0f1115;--card:#181a20;--gray2:#1f2229;
+  --tx:#ffffff;--tx2:#9ca3af;--tx3:#6b7280;
+  --brd:rgba(255,255,255,0.05);
+  --v4-red:#E8000D;--v4-dark:#000000;
+  --green:#10B981;--blue:#2563EB;
+  --sh:0 10px 25px -5px rgba(0,0,0,0.5);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;scroll-behavior:smooth}
+html{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;scroll-behavior:smooth;overflow-x:hidden}
 
-/* HOME SCREEN */
-#home-screen{padding:50px 20px;max-width:1200px;margin:0 auto;display:none}
-.client-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;margin-top:40px}
-.client-card{background:#fff;border-radius:20px;padding:30px;text-align:center;box-shadow:var(--sh);cursor:pointer;transition:0.3s;border:1px solid transparent}
-.client-card:hover{transform:translateY(-10px);border-color:var(--v4-red)}
-.client-logo{width:80px;height:80px;background:var(--v4-dark);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:24px;font-weight:800}
+/* HOME SCREEN GLASSMORPHISM */
+#home-screen{padding:80px 20px;max-width:1200px;margin:0 auto;display:none;min-height:100vh;flex-direction:column;justify-content:center}
+.client-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:50px}
+.client-card{background:linear-gradient(145deg, #1e2128, #16181d);border-radius:24px;padding:40px;text-align:center;box-shadow:var(--sh);cursor:pointer;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);border:1px solid var(--brd);position:relative;overflow:hidden}
+.client-card:hover{transform:translateY(-15px);border-color:var(--v4-red);box-shadow: 0 20px 40px rgba(232, 0, 13, 0.2)}
+.client-card h2{font-weight:900;letter-spacing:-1px}
 
 /* DASHBOARD LAYOUT */
 #app-ui{display:none}
-.nav{background:var(--card);border-bottom:1px solid var(--brd);height:70px;display:flex;align-items:center;padding:0 30px;position:sticky;top:0;z-index:100}
-.nav-brand{font-weight:800;font-size:20px;color:var(--v4-dark);display:flex;align-items:center;gap:12px}
+.nav{background:rgba(24, 26, 32, 0.8);backdrop-filter:blur(15px);border-bottom:1px solid var(--brd);height:70px;display:flex;align-items:center;padding:0 30px;position:sticky;top:0;z-index:100}
+.nav-brand{font-weight:900;font-size:20px;display:flex;align-items:center;gap:12px;text-transform:uppercase;letter-spacing:1px}
 .nav-logo{width:35px;height:35px;background:var(--v4-red);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:15px}
 
-.sidebar{position:fixed;top:70px;left:0;width:240px;height:calc(100vh - 70px);background:var(--v4-dark);padding:25px 15px}
-.sb-btn{width:100%;padding:14px;background:transparent;border:none;color:#888;text-align:left;border-radius:10px;cursor:pointer;font-weight:600;margin-bottom:8px;transition:0.2s;display:flex;align-items:center;gap:10px}
+.sidebar{position:fixed;top:70px;left:0;width:240px;height:calc(100vh - 70px);background:var(--v4-dark);padding:30px 15px;border-right:1px solid var(--brd)}
+.sb-btn{width:100%;padding:15px;background:transparent;border:none;color:var(--tx2);text-align:left;border-radius:12px;cursor:pointer;font-weight:600;margin-bottom:10px;transition:0.3s;display:flex;align-items:center;gap:12px}
 .sb-btn:hover{color:#fff;background:rgba(255,255,255,0.05)}
-.sb-btn.active{background:var(--v4-red);color:#fff}
+.sb-btn.active{background:var(--v4-red);color:#fff;box-shadow: 0 4px 15px rgba(232, 0, 13, 0.3)}
 
-.main{margin-left:240px;padding:40px}
+.main{margin-left:240px;padding:40px;max-width:1400px;margin-right:auto}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:30px}
-.kpi-card{background:var(--card);padding:25px;border-radius:var(--r);box-shadow:var(--sh);position:relative;overflow:hidden}
-.kpi-card::after{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:var(--v4-red)}
-.kpi-label{font-size:12px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:1px}
-.kpi-val{font-size:28px;font-weight:800;margin-top:8px;color:var(--v4-dark)}
+.kpi-card{background:var(--card);padding:25px;border-radius:20px;box-shadow:var(--sh);border:1px solid var(--brd);transition:0.3s}
+.kpi-card:hover{border-color:rgba(255,255,255,0.1)}
+.kpi-label{font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.kpi-val{font-size:28px;font-weight:900;color:#fff;letter-spacing:-1px}
 
-/* GAUGES */
-.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:30px}
-.gauge-card{background:#fff;border-radius:var(--r);padding:25px;text-align:center;box-shadow:var(--sh)}
-.gauge-container{height:120px;position:relative}
+/* GAUGES PREMIUM */
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;margin-bottom:35px}
+.gauge-card{background:var(--card);border-radius:24px;padding:30px;text-align:center;box-shadow:var(--sh);border:1px solid var(--brd);position:relative}
+.gauge-container{height:140px;margin-bottom:10px}
+.gauge-txt{font-size:26px;font-weight:900;margin-top:-20px}
 
-.status-bar{background:var(--v4-dark);color:#0f0;padding:6px;font-family:monospace;font-size:11px;text-align:center;position:fixed;bottom:0;width:100%;z-index:1000}
+/* TABLES & CHARTS */
+.card{background:var(--card);border-radius:20px;box-shadow:var(--sh);margin-bottom:30px;overflow:hidden;border:1px solid var(--brd)}
+.card-hd{padding:20px 25px;border-bottom:1px solid var(--brd);font-weight:800;font-size:16px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.02)}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:15px 25px;background:rgba(255,255,255,0.03);color:var(--tx3);font-size:10px;text-transform:uppercase;letter-spacing:1px}
+.tbl td{padding:18px 25px;border-bottom:1px solid var(--brd);color:var(--tx2)}
+.tbl tr:hover td{background:rgba(255,255,255,0.02)}
+.hi{color:#fff !important;font-weight:700}
 
-/* CALENDAR CUSTOM */
-.date-picker-wrap{display:flex;align-items:center;background:var(--gray2);padding:5px 15px;border-radius:10px;border:1px solid var(--brd)}
-.date-input{border:none;background:transparent;font-family:inherit;font-weight:600;font-size:13px;color:var(--tx2);cursor:pointer}
+/* ADS GALLERY */
+.cri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;padding:25px}
+.cri-card{background:var(--gray2);border-radius:18px;overflow:hidden;border:1px solid var(--brd);transition:0.3s}
+.cri-card:hover{transform:scale(1.03);border-color:var(--v4-red)}
+.cri-img{width:100%;aspect-ratio:1;object-fit:cover;background:#000}
+.cri-body{padding:15px}
 
-@media(max-width:1000px){.client-grid{grid-template-columns:1fr}.sidebar{display:none}.main{margin-left:0}.kpi-grid{grid-template-columns:1fr 1fr}}
+/* STATUS */
+.status-tag{position:fixed;bottom:20px;right:20px;background:var(--v4-dark);border:1px solid var(--green);color:var(--green);padding:8px 15px;border-radius:30px;font-size:10px;font-weight:800;z-index:1000;display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
+
+.date-picker-wrap{display:flex;align-items:center;background:var(--gray2);padding:6px 15px;border-radius:12px;border:1px solid var(--brd);margin-right:10px}
+.date-input{border:none;background:transparent;color:#fff;font-family:inherit;font-size:12px;font-weight:600;outline:none}
+
+@media(max-width:1000px){.client-grid{grid-template-columns:1fr}.sidebar{display:none}.main{margin-left:0}}
 </style>
 </head>
 <body>
 
-<div class="status-bar" id="status">SISTEMA V4 RDR ATIVO</div>
+<div class="status-tag"><div class="dot"></div> SISTEMA V4 RDR ATIVO</div>
 
 <div id="home-screen">
     <div style="text-align:center">
-        <h1 style="font-size:32px;font-weight:800;color:var(--v4-dark)">Selecione o Dashboard</h1>
-        <p style="color:var(--tx2);margin-top:10px">Gestão de Performance — V4 RDR</p>
+        <h1 style="font-size:42px;font-weight:900;text-transform:uppercase">Selecione o Projeto</h1>
+        <p style="color:var(--tx3);margin-top:10px;font-weight:500">V4 RDR — High Performance Management</p>
     </div>
     <div class="client-grid">
         <div class="client-card" onclick="window.location.search='?cliente=aliancas'">
-            <div class="client-logo">AC</div>
+            <div style="font-size:40px;margin-bottom:20px">💍</div>
             <h2>Alianças CS</h2>
-            <p style="color:var(--tx3);margin-top:10px">E-commerce</p>
+            <p style="color:var(--tx3);margin-top:10px;font-size:12px;text-transform:uppercase;letter-spacing:1px">E-commerce Premium</p>
         </div>
         <div class="client-card" onclick="window.location.search='?cliente=bsc'">
-            <div class="client-logo" style="background:var(--blue)">BS</div>
-            <h2>BSC Pickup Solutions</h2>
-            <p style="color:var(--tx3);margin-top:10px">E-commerce B2B</p>
+            <div style="font-size:40px;margin-bottom:20px">📦</div>
+            <h2>BSC Pickup</h2>
+            <p style="color:var(--tx3);margin-top:10px;font-size:12px;text-transform:uppercase;letter-spacing:1px">Logística & B2B</p>
         </div>
         <div class="client-card" onclick="window.location.search='?cliente=starman'">
-            <div class="client-logo" style="background:var(--green)">SM</div>
+            <div style="font-size:40px;margin-bottom:20px">🚀</div>
             <h2>Star Man Net</h2>
-            <p style="color:var(--tx3);margin-top:10px">Inside Sales (Leads)</p>
+            <p style="color:var(--tx3);margin-top:10px;font-size:12px;text-transform:uppercase;letter-spacing:1px">Telecom & Leads</p>
         </div>
     </div>
 </div>
 
 <div id="app-ui">
   <nav class="nav">
-    <div class="nav-brand"><div class="nav-logo">4</div> V4 RDR <span id="client-name-top" style="font-weight:400;color:var(--tx3)"></span></div>
+    <div class="nav-brand"><div class="nav-logo">4</div> V4 RDR <span id="client-name-top" style="font-weight:300;color:var(--tx3);margin-left:10px"></span></div>
     <div class="nav-right">
       <div class="date-picker-wrap">
           <input type="date" id="date-from" class="date-input">
-          <span style="margin:0 10px;color:var(--tx3)">|</span>
+          <span style="margin:0 10px;color:var(--tx3)">-</span>
           <input type="date" id="date-to" class="date-input">
       </div>
-      <button class="qbtn" onclick="setPreset('7d',this)">7D</button>
-      <button class="qbtn on" onclick="setPreset('30d',this)">30D</button>
-      <button class="qbtn" style="background:var(--v4-red);color:#fff;border:none" onclick="customSearch()">Aplicar</button>
+      <button class="sb-btn active" style="width:auto;margin:0" onclick="setPreset('30d',this)">30D</button>
+      <button class="sb-btn" style="width:auto;margin:0;background:var(--v4-red)" onclick="refresh()">APLICAR</button>
     </div>
   </nav>
 
   <aside class="sidebar">
-    <div class="sb-sec">Performance</div>
-    <button class="sb-btn active">Visão Geral</button>
-    <button class="sb-btn">Meta Ads</button>
-    <button class="sb-btn">Google Ads</button>
-    <button class="sb-btn">TikTok Ads</button>
+    <button class="sb-btn active" onclick="tab('overview',this)">Visão Geral</button>
+    <button class="sb-btn" onclick="tab('meta',this)">Meta Ads</button>
+    <button class="sb-btn" onclick="tab('google',this)">Google Ads</button>
+    <button class="sb-btn" onclick="tab('ads',this)">Anúncios Campeões</button>
   </aside>
 
   <main class="main">
-    <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-label">Investimento (Mídia)</div><div class="kpi-val" id="kpi-gasto">R$ 0</div></div>
-      <div class="kpi-card"><div class="kpi-label">Faturamento (Planilha)</div><div class="kpi-val" id="kpi-fat">R$ 0</div></div>
-      <div class="kpi-card"><div class="kpi-label">Vendas Reais</div><div class="kpi-val" id="kpi-vendas">0</div></div>
-      <div class="kpi-card"><div class="kpi-label">ROI / ROAS</div><div class="kpi-val" id="kpi-roas">0.0x</div></div>
-    </div>
-
-    <div class="gauge-grid">
-      <div class="gauge-card">
-        <div class="gauge-container"><canvas id="gauge-roas"></canvas></div>
-        <div style="font-size:22px;font-weight:800" id="txt-roas">0.0x</div>
-        <div style="font-weight:700;font-size:12px;color:var(--tx3);margin-top:5px">SAÚDE DO ROAS</div>
-      </div>
-      <div class="gauge-card">
-        <div class="gauge-container"><canvas id="gauge-fat"></canvas></div>
-        <div style="font-size:22px;font-weight:800" id="txt-fat">R$ 0</div>
-        <div style="font-weight:700;font-size:12px;color:var(--tx3);margin-top:5px">PULSO DE FATURAMENTO</div>
-      </div>
-      <div class="gauge-card">
-        <div class="gauge-container"><canvas id="gauge-ctr"></canvas></div>
-        <div style="font-size:22px;font-weight:800" id="txt-ctr">0.0%</div>
-        <div style="font-weight:700;font-size:12px;color:var(--tx3);margin-top:5px">FORÇA DE ATRAÇÃO (CTR)</div>
-      </div>
-    </div>
-
-    <div id="section-bsc" style="display:none; margin-bottom:30px">
-        <h3 style="margin-bottom:20px;letter-spacing:-1px">Estratégia de Mensagens (BSC)</h3>
+    <div id="sec-overview" class="sec on">
         <div class="kpi-grid">
-            <div class="kpi-card" style="border-color:var(--blue)"><div class="kpi-label">Receita Mensagens</div><div class="kpi-val" id="bsc-msg-fat">R$ 0</div></div>
-            <div class="kpi-card" style="border-color:var(--blue)"><div class="kpi-label">ROI Mensagens</div><div class="kpi-val" id="bsc-msg-roas">0.0x</div></div>
-            <div class="kpi-card" style="border-color:var(--blue)"><div class="kpi-label">Ticket Médio Msg</div><div class="kpi-val" id="bsc-msg-tkt">R$ 0</div></div>
-            <div class="kpi-card" style="border-color:var(--blue)"><div class="kpi-label">Custo por Lead/Msg</div><div class="kpi-val" id="bsc-msg-cpa">R$ 0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Investimento (Mídia)</div><div class="kpi-val" id="k-gasto">R$ 0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Faturamento (Real)</div><div class="kpi-val" id="k-fat">R$ 0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Vendas/Leads</div><div class="kpi-val" id="k-vendas">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">CPA Médio</div><div class="kpi-val" id="k-cpa">R$ 0</div></div>
+        </div>
+
+        <div class="gauge-grid">
+            <div class="gauge-card">
+                <div class="gauge-container"><canvas id="g-roas"></canvas></div>
+                <div class="gauge-txt" id="v-roas">0.0x</div>
+                <p style="font-weight:800;font-size:11px;color:var(--tx3);margin-top:5px;letter-spacing:1px">ROAS REAL</p>
+            </div>
+            <div class="gauge-card">
+                <div class="gauge-container"><canvas id="g-ctr"></canvas></div>
+                <div class="gauge-txt" id="v-ctr">0.0%</div>
+                <p style="font-weight:800;font-size:11px;color:var(--tx3);margin-top:5px;letter-spacing:1px">ENGAGEMENT (CTR)</p>
+            </div>
+            <div class="gauge-card">
+                <div class="gauge-container"><canvas id="g-tkt"></canvas></div>
+                <div class="gauge-txt" id="v-tkt">R$ 0</div>
+                <p style="font-weight:800;font-size:11px;color:var(--tx3);margin-top:5px;letter-spacing:1px">TICKET MÉDIO</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-hd">Desempenho por Canal</div>
+            <div style="padding:30px; height:350px"><canvas id="c-main"></canvas></div>
         </div>
     </div>
 
-    <div style="background:#fff;padding:30px;border-radius:var(--r);box-shadow:var(--sh)">
-        <h4 style="margin-bottom:20px">Investimento x Receita por Canal</h4>
-        <div style="height:300px"><canvas id="main-chart"></canvas></div>
+    <div id="sec-meta" class="sec">
+        <div class="card">
+            <div class="card-hd">Campanhas Ativas - Meta Ads</div>
+            <div class="tbl-wrap">
+                <table class="tbl">
+                    <thead><tr><th>Campanha</th><th>Gasto</th><th>Cliques</th><th>Resultados</th><th>CPA</th><th>CTR</th></tr></thead>
+                    <tbody id="tb-meta"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
+    <div id="sec-google" class="sec">
+        <div class="card">
+            <div class="card-hd">Campanhas Ativas - Google Ads</div>
+            <div class="tbl-wrap">
+                <table class="tbl">
+                    <thead><tr><th>Campanha</th><th>Gasto</th><th>Cliques</th><th>Conversões</th><th>CPA</th><th>CTR</th></tr></thead>
+                    <tbody id="tb-google"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-ads" class="sec">
+        <div id="ad-loader" style="text-align:center;padding:50px;display:none;font-weight:800;color:var(--v4-red)">BAIXANDO CRIATIVOS...</div>
+        <div class="cri-grid" id="ad-grid"></div>
+    </div>
+
   </main>
 </div>
 
 <script>
+// CONFIGURAÇÃO
 const DB = {
   aliancas: { nome: "Alianças CS", ids: ["2429115943910453", "6704265990"], sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTsMuSXIpzP3kg-v1c_8peav-AaSKPWQ7irMj3padTTA8J8OR24do9Y0_RRfeKa5Tr6W0WjYCRwTQNi/pub?output=csv" },
   bsc: { nome: "BSC Pickup Solutions", ids: ["1707098029742717", "4837726517"], sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIqsXutKII_DYsFBQMEeo1I5SJq9b8I-RZxWoX3Ur8StELc9nYnntV_Dgnt20PLlD9nUeExeMjjihp/pub?output=csv" },
@@ -161,68 +203,48 @@ const DB = {
 const cid = new URLSearchParams(window.location.search).get('cliente');
 const C = DB[cid];
 const API_KEY = "2d4d1d577551f238260e5e6e150a4d7b4f24";
-
-let midia = { meta:0, google:0, tiktok:0, clk:0, imp:0, msgSp:0 };
-let financeiro = { fat:0, vendas:0, msgFat:0, msgVendas:0 };
+let midia = { meta:[], google:[], ads:[] };
+let financeiro = { fat:0, vendas:0 };
 const charts = {};
 
-// INICIALIZAÇÃO
-if(!cid) {
-    document.getElementById('home-screen').style.display = 'block';
-} else if(C) {
-    document.getElementById('app-ui').style.display = 'block';
+if(!cid) { document.getElementById('home-screen').style.display='flex'; }
+else if(C) { 
+    document.getElementById('app-ui').style.display='block';
     document.getElementById('client-name-top').textContent = "| " + C.nome;
-    if(cid === 'bsc') document.getElementById('section-bsc').style.display = 'block';
-    
-    // Datas padrão
     const t = new Date(); const f = new Date(); f.setDate(t.getDate()-30);
     document.getElementById('date-from').value = f.toISOString().split('T')[0];
     document.getElementById('date-to').value = t.toISOString().split('T')[0];
-    
     refresh();
 }
 
 async function refresh() {
     const f = document.getElementById('date-from').value;
     const t = document.getElementById('date-to').value;
-    document.getElementById('status').textContent = "⚡ ATUALIZANDO DADOS...";
     
-    // Busca API (Mídia)
-    const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${f}&date_to=${t}&fields=source,account_id,spend,clicks,impressions,campaign`;
-    try {
-        const r = await fetch(url);
-        const j = await r.json();
-        midia = { meta:0, google:0, tiktok:0, clk:0, imp:0, msgSp:0 };
-        j.data.forEach(row => {
-            if(C.ids.includes(String(row.account_id))) {
-                const s = row.source.toLowerCase();
-                const val = parseFloat(row.spend || 0);
-                midia.clk += parseInt(row.clicks || 0);
-                midia.imp += parseInt(row.impressions || 0);
-                if(s.includes('facebook')) { 
-                    midia.meta += val;
-                    if(row.campaign.toLowerCase().includes('msg')) midia.msgSp += val;
-                }
-                else if(s.includes('google')) midia.google += val;
-                else if(s.includes('tiktok')) midia.tiktok += val;
-            }
-        });
-    } catch(e){}
+    // API Mídia (Simples para velocidade)
+    const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,clicks,impressions,conversions`;
+    const res = await fetch(url);
+    const json = await res.json();
+    midia.meta = []; midia.google = [];
+    json.data.forEach(r => {
+        if(C.ids.includes(String(r.account_id))) {
+            if(r.source.includes('facebook')) midia.meta.push(r);
+            else midia.google.push(r);
+        }
+    });
 
-    // Busca Planilha (Financeiro)
+    // Planilha (Financeiro)
     if(C.sheet) {
         Papa.parse(C.sheet, {
             download: true, header: true,
-            complete: (res) => {
+            complete: (r) => {
                 const mesAtual = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(t)).toLowerCase();
-                financeiro = { fat:0, vendas:0, msgFat:0, msgVendas:0 };
-                res.data.forEach(row => {
+                financeiro = { fat:0, vendas:0 };
+                r.data.forEach(row => {
                     const mesRow = String(row['Mês'] || row['mês'] || '').toLowerCase();
                     if(mesRow.includes(mesAtual)) {
-                        financeiro.fat = parseVal(row['Faturamento'] || row['GERAL']);
-                        financeiro.vendas = parseVal(row['Vendas'] || row['Vendas Totais']);
-                        financeiro.msgFat = parseVal(row['Faturamento Campanha Mensagens']);
-                        financeiro.msgVendas = parseVal(row['Numero de vendas Campanha Mensagens']);
+                        financeiro.fat = parseFloat(String(row['Faturamento'] || 0).replace(/[R$\s.]/g,'').replace(',','.'));
+                        financeiro.vendas = parseInt(row['Vendas'] || row['GERAL'] || 0);
                     }
                 });
                 render();
@@ -231,71 +253,94 @@ async function refresh() {
     } else { render(); }
 }
 
-function parseVal(v) { return parseFloat(String(v || 0).replace(/[R$\s.]/g,'').replace(',','.')); }
-
 function render() {
-    const totalSp = midia.meta + midia.google + midia.tiktok;
+    const spMeta = midia.meta.reduce((a,x)=>a+parseFloat(x.spend||0),0);
+    const spGoogle = midia.google.reduce((a,x)=>a+parseFloat(x.spend||0),0);
+    const totalSp = spMeta + spGoogle;
+    const clkTotal = midia.meta.reduce((a,x)=>a+parseInt(x.clicks||0),0) + midia.google.reduce((a,x)=>a+parseInt(x.clicks||0),0);
+    const impTotal = midia.meta.reduce((a,x)=>a+parseInt(x.impressions||0),0) + midia.google.reduce((a,x)=>a+parseInt(x.impressions||0),0);
+    
+    document.getElementById('k-gasto').textContent = 'R$ ' + totalSp.toLocaleString('pt-BR');
+    document.getElementById('k-fat').textContent = 'R$ ' + financeiro.fat.toLocaleString('pt-BR');
+    document.getElementById('k-vendas').textContent = financeiro.vendas;
+    document.getElementById('k-cpa').textContent = 'R$ ' + (totalSp / (financeiro.vendas || 1)).toFixed(2);
+
+    const ctr = (clkTotal / (impTotal || 1)) * 100;
     const roas = financeiro.fat / (totalSp || 1);
-    const ctr = (midia.clk / (midia.imp || 1)) * 100;
+    const tkt = financeiro.fat / (financeiro.vendas || 1);
 
-    document.getElementById('kpi-gasto').textContent = 'R$ ' + totalSp.toLocaleString('pt-BR');
-    document.getElementById('kpi-fat').textContent = 'R$ ' + financeiro.fat.toLocaleString('pt-BR');
-    document.getElementById('kpi-vendas').textContent = financeiro.vendas;
-    document.getElementById('kpi-roas').textContent = roas.toFixed(2) + 'x';
+    updateGauge('g-roas', roas, 10, '#E8000D', roas.toFixed(1)+'x');
+    updateGauge('g-ctr', ctr, 3, '#2563EB', ctr.toFixed(2)+'%');
+    updateGauge('g-tkt', tkt, 2000, '#fff', 'R$ '+Math.round(tkt));
 
-    // BSC Mensagens
-    if(cid === 'bsc') {
-        document.getElementById('bsc-msg-fat').textContent = 'R$ ' + financeiro.msgFat.toLocaleString('pt-BR');
-        document.getElementById('bsc-msg-roas').textContent = (financeiro.msgFat / (midia.msgSp || 1)).toFixed(2) + 'x';
-        document.getElementById('bsc-msg-tkt').textContent = 'R$ ' + Math.round(financeiro.msgFat / (financeiro.msgVendas || 1));
-        document.getElementById('bsc-msg-cpa').textContent = 'R$ ' + (midia.msgSp / (financeiro.msgVendas || 1)).toFixed(2);
-    }
+    // Tabelas Meta
+    const tbMeta = document.getElementById('tb-meta'); tbMeta.innerHTML = '';
+    midia.meta.sort((a,b)=>b.spend-a.spend).forEach(r => {
+        tbMeta.innerHTML += `<tr><td class="hi">${r.campaign.substring(0,35)}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td class="hi">${r.conversions}</td><td>R$ ${(r.spend/(r.conversions||1)).toFixed(2)}</td><td>${(r.clicks/r.impressions*100).toFixed(2)}%</td></tr>`;
+    });
 
-    // Gauges
-    updateGauge('gauge-roas', roas, 10, '#E8000D', roas.toFixed(1)+'x');
-    updateGauge('gauge-fat', financeiro.fat, 100000, '#111', 'R$ '+Math.round(financeiro.fat/1000)+'k');
-    updateGauge('gauge-ctr', ctr, 3, '#2563EB', ctr.toFixed(2)+'%');
+    renderMainChart(spMeta, spGoogle);
+}
 
-    renderChart();
-    document.getElementById('status').textContent = "✅ DADOS SINCRONIZADOS";
+// ADS MOTOR SEPARADO PARA VELOCIDADE
+async function loadAds() {
+    document.getElementById('ad-loader').style.display='block';
+    const f = document.getElementById('date-from').value;
+    const t = document.getElementById('date-to').value;
+    const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${f}&date_to=${t}&fields=source,account_id,ad_name,picture,spend,conversions,clicks,impressions`;
+    const res = await fetch(url);
+    const json = await res.json();
+    const grid = document.getElementById('ad-grid'); grid.innerHTML = '';
+    const allowed = C.ids.map(limparID);
+
+    json.data.forEach(ad => {
+        const accId = limparID(ad.account_id);
+        if(!allowed.includes(accId) || !ad.picture) return;
+        grid.innerHTML += `
+            <div class="cri-card">
+                <img src="${ad.picture}" class="cri-img">
+                <div class="cri-body">
+                    <p class="cri-name">${ad.ad_name}</p>
+                    <div class="cri-stats">
+                        <div style="font-size:10px">Gasto: <b>R$ ${parseFloat(ad.spend).toFixed(0)}</b></div>
+                        <div style="font-size:10px">Vendas: <b style="color:var(--v4-red)">${ad.conversions}</b></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    document.getElementById('ad-loader').style.display='none';
 }
 
 function updateGauge(id, val, max, color, label) {
     if(charts[id]) charts[id].destroy();
     charts[id] = new Chart(document.getElementById(id), {
         type: 'doughnut',
-        data: { datasets: [{ data: [val, Math.max(0, max-val)], backgroundColor: [color, '#eee'], borderWidth: 0 }]},
-        options: { rotation: 270, circumference: 180, cutout: '80%', plugins: { tooltip: {enabled: false}}}
+        data: { datasets: [{ data: [val, Math.max(0, max-val)], backgroundColor: [color, 'rgba(255,255,255,0.05)'], borderWidth: 0 }]},
+        options: { rotation: 270, circumference: 180, cutout: '85%', plugins: { tooltip: {enabled: false}}}
     });
-    document.getElementById('txt-'+id.split('-')[1]).textContent = label;
+    document.getElementById('v-'+id.split('-')[1]).textContent = label;
 }
 
-function renderChart() {
+function renderMainChart(m, g) {
     if(charts.main) charts.main.destroy();
-    charts.main = new Chart(document.getElementById('main-chart'), {
+    charts.main = new Chart(document.getElementById('c-main'), {
         type: 'bar',
         data: {
-            labels: ['Meta Ads', 'Google Ads', 'TikTok Ads'],
-            datasets: [
-                { label: 'Investimento', data: [midia.meta, midia.google, midia.tiktok], backgroundColor: '#888' },
-                { label: 'Faturamento Estimado', data: [financeiro.fat*0.6, financeiro.fat*0.3, financeiro.fat*0.1], backgroundColor: '#E8000D' }
-            ]
+            labels: ['Meta Ads', 'Google Ads'],
+            datasets: [{ label: 'Investimento por Canal', data: [m, g], backgroundColor: ['#2563EB', '#E8000D'], borderRadius: 10 }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
     });
 }
 
-function setPreset(p, btn) {
-    document.querySelectorAll('.qbtn').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on');
-    const t = new Date(); const f = new Date();
-    f.setDate(t.getDate() - (p === '7d' ? 7 : 30));
-    document.getElementById('date-from').value = f.toISOString().split('T')[0];
-    document.getElementById('date-to').value = t.toISOString().split('T')[0];
-    refresh();
+function tab(name, btn) {
+    document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+    document.getElementById('sec-'+name).classList.add('on');
+    document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    if(name === 'ads') loadAds();
 }
-
-function customSearch() { refresh(); }
 </script>
 </body>
 </html>
