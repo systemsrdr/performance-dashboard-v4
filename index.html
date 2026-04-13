@@ -3,617 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V4 RDR — Dashboard de Performance</title>
+<title>V4 RDR — Gestão de Performance</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#F3F4F6;--card:#ffffff;--gray2:#F9FAFB;
   --tx:#111827;--tx2:#4B5563;--tx3:#9CA3AF;
-  --brd:#E5E7EB;--brd2:#D1D5DB;
-  --v4-red:#E8000D; --v4-dark:#111111;
+  --brd:#E5E7EB;--v4-red:#E8000D;--v4-dark:#111111;
   --green:#10B981;--green2:#ECFDF5;
   --blue:#2563EB;--blue2:#EFF6FF;
-  --sh:0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --sh:0 4px 6px -1px rgba(0,0,0,0.05);
   --r:14px;--rs:8px
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:14px}
 body{min-height:100vh}
 
-/* ESTADOS INICIAIS */
 #app-ui, #nf { display: none; }
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,0.9);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.spinner{width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid var(--v4-red);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 
-/* TOOLTIPS (LEGENDA PARA O CLIENTE) */
-.info-icon{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--brd2);color:#fff;font-size:10px;font-weight:700;cursor:help;margin-left:6px;position:relative}
-.info-icon:hover{background:var(--tx2)}
-.info-icon:hover::after{content:attr(data-tip);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);background:var(--v4-dark);color:#fff;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:500;white-space:pre-wrap;width:max-content;max-width:220px;text-align:center;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.nav{background:var(--card);border-bottom:1px solid var(--brd);height:60px;display:flex;align-items:center;padding:0 28px;gap:14px;position:sticky;top:0;z-index:100}
+.nav-logo-mark{width:30px;height:30px;background:var(--v4-red);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+.nav-brand{font-size:16px;font-weight:800;color:var(--v4-dark)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.qbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--brd);background:#fff;font-size:12px;font-weight:600;cursor:pointer}
+.qbtn.on{background:var(--v4-dark);color:#fff}
 
-/* TRENDS (COMPARATIVO DE PERÍODO) */
-.trend{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:8px}
-.trend.up-good{background:var(--green2);color:var(--green)}
-.trend.down-good{background:var(--green2);color:var(--green)}
-.trend.up-bad{background:var(--red2);color:var(--red)}
-.trend.down-bad{background:var(--red2);color:var(--red)}
-.trend.neu{background:var(--gray2);color:var(--tx3)}
-
-/* NAV TOP */
-.nav{background:var(--card);border-bottom:1px solid var(--brd);height:60px;display:flex;align-items:center;padding:0 28px;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.nav-logo-mark{width:30px;height:30px;background:var(--v4-red);border-radius:6px;display:flex;align-items:center;justify-content:center}
-.nav-brand{font-size:15px;font-weight:800;color:var(--v4-dark);letter-spacing:-0.5px}
-.nav-sep{width:1px;height:24px;background:var(--brd2)}
-.nav-client{font-size:14px;font-weight:600;color:var(--tx);white-space:nowrap}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.date-input{background:var(--gray2);border:1px solid var(--brd);border-radius:var(--rs);padding:6px 10px;color:var(--tx);font-size:12px;font-weight:500;font-family:'Inter',sans-serif}
-.qbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--brd);background:var(--card);font-size:12px;font-weight:600;cursor:pointer;color:var(--tx2);transition:all .15s}
-.qbtn.on{background:var(--v4-dark);color:#fff;border-color:var(--v4-dark)}
-.qbtn:hover:not(.on){background:var(--gray2)}
-
-/* SIDEBAR DARK PREMIUM */
-.sidebar{position:fixed;top:60px;left:0;width:220px;height:calc(100vh - 60px);background:var(--v4-dark);border-right:1px solid var(--v4-dark);padding:20px 14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-.sb-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#666;padding:10px 10px 4px;margin-top:8px}
-.sb-sec:first-child{margin-top:0;padding-top:0}
-.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);font-size:13px;font-weight:500;color:#aaa;cursor:pointer;transition:all .15s;border:none;background:transparent;width:100%;text-align:left}
+.sidebar{position:fixed;top:60px;left:0;width:220px;height:calc(100vh - 60px);background:var(--v4-dark);padding:20px 14px;display:flex;flex-direction:column;gap:5px}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--rs);font-size:13px;color:#aaa;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;transition:0.2s}
 .sb-btn:hover{background:rgba(255,255,255,0.05);color:#fff}
 .sb-btn.on{background:var(--v4-red);color:#fff;font-weight:700}
-.sb-btn svg{opacity:.7;flex-shrink:0}.sb-btn.on svg{opacity:1}
-.sb-live{display:flex;align-items:center;gap:8px;margin-top:auto;padding:12px;background:rgba(16,185,129,0.1);border-radius:var(--rs);border:1px solid rgba(16,185,129,0.2)}
-.sb-live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.sb-live-text{font-size:12px;color:var(--green);font-weight:600}
 
-/* MAIN */
-.main{margin-left:220px;margin-top:60px;padding:32px 40px;min-height:calc(100vh - 60px)}
-.page-hd{margin-bottom:24px; display:flex; justify-content:space-between; align-items:flex-end}
-.pg-title{font-size:26px;font-weight:800;color:var(--tx);margin-bottom:4px;letter-spacing:-1px}
-.pg-sub{font-size:14px;color:var(--tx2)}
-.sec{display:none}.sec.on{display:block}
+.main{margin-left:220px;margin-top:60px;padding:30px 40px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--sh);border-top:4px solid var(--v4-red)}
+.kpi-label{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:800;color:var(--v4-dark);letter-spacing:-1px}
 
-/* KPI & GAUGES */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}
-.kpi{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:24px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;display:flex;flex-direction:column}
-.kpi::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;background:var(--v4-red)}
-.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:10px;display:flex;align-items:center}
-.kpi-value{font-size:32px;font-weight:800;color:var(--v4-dark);line-height:1;margin-bottom:10px;letter-spacing:-1px;display:flex;align-items:center}
-.kpi-foot{font-size:12px;font-weight:500;color:var(--tx2);margin-top:auto}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.gauge-card{background:var(--card);border-radius:var(--r);padding:20px;text-align:center;box-shadow:var(--sh)}
+.gauge-wrap{height:100px;position:relative}
 
-.gauge-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:24px}
-.gauge-card{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:20px;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;text-align:center}
-.gauge-wrap{width:160px;height:90px;position:relative;margin-bottom:10px}
-.gauge-val{position:absolute;bottom:0;left:0;width:100%;text-align:center;font-size:22px;font-weight:800;color:var(--tx)}
-.gauge-title{font-size:13px;font-weight:700;color:var(--tx);display:flex;align-items:center;justify-content:center}
-.gauge-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:24px;overflow:hidden}
+.card-hd{padding:16px 20px;border-bottom:1px solid var(--brd);font-weight:700}
 
-/* CARD & TABLES */
-.card{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:24px}
-.card-hd{padding:16px 20px;border-bottom:1px solid var(--brd)}
-.card-title{font-size:15px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:8px}
-.card-sub{font-size:12px;color:var(--tx2);margin-top:4px}
-.card-body{padding:20px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
-.cwrap{position:relative;width:100%}
-
-.badge-tipo{font-size:10px;font-weight:800;padding:4px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.05em}
-.bt-venda{background:var(--green2);color:var(--green)}
-.bt-msg{background:var(--blue2);color:var(--blue)}
-.bt-lead{background:#FFF7E0;color:#A0640A}
-
-.tbl-wrap{overflow-x:auto}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl thead tr{background:var(--gray2)}
-.tbl th{text-align:left;padding:12px 20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);border-bottom:1px solid var(--brd)}
-.tbl td{padding:14px 20px;border-bottom:1px solid var(--brd);color:var(--tx2);max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:#F8FAFC}
-.tbl td.hi{color:var(--v4-dark);font-weight:700}
-.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700}
-.bg{background:var(--green2);color:var(--green)}.ba{background:#FFF7E0;color:#A0640A}.br{background:var(--red2);color:var(--v4-red)}.bb{background:var(--blue2);color:var(--blue)}
-
-/* LOADER INTERNO DOS CRIATIVOS */
-#cri-loader{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center}
-.cri-spinner{width:40px;height:40px;border:4px solid var(--brd);border-top:4px solid var(--v4-red);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.cri-ld-title{font-size:18px;font-weight:700;color:var(--tx);margin-bottom:8px}
-.cri-ld-sub{font-size:13px;color:var(--tx2)}
-
-/* CRIATIVOS / ANÚNCIOS */
-.sort-hd{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--brd);flex-wrap:wrap;background:var(--gray2)}
-.cri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;padding:20px}
-.cri-card{background:var(--card);border:1px solid var(--brd);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;box-shadow:var(--sh)}
-.cri-card:hover{transform:translateY(-4px);box-shadow:0 10px 25px rgba(0,0,0,.1);border-color:var(--v4-red)}
-.cri-card.rank1{border:2px solid var(--v4-red)}
-.cri-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:var(--gray2)}
-.cri-img{width:100%;height:100%;object-fit:cover;transition:transform .3s;display:block}
-.cri-card:hover .cri-img{transform:scale(1.05)}
-.cri-badge{position:absolute;top:10px;left:10px;font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px;z-index:2}
-.cri-badge.gold{background:rgba(255,255,255,.95);color:var(--v4-red);border:1px solid var(--v4-red);box-shadow:0 2px 4px rgba(0,0,0,.1)}
-.cri-badge.rank{background:rgba(0,0,0,.7);color:#fff}
-.cri-nopic{aspect-ratio:1;background:var(--gray2);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--tx3);font-size:12px;font-weight:600;padding:20px;text-align:center}
-.cri-body{padding:16px}
-.cri-name{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cri-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cs{background:var(--gray2);border-radius:8px;padding:8px 10px}
-.cs-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:2px}
-.cs-v{font-size:14px;font-weight:800;color:var(--tx)}
-.cs-v.red{color:var(--v4-red)}.cs-v.green{color:var(--green)}.cs-v.blue{color:var(--blue)}
-
-/* LIGHTBOX */
-.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
-.lb.open{display:flex}
-.lb-box{background:var(--card);border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}
-.lb-img{width:100%;max-height:400px;object-fit:contain;background:#000;border-radius:16px 16px 0 0;display:block}
-.lb-body{padding:24px}
-.lb-title{font-size:20px;font-weight:800;color:var(--tx);margin-bottom:6px}
-.lb-camp{font-size:13px;font-weight:600;background:var(--gray2);color:var(--tx2);padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:20px}
-.lb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.lb-stat{background:var(--gray2);border-radius:10px;padding:16px}
-.lb-stat-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:4px}
-.lb-stat-v{font-size:20px;font-weight:800;color:var(--v4-dark)}
-.lb-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:var(--tx);z-index:10;box-shadow:0 2px 10px rgba(0,0,0,.1)}
-.lb-close:hover{background:var(--v4-red);color:#fff}
-
-#nf{min-height:100vh;align-items:center;justify-content:center;flex-direction:column;text-align:center}
-@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.kpi-grid{grid-template-columns:repeat(2,1fr)}.gauge-grid{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.nav{padding:0 16px}.main{padding:16px}}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.kpi-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<div id="nf">
-  <div style="font-size:64px;font-weight:800;color:#ddd">404</div>
-  <p style="color:var(--tx2)">Cliente não encontrado. Você precisa selecionar um projeto.</p>
-  <a href="/home.html" style="color:var(--v4-red);text-decoration:none;font-weight:600;margin-top:10px;padding:10px 20px;border:1px solid var(--v4-red);border-radius:8px">← Voltar para a tela inicial</a>
+<div id="loading" class="loading-overlay">
+  <div class="spinner"></div>
+  <p style="margin-top:15px; font-weight:600">Sincronizando Financeiro e Mídia...</p>
+</div>
+
+<div id="nf" style="padding:100px; text-align:center">
+    <h1>404</h1>
+    <p>Projeto não identificado.</p>
 </div>
 
 <div id="app-ui">
-  <header class="nav" id="nav">
-    <a class="nav-logo" href="/home.html">
-      <div class="nav-logo-mark"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><polygon points="2,4 10,16 18,4" fill="white"/></svg></div>
-      <span class="nav-brand">V4 RDR</span>
-    </a>
-    <div class="nav-sep"></div>
-    <span class="nav-client" id="nav-client">Carregando Sistema...</span>
-    
+  <nav class="nav">
+    <div class="nav-logo-mark">4</div>
+    <span class="nav-brand">V4 RDR</span>
+    <span id="nav-client" style="font-weight:600; color:var(--tx2); margin-left:10px"></span>
     <div class="nav-right">
-      <input type="date" id="d-from" class="date-input" onchange="customDate()">
-      <span style="color:var(--tx3)">—</span>
-      <input type="date" id="d-to" class="date-input" onchange="customDate()">
-      <button class="qbtn" onclick="setQ('this_month',this)">Este mês</button>
-      <button class="qbtn" onclick="setQ('prev_month',this)">Mês anterior</button>
-      <button class="qbtn on" id="qbtn-30" onclick="setQ('30d',this)">30 dias</button>
+      <button class="qbtn on" onclick="setQ('30d',this)">Últimos 30 dias</button>
       <button class="qbtn" onclick="setQ('7d',this)">7 dias</button>
-    </div>
-  </header>
-
-  <nav class="sidebar" id="sidebar">
-    <div class="sb-sec">Análise de Dados</div>
-    <button class="sb-btn on" onclick="showSec('overview',this)">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" opacity=".4"/><rect x="1" y="9" width="6" height="6" rx="1.5" opacity=".4"/><rect x="9" y="9" width="6" height="6" rx="1.5" opacity=".4"/></svg> Visão Geral
-    </button>
-    <button class="sb-btn" onclick="showSec('meta',this)">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 8c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"/></svg> Meta Ads
-    </button>
-    <button class="sb-btn" onclick="showSec('google',this)">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm3.5 7.5H8.5v3h-1v-3h-3v-1h3v-3h1v3h3v1z"/></svg> Google Ads
-    </button>
-    
-    <div class="sb-sec">Mídia & Conteúdo</div>
-    <button class="sb-btn" onclick="showSec('criativos',this)" id="btn-cri">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2zm2 0v8l2.5-2 2 2.5 2-3 2 2.5V2H4z"/></svg> Anúncios (Ads)
-    </button>
-
-    <div class="sb-live" style="margin-top:auto">
-      <div class="sb-live-dot"></div>
-      <div class="sb-live-text">Sistema Online</div>
     </div>
   </nav>
 
-  <main class="main" id="main">
-
-    <div class="sec on" id="sec-overview">
-      <div class="page-hd">
-        <div>
-            <div class="pg-title">Inteligência de Performance</div>
-            <div class="pg-sub">Resumo executivo e comparativo de métricas vitalícias (Meta + Google)</div>
-        </div>
-      </div>
-      
-      <div class="kpi-grid" id="ov-kpi"></div>
-      
-      <div class="gauge-grid">
-        <div class="gauge-card">
-          <div class="gauge-wrap"><canvas id="g-cpa"></canvas><div class="gauge-val" id="g-cpa-v"></div></div>
-          <div class="gauge-title">Saúde do Custo (CPA) <span class="info-icon" data-tip="Média geral de quanto a empresa está pagando para adquirir um novo cliente ou lead cruzando todas as campanhas.">i</span></div>
-          <div class="gauge-sub">Eficiência financeira da conta</div>
-        </div>
-        <div class="gauge-card">
-          <div class="gauge-wrap"><canvas id="g-ctr"></canvas><div class="gauge-val" id="g-ctr-v"></div></div>
-          <div class="gauge-title">Termômetro de Engajamento <span class="info-icon" data-tip="Taxa de Cliques (CTR). Mostra se os anúncios estão atrativos. Um número alto significa que o público tem muito interesse na oferta.">i</span></div>
-          <div class="gauge-sub">Taxa de atração dos anúncios</div>
-        </div>
-        <div class="gauge-card">
-          <div class="gauge-wrap"><canvas id="g-conv"></canvas><div class="gauge-val" id="g-conv-v"></div></div>
-          <div class="gauge-title">Força de Conversão <span class="info-icon" data-tip="De todas as pessoas que clicaram e acessaram seu site ou WhatsApp, qual porcentagem efetivamente tomou a ação desejada (comprou/virou lead).">i</span></div>
-          <div class="gauge-sub">Capacidade de fechamento</div>
-        </div>
-      </div>
-
-      <div class="g2">
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Distribuição de Verba</div></div>
-          <div class="card-body"><div class="cwrap" style="height:200px"><canvas id="ov-c1"></canvas></div></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div class="card-title">Top Campanhas (Investimento)</div></div>
-          <div class="card-body"><div class="cwrap" style="height:200px"><canvas id="ov-c2"></canvas></div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sec" id="sec-meta">
-      <div class="page-hd">
-        <div class="pg-title">Estratégias Meta Ads</div>
-        <div class="pg-sub">Desempenho detalhado separando os objetivos de Aquisição e Relacionamento.</div>
-      </div>
-      <div class="kpi-grid" id="meta-kpi"></div>
-      
-      <div class="card" style="padding:0; margin-bottom:30px;">
-        <div class="card-hd">
-          <div class="card-title"><span class="badge-tipo bt-venda" id="lbl-t1">VENDAS</span> Fundo de Funil & Aquisição Direta</div>
-        </div>
-        <div class="tbl-wrap">
-          <table class="tbl">
-            <thead>
-              <tr><th>Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th id="th-conv-1">Conversões</th><th id="th-cpa-1">CPA (Custo/Conv)</th></tr>
-            </thead>
-            <tbody id="tb-vendas"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card" style="padding:0">
-        <div class="card-hd">
-          <div class="card-title"><span class="badge-tipo bt-msg">MENSAGEM</span> Relacionamento (WhatsApp / Direct)</div>
-        </div>
-        <div class="tbl-wrap">
-          <table class="tbl">
-            <thead>
-              <tr><th>Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th id="th-conv-2">Mensagens Iniciadas</th><th id="th-cpa-2">Custo por Mensagem</th></tr>
-            </thead>
-            <tbody id="tb-msgs"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="sec" id="sec-google">
-      <div class="page-hd">
-        <div class="pg-title">Google Ads Performance</div>
-      </div>
-      <div class="kpi-grid" id="google-kpi"></div>
-      <div class="card" style="padding:0">
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32%">Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Conversões</th><th>CPA</th></tr></thead><tbody id="google-tb"></tbody></table></div>
-      </div>
-    </div>
-
-    <div class="sec" id="sec-criativos">
-      <div class="page-hd">
-        <div class="pg-title">Galeria de Criativos & Mídia</div>
-        <div class="pg-sub">Acompanhe visualmente os anúncios campeões da sua conta.</div>
-      </div>
-      
-      <div id="cri-loader">
-        <div class="cri-spinner"></div>
-        <div class="cri-ld-title">Processando Banco de Mídias...</div>
-        <div class="cri-ld-sub">Aguarde. O sistema está buscando as imagens e o desempenho individual de todos os anúncios vinculados às suas campanhas neste momento.</div>
-      </div>
-
-      <div id="cri-content" style="display:none">
-        <div class="kpi-grid" id="cri-kpi"></div>
-        <div class="card" style="padding:0">
-          <div class="sort-hd">
-            <span class="sort-lbl">Métricas de Sucesso:</span>
-            <button class="qbtn on" onclick="sortCri('conv',this)">Maior Volume</button>
-            <button class="qbtn" onclick="sortCri('spend',this)">Maior Gasto</button>
-            <button class="qbtn" onclick="sortCri('cpa',this)">Custo Mais Barato</button>
-            <button class="qbtn" onclick="sortCri('ctr',this)">Melhor Engajamento</button>
-          </div>
-          <div class="cri-grid" id="cri-grid"></div>
-        </div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<div class="lb" id="lb" onclick="closeLB(event)">
-  <div class="lb-box">
-    <div style="position:relative">
-      <button class="lb-close" onclick="closeLB()">✕</button>
-      <div id="lb-img-wrap"></div>
-      <div class="lb-body">
-        <div class="lb-title" id="lb-title"></div>
-        <div class="lb-camp" id="lb-camp"></div>
-        <div class="lb-stats" id="lb-stats"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── CONFIGURAÇÃO DAS CONTAS (IDs) ─────────────────────────────────────
-const DB = {
-  aliancas: { 
-    nome: "Alianças CS", 
-    tipo: "ec",
-    ids_contas: ["2429115943910453", "6704265990"], 
-    meta: [], google: [], prev_meta: [], prev_google: [], creatives: [], creativesLoaded: false
-  },
-  starman: { 
-    nome: "Star Man Net", 
-    tipo: "is",
-    ids_contas: ["465598168178564", "6835774127"], 
-    meta: [], google: [], prev_meta: [], prev_google: [], creatives: [], creativesLoaded: false
-  },
-  bsc: { 
-    nome: "BSC Pickup Solutions", 
-    tipo: "ec",
-    ids_contas: ["1707098029742717", "4837726517"], 
-    meta: [], google: [], prev_meta: [], prev_google: [], creatives: [], creativesLoaded: false
-  }
-};
-
-const API_KEY = "2d4d1d577551f238260e5e6e150a4d7b4f24";
-const limparID = (idStr) => String(idStr).replace(/[^0-9]/g, '');
-
-// ── VERIFICAÇÃO INICIAL (PROTEÇÃO DA TELA BRANCA) ─────────────────────
-const cid=(new URLSearchParams(location.search).get('cliente')||new URLSearchParams(location.search).get('c')||'').toLowerCase();
-const C=DB[cid];
-
-if(!C){
-  document.getElementById('nf').style.display = 'flex';
-} else {
-  document.getElementById('app-ui').style.display = 'block';
-  document.getElementById('nav-client').textContent = C.nome;
-  document.title = 'V4 RDR — ' + C.nome;
-  setQ('30d', document.getElementById('qbtn-30'));
-}
-
-// ── 1. MOTOR ULTRA RÁPIDO (Traz o Período Atual e o Anterior para Deltas) ──
-async function sincronizarDadosGerais(dataInicio, dataFim, prevInicio, prevFim) {
-  if(!C) return;
-  
-  // SOLUÇÃO DOS ZEROS: Adicionamos "leads", "purchases" e "results" ao fields para forçar a API a achar os dados extras
-  const fields = "source,account_id,campaign,spend,clicks,impressions,conversions,leads,purchases,results";
-  
-  const urlCurrent = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${dataInicio}&date_to=${dataFim}&fields=${fields}`;
-  const urlPrev = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${prevInicio}&date_to=${prevFim}&fields=${fields}`;
-
-  const navClient = document.getElementById('nav-client');
-  navClient.textContent = C.nome + " (Sincronizando...)";
-  navClient.style.color = "var(--v4-red)";
-
-  try {
-    // Fazemos as duas buscas ao mesmo tempo para não perder velocidade
-    const [resCurr, resPrev] = await Promise.all([fetch(urlCurrent), fetch(urlPrev)]);
-    const jsonCurr = await resCurr.json();
-    const jsonPrev = await resPrev.json();
-
-    const allowedIDs = C.ids_contas.map(limparID);
-
-    // FUNÇÃO QUE PROCESSA OS DADOS (Reutilizável para Atual e Passado)
-    function processarLinhas(dataArray) {
-      const aggMeta = {}; const aggGoogle = {};
-      if(!dataArray) return {m:[], g:[]};
-      
-      dataArray.forEach(row => {
-        const plataforma = String(row.source || "").toLowerCase();
-        const accId = limparID(row.account_id || "");
-        if(allowedIDs.length > 0 && !allowedIDs.includes(accId)) return;
-
-        const camp = String(row.campaign || "Campanha Desconhecida");
-        const sp = parseFloat(row.spend) || 0;
-        const imp = parseInt(row.impressions) || 0;
-        const clk = parseInt(row.clicks) || 0;
-        
-        // TRUQUE PARA OS ZEROS: Se conversions for 0, testamos os outros campos
-        const cv = parseInt(row.conversions) || parseInt(row.leads) || parseInt(row.purchases) || parseInt(row.results) || 0;
-
-        if (sp === 0 && imp === 0) return;
-
-        const campLower = camp.toLowerCase();
-        let tipo = 'venda'; 
-        let pur=0, msg=0, leads=0, wpp=0;
-
-        if (campLower.includes('msg') || campLower.includes('mens') || campLower.includes('wpp') || campLower.includes('whats') || campLower.includes('direct') || campLower.includes('chat')) {
-            tipo = 'msg';
-        } else if (C.tipo === 'is' && (campLower.includes('lead') || campLower.includes('form') || campLower.includes('cad') || campLower.includes('contato'))) {
-            tipo = 'lead';
-        }
-
-        if (tipo === 'msg') { msg = cv; wpp = cv; } 
-        else if (tipo === 'lead') { leads = cv; } 
-        else { pur = cv; }
-
-        if (plataforma.includes('facebook') || plataforma.includes('meta')) {
-          if(!aggMeta[camp]) aggMeta[camp] = {c:camp, tipo:tipo, sp:0, imp:0, clk:0, pur:0, msg:0, wpp:0, leads:0};
-          aggMeta[camp].sp += sp; aggMeta[camp].imp += imp; aggMeta[camp].clk += clk;
-          aggMeta[camp].pur += pur; aggMeta[camp].msg += msg; aggMeta[camp].wpp += wpp; aggMeta[camp].leads += leads;
-        } else if (plataforma.includes('google')) {
-          if(!aggGoogle[camp]) aggGoogle[camp] = {c:camp, sp:0, imp:0, clk:0, conversions:0};
-          aggGoogle[camp].sp += sp; aggGoogle[camp].imp += imp; aggGoogle[camp].clk += clk;
-          aggGoogle[camp].conversions += cv;
-        }
-      });
-      return {
-        m: Object.values(aggMeta).map(d => ({...d, ctr: d.imp>0?(d.clk/d.imp*100):0, cpc: d.clk>0?(d.sp/d.clk):0})),
-        g: Object.values(aggGoogle).map(d => ({...d, ctr: d.imp>0?(d.clk/d.imp*100):0, cpc: d.clk>0?(d.sp/d.clk):0}))
-      };
-    }
-
-    const currData = processarLinhas(jsonCurr.data);
-    const prevData = processarLinhas(jsonPrev.data);
-
-    C.meta = currData.m; C.google = currData.g;
-    C.prev_meta = prevData.m; C.prev_google = prevData.g;
-    
-    C.creativesLoaded = false;
-    document.getElementById('cri-content').style.display = 'none';
-
-    navClient.textContent = C.nome;
-    navClient.style.color = "var(--tx)";
-    
-    renderOV(); renderMeta(); renderGoogle();
-    
-    if(document.getElementById('sec-criativos').classList.contains('on')){
-        baixarCriativosImagens();
-    }
-  } catch (erro) {
-    console.error("Erro na API Base:", erro);
-    navClient.textContent = C.nome + " (Falha na conexão)";
-  }
-}
-
-// ── 2. MOTOR DE ANÚNCIOS (Só dispara se abrir a aba de Criativos) ──────
-async function baixarCriativosImagens() {
-  const dataInicio = document.getElementById('d-from').value;
-  const dataFim = document.getElementById('d-to').value;
-  
-  const fields = "source,account_id,campaign,ad_name,picture,spend,clicks,impressions,conversions,leads,purchases,results";
-  const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${dataInicio}&date_to=${dataFim}&fields=${fields}`;
-
-  document.getElementById('cri-loader').style.display = 'flex';
-  document.getElementById('cri-content').style.display = 'none';
-
-  try {
-    const resposta = await fetch(url);
-    const json = await resposta.json();
-
-    if (json && json.data) {
-      const allowedIDs = C.ids_contas.map(limparID);
-      const aggAds = {};
-
-      json.data.forEach(row => {
-        const plataforma = String(row.source || "").toLowerCase();
-        if(!plataforma.includes('facebook') && !plataforma.includes('meta')) return;
-
-        const accId = limparID(row.account_id || "");
-        if(allowedIDs.length > 0 && !allowedIDs.includes(accId)) return;
-
-        const camp = String(row.campaign || "Campanha Desconhecida");
-        const anuncio = String(row.ad_name || "Anúncio Padrão");
-        const foto = row.picture || ""; 
-        const sp = parseFloat(row.spend) || 0;
-        const imp = parseInt(row.impressions) || 0;
-        const clk = parseInt(row.clicks) || 0;
-        const cv = parseInt(row.conversions) || parseInt(row.leads) || parseInt(row.purchases) || parseInt(row.results) || 0;
-
-        if (sp === 0 && imp === 0) return;
-
-        const campLower = camp.toLowerCase();
-        let tipo = 'venda'; 
-        let pur=0, msg=0, leads=0, wpp=0;
-
-        if (campLower.includes('msg') || campLower.includes('mens') || campLower.includes('wpp') || campLower.includes('whats') || campLower.includes('direct')) {
-            tipo = 'msg';
-        } else if (C.tipo === 'is' && (campLower.includes('lead') || campLower.includes('form') || campLower.includes('cad'))) {
-            tipo = 'lead';
-        }
-
-        if (tipo === 'msg') { msg = cv; wpp = cv; } 
-        else if (tipo === 'lead') { leads = cv; } 
-        else { pur = cv; }
-
-        const adKey = camp + "|||" + anuncio;
-        if(!aggAds[adKey]) aggAds[adKey] = {n:anuncio, camp:camp, tipo:tipo, img:foto, sp:0, imp:0, clk:0, pur:0, msg:0, wpp:0, leads:0};
-        aggAds[adKey].sp += sp; aggAds[adKey].imp += imp; aggAds[adKey].clk += clk;
-        aggAds[adKey].pur += pur; aggAds[adKey].msg += msg; aggAds[adKey].wpp += wpp; aggAds[adKey].leads += leads;
-        if(foto && !aggAds[adKey].img) aggAds[adKey].img = foto;
-      });
-
-      C.creatives = Object.values(aggAds).map(d => ({...d, ctr: d.imp>0?(d.clk/d.imp*100):0, cpc: d.clk>0?(d.sp/d.clk):0}));
-      C.creativesLoaded = true;
-
-      document.getElementById('cri-loader').style.display = 'none';
-      document.getElementById('cri-content').style.display = 'block';
-      
-      document.querySelectorAll('.sort-hd .qbtn').forEach(b=>b.classList.remove('on'));
-      document.querySelector('.sort-hd .qbtn').classList.add('on');
-      renderCri('conv');
-    }
-  } catch (erro) {
-    document.getElementById('cri-loader').innerHTML = '<div style="color:var(--v4-red);font-weight:bold;margin-top:20px">Falha ao baixar as mídias. Tente novamente.</div>';
-  }
-}
-
-// ── UTILITÁRIOS & GRÁFICOS ───────────────────────────────────────────
-const charts={};
-function dc(id,cfg){if(charts[id])charts[id].destroy();try{charts[id]=new Chart(document.getElementById(id),cfg);}catch(e){}}
-
-function dg(id, val, max, color, label){
-    const safeVal = isNaN(val) || !isFinite(val) ? 0 : val;
-    const safeMax = isNaN(max) || max <= 0 || !isFinite(max) ? 1 : max;
-    const v = Math.min(safeVal, safeMax);
-    
-    dc(id, {
-        type: 'doughnut',
-        data: { datasets: [{ data: [v, safeMax-v], backgroundColor: [color, '#F3F4F6'], borderWidth: 0, borderRadius: [4,0] }] },
-        options: { rotation: 270, circumference: 180, cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { tooltip: {enabled: false} } }
-    });
-    document.getElementById(id+'-v').textContent = label;
-}
-
-function fr(n){return 'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}
-function frr(n){return 'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fn(n){return Math.round(n||0).toLocaleString('pt-BR');}
-function fp(n){return (n||0).toFixed(2)+'%';}
-function sn(s,l=35){return String(s).replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/g,'').trim().substring(0,l);}
-function iso(d){return d.toISOString().split('T')[0];}
-const TK='#9CA3AF',GK='#F3F4F6';
-const BO={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:TK,font:{size:10,family:'Inter'}},grid:{display:false},border:{display:false}},y:{ticks:{color:TK,font:{size:10,family:'Inter'}},grid:{color:GK},border:{display:false}}}};
-
-// CALCULA O DELTA (Crescimento)
-function getDeltaHtml(curr, prev, isInverted = false){
-  if(!prev || prev === 0) return '';
-  const pct = ((curr - prev) / prev) * 100;
-  if(Math.abs(pct) < 0.1) return `<span class="trend neu">—</span>`;
-  
-  const isUp = pct > 0;
-  // isInverted = true significa que CUSTO SUBIR é RUIM. 
-  let cls = 'neu';
-  if(isUp) cls = isInverted ? 'up-bad' : 'up-good';
-  else cls = isInverted ? 'down-good' : 'down-bad';
-  
-  const icon = isUp ? '↑' : '↓';
-  return `<span class="trend ${cls}">${icon} ${Math.abs(pct).toFixed(1)}%</span>`;
-}
-
-// ── CONTROLE DE DATAS E NAVEGAÇÃO ─────────────────────────────────────
-function setQ(preset,btn){
-  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
-  let f,t=new Date(now);
-  if(preset==='this_month'){f=new Date(y,m,1);}
-  else if(preset==='prev_month'){f=new Date(y,m-1,1);t=new Date(y,m,0);}
-  else if(preset==='7d'){f=new Date(now);f.setDate(f.getDate()-7);}
-  else{f=new Date(now);f.setDate(f.getDate()-30);} 
-  
-  document.getElementById('d-from').value=iso(f);
-  document.getElementById('d-to').value=iso(t);
-  document.querySelectorAll('.nav-right .qbtn').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  
-  const diffTime = Math.abs(t - f);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-  const pf = new Date(f); pf.setDate(pf.getDate() - 1);
-  const pi = new Date(pf); pi.setDate(pi.getDate() - diffDays + 1);
-
-  sincronizarDadosGerais(iso(f), iso(t), iso(pi), iso(pf));
-}
-
-function customDate() {
-  document.querySelectorAll('.nav-right .qbtn').forEach(b=>b.classList.remove('on'));
-  const f = document.getElementById('d-from').value, t = document.getElementById('d-to').value;
-  if(f && t){
-      const df = new Date(f), dt = new Date(t);
-      const diffTime = Math.abs(dt - df);
-      const diffDays = Math.ceil(diffTime / (10
+  <nav class="sidebar">
+    <button class="sb-btn on" onclick="showSec('overview',this)">Visão Geral</button>
