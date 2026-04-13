@@ -50,20 +50,9 @@ body{display:flex;flex-direction:column;min-height:100vh}
 .plat{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px}
 .plat-meta{background:#EBF4FF;color:#1877F2}.plat-google{background:#FEF2F2;color:#EA4335}
 
-/* STATS BAR */
-.stat-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#6B7280;padding-top:6px}
-.stat-dot{width:5px;height:5px;border-radius:50%;background:#E8000D}
-
 /* FOOTER */
 footer{text-align:center;padding:24px;font-size:11px;color:#9CA3AF;border-top:1px solid #E8EAED;background:#fff}
 footer strong{color:#1A1A2E}
-
-/* URL COPY */
-.url-box{background:#F3F4F6;border:1px solid #E5E7EB;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;margin-top:10px}
-.url-text{font-size:11px;color:#6B7280;font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.url-copy{font-size:10px;font-weight:600;color:#E8000D;cursor:pointer;padding:3px 8px;background:#fff;border:1px solid #E8000D;border-radius:5px;transition:all .15s;white-space:nowrap}
-.url-copy:hover{background:#E8000D;color:#fff}
-.url-copy.copied{background:#10B981;border-color:#10B981;color:#fff}
 
 @media(max-width:600px){.main{padding:28px 16px}.clients-grid{grid-template-columns:1fr}.nav{padding:0 20px}}
 </style>
@@ -95,8 +84,7 @@ footer strong{color:#1A1A2E}
 
   <div class="clients-grid">
 
-    <!-- ALIANÇAS CS -->
-    <div class="client-card" onclick="goTo('aliancas')">
+    <a href="/?cliente=aliancas" class="client-card">
       <div class="client-card-header">
         <div class="client-avatar" style="background:#C084FC">AC</div>
         <span class="client-status">Ativo</span>
@@ -113,18 +101,13 @@ footer strong{color:#1A1A2E}
         <div class="cm"><div class="cm-label">Compras</div><div class="cm-value">469</div></div>
         <div class="cm"><div class="cm-label">ROAS</div><div class="cm-value">5.8x</div></div>
       </div>
-      <div class="url-box">
-        <span class="url-text" id="url-aliancas">dashboard.vercel.app?cliente=aliancas</span>
-        <button class="url-copy" onclick="copyUrl(event,'aliancas')">Copiar link</button>
-      </div>
       <div class="client-cta">
         <span class="client-cta-text">Abrir dashboard</span>
         <div class="client-cta-arrow">→</div>
       </div>
-    </div>
+    </a>
 
-    <!-- STAR MAN NET -->
-    <div class="client-card" onclick="goTo('starman')">
+    <a href="/?cliente=starman" class="client-card">
       <div class="client-card-header">
         <div class="client-avatar" style="background:#3B82F6">SM</div>
         <span class="client-status">Ativo</span>
@@ -137,22 +120,17 @@ footer strong{color:#1A1A2E}
       </div>
       <div class="client-metrics">
         <div class="cm"><div class="cm-label">Investimento</div><div class="cm-value">R$ 43k</div></div>
-        <div class="cm"><div class="cm-label">Leads</div><div class="cm-value">277</div></div>
-        <div class="cm"><div class="cm-label">Conversões</div><div class="cm-value">277</div></div>
-        <div class="cm"><div class="cm-label">Melhor CPA</div><div class="cm-value">R$ 13</div></div>
-      </div>
-      <div class="url-box">
-        <span class="url-text" id="url-starman">dashboard.vercel.app?cliente=starman</span>
-        <button class="url-copy" onclick="copyUrl(event,'starman')">Copiar link</button>
+        <div class="cm"><div class="cm-label">WhatsApp</div><div class="cm-value">59</div></div>
+        <div class="cm"><div class="cm-label">Leads</div><div class="cm-value">120</div></div>
+        <div class="cm"><div class="cm-label">Melhor CPA</div><div class="cm-value">R$ 10</div></div>
       </div>
       <div class="client-cta">
         <span class="client-cta-text">Abrir dashboard</span>
         <div class="client-cta-arrow">→</div>
       </div>
-    </div>
+    </a>
 
-    <!-- BSC -->
-    <div class="client-card" onclick="goTo('bsc')">
+    <a href="/?cliente=bsc" class="client-card">
       <div class="client-card-header">
         <div class="client-avatar" style="background:#10B981">BS</div>
         <span class="client-status">Ativo</span>
@@ -165,19 +143,15 @@ footer strong{color:#1A1A2E}
       </div>
       <div class="client-metrics">
         <div class="cm"><div class="cm-label">Investimento</div><div class="cm-value">R$ 4k</div></div>
-        <div class="cm"><div class="cm-label">Receita</div><div class="cm-value">R$ 5.1k</div></div>
-        <div class="cm"><div class="cm-label">Conversões</div><div class="cm-value">12</div></div>
+        <div class="cm"><div class="cm-label">Mensagens</div><div class="cm-value">311</div></div>
+        <div class="cm"><div class="cm-label">Compras</div><div class="cm-value">7</div></div>
         <div class="cm"><div class="cm-label">CPA médio</div><div class="cm-value">R$ 282</div></div>
-      </div>
-      <div class="url-box">
-        <span class="url-text" id="url-bsc">dashboard.vercel.app?cliente=bsc</span>
-        <button class="url-copy" onclick="copyUrl(event,'bsc')">Copiar link</button>
       </div>
       <div class="client-cta">
         <span class="client-cta-text">Abrir dashboard</span>
         <div class="client-cta-arrow">→</div>
       </div>
-    </div>
+    </a>
 
   </div>
 </main>
@@ -186,38 +160,5 @@ footer strong{color:#1A1A2E}
   <strong>V4 Company</strong> — Dashboards de Performance · Dados via Windsor.ai · Atualizado automaticamente
 </footer>
 
-<script>
-// Atualiza URLs com o domínio real do Vercel
-function getBase(){return location.origin+location.pathname.replace('home.html','');}
-
-window.addEventListener('load',()=>{
-  const base = location.hostname==='localhost'||location.hostname===''
-    ? location.href.replace('home.html','')
-    : location.origin+'/';
-  ['aliancas','starman','bsc'].forEach(c=>{
-    const el=document.getElementById('url-'+c);
-    if(el) el.textContent = base+'?cliente='+c;
-  });
-});
-
-function goTo(c){
-  const base = location.hostname==='localhost'||location.hostname===''
-    ? location.href.replace(/home\.html.*$/,'')
-    : location.origin+'/';
-  window.location.href = base+'?cliente='+c;
-}
-
-function copyUrl(e,c){
-  e.stopPropagation();
-  const el=document.getElementById('url-'+c);
-  const url=el?el.textContent:location.origin+'/?cliente='+c;
-  navigator.clipboard.writeText(url).then(()=>{
-    const btn=e.target;
-    btn.textContent='Copiado ✓';
-    btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='Copiar link';btn.classList.remove('copied');},2000);
-  });
-}
-</script>
 </body>
 </html>
