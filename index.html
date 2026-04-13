@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V4 Company — Dashboard</title>
+<title>V4 RDR — Dashboard de Performance</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F4F5F7;--card:#fff;--gray2:#F9FAFB;
+  --bg:#F3F4F6;--card:#ffffff;--gray2:#F9FAFB;
   --tx:#111827;--tx2:#4B5563;--tx3:#9CA3AF;
   --brd:#E5E7EB;--brd2:#D1D5DB;
-  --red:#DC2626;--red2:#FEF2F2;
+  --v4-red:#E8000D; /* VERMELHO V4 */
+  --v4-dark:#111111; /* PRETO V4 */
   --green:#10B981;--green2:#ECFDF5;
   --blue:#2563EB;--blue2:#EFF6FF;
   --sh:0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
@@ -21,51 +22,45 @@
 html{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:14px}
 body{min-height:100vh}
 
-/* LOADER FULLSCREEN */
-#loader{position:fixed;inset:0;background:rgba(255,255,255,0.95);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s;backdrop-filter:blur(5px)}
-.spinner{width:50px;height:50px;border:4px solid var(--gray2);border-top:4px solid var(--red);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.loader-title{font-size:20px;font-weight:700;color:var(--tx);margin-bottom:8px}
-.loader-sub{font-size:14px;color:var(--tx2);max-width:400px;text-align:center;line-height:1.5}
-
-/* NAV */
+/* NAV TOP */
 .nav{background:var(--card);border-bottom:1px solid var(--brd);height:60px;display:flex;align-items:center;padding:0 28px;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.nav-logo-mark{width:32px;height:32px;background:#111;border-radius:6px;display:flex;align-items:center;justify-content:center}
-.nav-brand{font-size:14px;font-weight:700;color:#111;letter-spacing:-0.5px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.nav-logo-mark{width:30px;height:30px;background:var(--v4-red);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.nav-brand{font-size:15px;font-weight:800;color:var(--v4-dark);letter-spacing:-0.5px}
 .nav-sep{width:1px;height:24px;background:var(--brd2)}
 .nav-client{font-size:14px;font-weight:600;color:var(--tx);white-space:nowrap}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .date-input{background:var(--gray2);border:1px solid var(--brd);border-radius:var(--rs);padding:6px 10px;color:var(--tx);font-size:12px;font-weight:500;font-family:'Inter',sans-serif}
 .qbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--brd);background:var(--card);font-size:12px;font-weight:600;cursor:pointer;color:var(--tx2);transition:all .15s}
-.qbtn.on{background:#111;color:#fff;border-color:#111}
+.qbtn.on{background:var(--v4-dark);color:#fff;border-color:var(--v4-dark)}
 .qbtn:hover:not(.on){background:var(--gray2)}
 
-/* SIDEBAR */
-.sidebar{position:fixed;top:60px;left:0;width:220px;height:calc(100vh - 60px);background:var(--card);border-right:1px solid var(--brd);padding:20px 14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-.sb-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);padding:10px 10px 4px;margin-top:8px}
+/* SIDEBAR DARK PREMIUM */
+.sidebar{position:fixed;top:60px;left:0;width:220px;height:calc(100vh - 60px);background:var(--v4-dark);border-right:1px solid var(--v4-dark);padding:20px 14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#666;padding:10px 10px 4px;margin-top:8px}
 .sb-sec:first-child{margin-top:0;padding-top:0}
-.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .15s;border:none;background:transparent;width:100%;text-align:left}
-.sb-btn:hover{background:var(--gray2);color:var(--tx)}
-.sb-btn.on{background:var(--red2);color:var(--red);font-weight:700}
-.sb-btn svg{opacity:.5;flex-shrink:0}.sb-btn.on svg{opacity:1}
-.sb-live{display:flex;align-items:center;gap:8px;margin-top:auto;padding:12px;background:var(--green2);border-radius:var(--rs);border:1px solid var(--green3)}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);font-size:13px;font-weight:500;color:#aaa;cursor:pointer;transition:all .15s;border:none;background:transparent;width:100%;text-align:left}
+.sb-btn:hover{background:rgba(255,255,255,0.05);color:#fff}
+.sb-btn.on{background:var(--v4-red);color:#fff;font-weight:700}
+.sb-btn svg{opacity:.7;flex-shrink:0}.sb-btn.on svg{opacity:1}
+.sb-live{display:flex;align-items:center;gap:8px;margin-top:auto;padding:12px;background:rgba(16,185,129,0.1);border-radius:var(--rs);border:1px solid rgba(16,185,129,0.2)}
 .sb-live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .sb-live-text{font-size:12px;color:var(--green);font-weight:600}
 
 /* MAIN */
 .main{margin-left:220px;margin-top:60px;padding:32px 40px;min-height:calc(100vh - 60px)}
-.page-hd{margin-bottom:24px}
-.pg-title{font-size:26px;font-weight:700;color:var(--tx);margin-bottom:4px;letter-spacing:-1px}
+.page-hd{margin-bottom:24px; display:flex; justify-content:space-between; align-items:flex-end}
+.pg-title{font-size:26px;font-weight:800;color:var(--tx);margin-bottom:4px;letter-spacing:-1px}
 .pg-sub{font-size:14px;color:var(--tx2)}
 .sec{display:none}.sec.on{display:block}
 
 /* KPI & GAUGES */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}
 .kpi{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:20px;box-shadow:var(--sh);position:relative;overflow:hidden}
-.kpi::after{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red)}
+.kpi::after{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--v4-red)}
 .kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:8px}
-.kpi-value{font-size:28px;font-weight:800;color:var(--tx);line-height:1;margin-bottom:6px;letter-spacing:-1px}
+.kpi-value{font-size:28px;font-weight:800;color:var(--v4-dark);line-height:1;margin-bottom:6px;letter-spacing:-1px}
 .kpi-foot{font-size:12px;font-weight:500;color:var(--tx2)}
 
 .gauge-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:24px}
@@ -82,6 +77,7 @@ body{min-height:100vh}
 .card-sub{font-size:12px;color:var(--tx2);margin-top:4px}
 .card-body{padding:20px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.cwrap{position:relative;width:100%}
 
 .badge-tipo{font-size:10px;font-weight:800;padding:4px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.05em}
 .bt-venda{background:var(--green2);color:var(--green)}
@@ -95,21 +91,27 @@ body{min-height:100vh}
 .tbl td{padding:14px 20px;border-bottom:1px solid var(--brd);color:var(--tx2);max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:#F8FAFC}
-.tbl td.hi{color:var(--tx);font-weight:600}
+.tbl td.hi{color:var(--v4-dark);font-weight:700}
 .badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700}
-.bg{background:var(--green2);color:var(--green)}.ba{background:#FFF7E0;color:#A0640A}.br{background:var(--red2);color:var(--red)}.bb{background:var(--blue2);color:var(--blue)}
+.bg{background:var(--green2);color:var(--green)}.ba{background:#FFF7E0;color:#A0640A}.br{background:var(--red2);color:var(--v4-red)}.bb{background:var(--blue2);color:var(--blue)}
+
+/* LOADER INTERNO DOS CRIATIVOS */
+#cri-loader{display:none; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center}
+.cri-spinner{width:40px;height:40px;border:4px solid var(--brd);border-top:4px solid var(--v4-red);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+.cri-ld-title{font-size:18px;font-weight:700;color:var(--tx);margin-bottom:8px}
+.cri-ld-sub{font-size:13px;color:var(--tx2)}
 
 /* CRIATIVOS / ANÚNCIOS */
 .sort-hd{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--brd);flex-wrap:wrap;background:var(--gray2)}
 .cri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;padding:20px}
 .cri-card{background:var(--card);border:1px solid var(--brd);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;box-shadow:var(--sh)}
-.cri-card:hover{transform:translateY(-4px);box-shadow:0 10px 25px rgba(0,0,0,.1);border-color:var(--red)}
-.cri-card.rank1{border:2px solid #111}
+.cri-card:hover{transform:translateY(-4px);box-shadow:0 10px 25px rgba(0,0,0,.1);border-color:var(--v4-red)}
+.cri-card.rank1{border:2px solid var(--v4-red)}
 .cri-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:var(--gray2)}
 .cri-img{width:100%;height:100%;object-fit:cover;transition:transform .3s;display:block}
 .cri-card:hover .cri-img{transform:scale(1.05)}
 .cri-badge{position:absolute;top:10px;left:10px;font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px;z-index:2}
-.cri-badge.gold{background:rgba(255,255,255,.95);color:#111;border:1px solid #ddd;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.cri-badge.gold{background:rgba(255,255,255,.95);color:var(--v4-red);border:1px solid var(--v4-red);box-shadow:0 2px 4px rgba(0,0,0,.1)}
 .cri-badge.rank{background:rgba(0,0,0,.7);color:#fff}
 .cri-nopic{aspect-ratio:1;background:var(--gray2);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--tx3);font-size:12px;font-weight:600;padding:20px;text-align:center}
 .cri-body{padding:16px}
@@ -118,10 +120,10 @@ body{min-height:100vh}
 .cs{background:var(--gray2);border-radius:8px;padding:8px 10px}
 .cs-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:2px}
 .cs-v{font-size:14px;font-weight:800;color:var(--tx)}
-.cs-v.red{color:var(--red)}.cs-v.green{color:var(--green)}.cs-v.blue{color:var(--blue)}
+.cs-v.red{color:var(--v4-red)}.cs-v.green{color:var(--green)}.cs-v.blue{color:var(--blue)}
 
 /* LIGHTBOX */
-.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
+.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
 .lb.open{display:flex}
 .lb-box{background:var(--card);border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}
 .lb-img{width:100%;max-height:400px;object-fit:contain;background:#000;border-radius:16px 16px 0 0;display:block}
@@ -131,29 +133,28 @@ body{min-height:100vh}
 .lb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .lb-stat{background:var(--gray2);border-radius:10px;padding:16px}
 .lb-stat-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:4px}
-.lb-stat-v{font-size:20px;font-weight:800;color:var(--tx)}
+.lb-stat-v{font-size:20px;font-weight:800;color:var(--v4-dark)}
 .lb-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:var(--tx);z-index:10;box-shadow:0 2px 10px rgba(0,0,0,.1)}
-.lb-close:hover{background:var(--red);color:#fff}
+.lb-close:hover{background:var(--v4-red);color:#fff}
+
+#nf{display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+#nf.on{display:flex}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.kpi-grid{grid-template-columns:repeat(2,1fr)}.gauge-grid{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.nav{padding:0 16px}.main{padding:16px}}
 </style>
 </head>
 <body>
 
-<div id="loader">
-  <div class="spinner"></div>
-  <div class="loader-title">Analisando Inteligência de Mídia...</div>
-  <div class="loader-sub">Nosso sistema está processando as imagens dos anúncios e cruzando os dados das campanhas em tempo real. Isso leva alguns segundos, mas vale a pena! 🚀</div>
-</div>
-
-<div id="nf" style="display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;text-align:center">
+<div id="nf">
   <div style="font-size:64px;font-weight:800;color:#ddd">404</div>
   <p style="color:var(--tx2)">Cliente não encontrado.</p>
+  <a href="/home.html" style="color:var(--v4-red);text-decoration:none;font-weight:600;margin-top:10px">← Voltar para a Home</a>
 </div>
 
 <div id="app-ui" style="display:none">
   <header class="nav" id="nav">
     <a class="nav-logo" href="/home.html">
-      <div class="nav-logo-mark"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polygon points="2,4 10,16 18,4" fill="white"/></svg></div>
-      <span class="nav-brand">V4 Company</span>
+      <div class="nav-logo-mark"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><polygon points="2,4 10,16 18,4" fill="white"/></svg></div>
+      <span class="nav-brand">V4 RDR</span>
     </a>
     <div class="nav-sep"></div>
     <span class="nav-client" id="nav-client">...</span>
@@ -170,23 +171,25 @@ body{min-height:100vh}
   </header>
 
   <nav class="sidebar" id="sidebar">
-    <div class="sb-sec">Análise</div>
+    <div class="sb-sec">Análise de Dados</div>
     <button class="sb-btn on" onclick="showSec('overview',this)">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" opacity=".4"/><rect x="1" y="9" width="6" height="6" rx="1.5" opacity=".4"/><rect x="9" y="9" width="6" height="6" rx="1.5" opacity=".4"/></svg> Visão Geral
     </button>
     <button class="sb-btn" onclick="showSec('meta',this)">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 8c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"/></svg> Meta Ads
     </button>
-    <button class="sb-btn" onclick="showSec('criativos',this)">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2zm2 0v8l2.5-2 2 2.5 2-3 2 2.5V2H4z"/></svg> Anúncios (Ads)
-    </button>
     <button class="sb-btn" onclick="showSec('google',this)">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm3.5 7.5H8.5v3h-1v-3h-3v-1h3v-3h1v3h3v1z"/></svg> Google Ads
     </button>
-    <div class="sb-sec">Sistema</div>
+    
+    <div class="sb-sec">Mídia & Conteúdo</div>
+    <button class="sb-btn" onclick="showSec('criativos',this)" id="btn-cri">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2zm2 0v8l2.5-2 2 2.5 2-3 2 2.5V2H4z"/></svg> Anúncios (Ads)
+    </button>
+
     <div class="sb-live" style="margin-top:auto">
       <div class="sb-live-dot"></div>
-      <div class="sb-live-text">Conexão API Ativa</div>
+      <div class="sb-live-text">API Conectada</div>
     </div>
   </nav>
 
@@ -194,8 +197,10 @@ body{min-height:100vh}
 
     <div class="sec on" id="sec-overview">
       <div class="page-hd">
-        <div class="pg-title">Inteligência de Performance</div>
-        <div class="pg-sub">Resumo executivo de métricas vitalícias (Meta + Google)</div>
+        <div>
+            <div class="pg-title">Inteligência de Performance</div>
+            <div class="pg-sub">Resumo executivo de métricas vitalícias (Meta + Google)</div>
+        </div>
       </div>
       
       <div class="kpi-grid" id="ov-kpi"></div>
@@ -204,7 +209,7 @@ body{min-height:100vh}
         <div class="gauge-card">
           <div class="gauge-wrap"><canvas id="g-cpa"></canvas><div class="gauge-val" id="g-cpa-v"></div></div>
           <div class="gauge-title">Saúde do Custo (CPA)</div>
-          <div class="gauge-sub">Eficiência de aquisição</div>
+          <div class="gauge-sub">Eficiência de aquisição da conta</div>
         </div>
         <div class="gauge-card">
           <div class="gauge-wrap"><canvas id="g-ctr"></canvas><div class="gauge-val" id="g-ctr-v"></div></div>
@@ -214,17 +219,17 @@ body{min-height:100vh}
         <div class="gauge-card">
           <div class="gauge-wrap"><canvas id="g-conv"></canvas><div class="gauge-val" id="g-conv-v"></div></div>
           <div class="gauge-title">Força de Conversão</div>
-          <div class="gauge-sub">Volume total atingido</div>
+          <div class="gauge-sub">Taxa de conversão por clique</div>
         </div>
       </div>
 
       <div class="g2">
         <div class="card">
-          <div class="card-hd"><div class="card-title">Distribuição de Verba</div><div class="card-sub">Meta Ads vs Google Ads</div></div>
+          <div class="card-hd"><div class="card-title">Distribuição de Verba</div></div>
           <div class="card-body"><div class="cwrap" style="height:200px"><canvas id="ov-c1"></canvas></div></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title" id="ov-c2-title">Evolução de Custos</div><div class="card-sub" id="ov-c2-sub">CPA das Top Campanhas</div></div>
+          <div class="card-hd"><div class="card-title">Top Campanhas (Investimento)</div></div>
           <div class="card-body"><div class="cwrap" style="height:200px"><canvas id="ov-c2"></canvas></div></div>
         </div>
       </div>
@@ -266,24 +271,6 @@ body{min-height:100vh}
       </div>
     </div>
 
-    <div class="sec" id="sec-criativos">
-      <div class="page-hd">
-        <div class="pg-title">Galeria de Criativos</div>
-        <div class="pg-sub">Os anúncios que estão entregando performance. Imagens sincronizadas em tempo real.</div>
-      </div>
-      <div class="kpi-grid" id="cri-kpi"></div>
-      <div class="card" style="padding:0">
-        <div class="sort-hd">
-          <span class="sort-lbl">Métricas de Sucesso:</span>
-          <button class="qbtn on" onclick="sortCri('conv',this)">Maior Volume</button>
-          <button class="qbtn" onclick="sortCri('spend',this)">Maior Gasto</button>
-          <button class="qbtn" onclick="sortCri('cpa',this)">Custo Mais Barato</button>
-          <button class="qbtn" onclick="sortCri('ctr',this)">Melhor Engajamento</button>
-        </div>
-        <div class="cri-grid" id="cri-grid"></div>
-      </div>
-    </div>
-
     <div class="sec" id="sec-google">
       <div class="page-hd">
         <div class="pg-title">Google Ads Performance</div>
@@ -291,6 +278,33 @@ body{min-height:100vh}
       <div class="kpi-grid" id="google-kpi"></div>
       <div class="card" style="padding:0">
         <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32%">Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Conversões</th><th>CPA</th></tr></thead><tbody id="google-tb"></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="sec" id="sec-criativos">
+      <div class="page-hd">
+        <div class="pg-title">Galeria de Criativos</div>
+        <div class="pg-sub">Os anúncios que estão entregando performance. As imagens são extraídas diretamente do Meta Ads.</div>
+      </div>
+      
+      <div id="cri-loader">
+        <div class="cri-spinner"></div>
+        <div class="cri-ld-title">Extraindo Mídia dos Anúncios...</div>
+        <div class="cri-ld-sub">O sistema está fazendo o download em tempo real de todas as imagens, copys e métricas individuais dos seus anúncios. Aguarde um instante.</div>
+      </div>
+
+      <div id="cri-content" style="display:none">
+        <div class="kpi-grid" id="cri-kpi"></div>
+        <div class="card" style="padding:0">
+          <div class="sort-hd">
+            <span class="sort-lbl">Métricas de Sucesso:</span>
+            <button class="qbtn on" onclick="sortCri('conv',this)">Maior Volume</button>
+            <button class="qbtn" onclick="sortCri('spend',this)">Maior Gasto</button>
+            <button class="qbtn" onclick="sortCri('cpa',this)">Custo Mais Barato</button>
+            <button class="qbtn" onclick="sortCri('ctr',this)">Melhor Engajamento</button>
+          </div>
+          <div class="cri-grid" id="cri-grid"></div>
+        </div>
       </div>
     </div>
 
@@ -312,39 +326,40 @@ body{min-height:100vh}
 </div>
 
 <script>
-// ── CONFIGURAÇÃO DE CONTAS (Com os IDs do Cliente) ───────────────────
+// ── CONFIGURAÇÃO DE CONTAS (CLIENTES V4) ─────────────────────────────
 const DB = {
   aliancas: { 
     nome: "Alianças CS", 
     tipo: "ec",
     ids_contas: ["2429115943910453", "6704265990"], 
-    meta: [], google: [], creatives: [] 
+    meta: [], google: [], creatives: [], creativesLoaded: false
   },
   starman: { 
     nome: "Star Man Net", 
     tipo: "is",
     ids_contas: ["465598168178564", "6835774127"], 
-    meta: [], google: [], creatives: [] 
+    meta: [], google: [], creatives: [], creativesLoaded: false
   },
   bsc: { 
     nome: "BSC Pickup Solutions", 
     tipo: "ec",
     ids_contas: ["1707098029742717", "4837726517"], 
-    meta: [], google: [], creatives: [] 
+    meta: [], google: [], creatives: [], creativesLoaded: false
   }
 };
 
-const API_KEY = "2d4d1d577551f238260e5e6e150a4d7b4f24";
+const CHAVE_API_DADOS = "2d4d1d577551f238260e5e6e150a4d7b4f24";
 const limparID = (idStr) => String(idStr).replace(/[^0-9]/g, '');
 
-// ── O MOTOR DE BUSCA (A MÁGICA DOS ANÚNCIOS ACONTECE AQUI) ────────────
-async function sincronizarDados(dataInicio, dataFim) {
-  const fields = "source,account_id,campaign,ad_name,picture,spend,clicks,impressions,conversions";
-  const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${dataInicio}&date_to=${dataFim}&fields=${fields}`;
+// ── 1. MOTOR ULTRA RÁPIDO (Apenas Dados das Campanhas) ─────────────────
+// Este motor roda em ~1 segundo. Não baixa imagens.
+async function sincronizarDadosGerais(dataInicio, dataFim) {
+  const fields = "source,account_id,campaign,spend,clicks,impressions,conversions";
+  const url = `https://connectors.windsor.ai/all?api_key=${CHAVE_API_DADOS}&date_from=${dataInicio}&date_to=${dataFim}&fields=${fields}`;
 
-  document.getElementById('loader').style.display = 'flex';
-  document.getElementById('loader').style.opacity = '1';
-  document.getElementById('app-ui').style.display = 'none';
+  const navClient = document.getElementById('nav-client');
+  navClient.textContent = C.nome + " (Sincronizando...)";
+  navClient.style.color = "var(--v4-red)";
 
   try {
     const resposta = await fetch(url);
@@ -352,15 +367,98 @@ async function sincronizarDados(dataInicio, dataFim) {
 
     if (json && json.data) {
       const allowedIDs = C.ids_contas.map(limparID);
-      
       const aggMetaCamp = {};
       const aggGoogleCamp = {};
-      const aggAds = {};
 
       json.data.forEach(row => {
         const plataforma = String(row.source || "").toLowerCase();
         const accId = limparID(row.account_id || "");
-        
+        if(allowedIDs.length > 0 && !allowedIDs.includes(accId)) return;
+
+        const camp = String(row.campaign || "Campanha Desconhecida");
+        const sp = parseFloat(row.spend) || 0;
+        const imp = parseInt(row.impressions) || 0;
+        const clk = parseInt(row.clicks) || 0;
+        const cv = parseInt(row.conversions) || 0;
+
+        if (sp === 0 && imp === 0) return;
+
+        // Regras de Nomenclatura (Estratégia)
+        const campLower = camp.toLowerCase();
+        let tipo = 'venda'; 
+        let pur=0, msg=0, leads=0, wpp=0;
+
+        if (campLower.includes('msg') || campLower.includes('mensa') || campLower.includes('wpp') || campLower.includes('whats') || campLower.includes('direct')) {
+            tipo = 'msg';
+        } else if (C.tipo === 'is' && (campLower.includes('lead') || campLower.includes('form') || campLower.includes('cad') || campLower.includes('contato'))) {
+            tipo = 'lead';
+        }
+
+        if (tipo === 'msg') { msg = cv; wpp = cv; } 
+        else if (tipo === 'lead') { leads = cv; } 
+        else { pur = cv; }
+
+        if (plataforma.includes('facebook') || plataforma.includes('meta')) {
+          if(!aggMetaCamp[camp]) aggMetaCamp[camp] = {c:camp, tipo:tipo, sp:0, imp:0, clk:0, pur:0, msg:0, wpp:0, leads:0};
+          aggMetaCamp[camp].sp += sp; aggMetaCamp[camp].imp += imp; aggMetaCamp[camp].clk += clk;
+          aggMetaCamp[camp].pur += pur; aggMetaCamp[camp].msg += msg; aggMetaCamp[camp].wpp += wpp; aggMetaCamp[camp].leads += leads;
+        } else if (plataforma.includes('google')) {
+          if(!aggGoogleCamp[camp]) aggGoogleCamp[camp] = {c:camp, sp:0, imp:0, clk:0, conversions:0};
+          aggGoogleCamp[camp].sp += sp; aggGoogleCamp[camp].imp += imp; aggGoogleCamp[camp].clk += clk;
+          aggGoogleCamp[camp].conversions += cv;
+        }
+      });
+
+      C.meta = Object.values(aggMetaCamp).map(d => ({...d, ctr: d.imp>0?(d.clk/d.imp*100):0, cpc: d.clk>0?(d.sp/d.clk):0}));
+      C.google = Object.values(aggGoogleCamp).map(d => ({...d, ctr: d.imp>0?(d.clk/d.imp*100):0, cpc: d.clk>0?(d.sp/d.clk):0}));
+      
+      // Reseta a aba de criativos para obrigar a baixar de novo as fotos do periodo novo
+      C.creativesLoaded = false;
+      document.getElementById('cri-content').style.display = 'none';
+
+      document.getElementById('app-ui').style.display = 'block';
+      navClient.textContent = C.nome;
+      navClient.style.color = "var(--tx)";
+      
+      // Atualiza a tela primária
+      renderOV(); renderMeta(); renderGoogle();
+      
+      // Se ele mudou de data ENQUANTO estava na tela de criativos, força o download de novo
+      if(document.getElementById('sec-criativos').classList.contains('on')){
+          baixarCriativosImagens();
+      }
+    }
+  } catch (erro) {
+    console.error("Erro na API Base:", erro);
+    navClient.textContent = C.nome + " (Falha na conexão)";
+  }
+}
+
+// ── 2. MOTOR PESADO (Baixa as Imagens sob demanda) ────────────────────
+async function baixarCriativosImagens() {
+  const dataInicio = document.getElementById('d-from').value;
+  const dataFim = document.getElementById('d-to').value;
+  
+  // Aqui puxamos o Ad Name e a Picture
+  const fields = "source,account_id,campaign,ad_name,picture,spend,clicks,impressions,conversions";
+  const url = `https://connectors.windsor.ai/all?api_key=${CHAVE_API_DADOS}&date_from=${dataInicio}&date_to=${dataFim}&fields=${fields}`;
+
+  document.getElementById('cri-loader').style.display = 'flex';
+  document.getElementById('cri-content').style.display = 'none';
+
+  try {
+    const resposta = await fetch(url);
+    const json = await resposta.json();
+
+    if (json && json.data) {
+      const allowedIDs = C.ids_contas.map(limparID);
+      const aggAds = {};
+
+      json.data.forEach(row => {
+        const plataforma = String(row.source || "").toLowerCase();
+        if(!plataforma.includes('facebook') && !plataforma.includes('meta')) return; // Só Meta tem ads com imagem fácil aqui
+
+        const accId = limparID(row.account_id || "");
         if(allowedIDs.length > 0 && !allowedIDs.includes(accId)) return;
 
         const camp = String(row.campaign || "Campanha Desconhecida");
@@ -373,14 +471,13 @@ async function sincronizarDados(dataInicio, dataFim) {
 
         if (sp === 0 && imp === 0) return;
 
-        // 🧠 INTELIGÊNCIA DE ESTRATÉGIAS
         const campLower = camp.toLowerCase();
         let tipo = 'venda'; 
         let pur=0, msg=0, leads=0, wpp=0;
 
-        if (campLower.includes('msg') || campLower.includes('mensa') || campLower.includes('wpp') || campLower.includes('whats') || campLower.includes('engaja') || campLower.includes('direct')) {
+        if (campLower.includes('msg') || campLower.includes('mensa') || campLower.includes('wpp') || campLower.includes('whats') || campLower.includes('direct')) {
             tipo = 'msg';
-        } else if (C.tipo === 'is' && (campLower.includes('lead') || campLower.includes('form') || campLower.includes('cad') || campLower.includes('contato'))) {
+        } else if (C.tipo === 'is' && (campLower.includes('lead') || campLower.includes('form') || campLower.includes('cad'))) {
             tipo = 'lead';
         }
 
@@ -388,6 +485,117 @@ async function sincronizarDados(dataInicio, dataFim) {
         else if (tipo === 'lead') { leads = cv; } 
         else { pur = cv; }
 
-        if (plataforma.includes('facebook') || plataforma.includes('meta')) {
-          if(!aggMetaCamp[camp]) aggMetaCamp[camp] = {c:camp, tipo:tipo, sp:0, imp:0, clk:0, pur:0, msg:0, wpp:0, leads:0};
-          aggMetaCamp[camp].sp += sp; aggMetaCamp[camp].imp += imp; aggMetaCamp[camp].
+        const adKey = camp + "|||" + anuncio;
+        if(!aggAds[adKey]) aggAds[adKey] = {n:anuncio, camp:camp, tipo:tipo, img:foto, sp:0, imp:0, clk:0, pur:0, msg:0, wpp:0, leads:0};
+        aggAds[adKey].sp += sp; aggAds[adKey].imp += imp; aggAds[adKey].clk += clk;
+        aggAds[adKey].pur += pur; aggAds[adKey].msg += msg; aggAds[adKey].wpp += wpp; aggAds[adKey].leads += leads;
+        if(foto && !aggAds[adKey].img) aggAds[adKey].img = foto;
+      });
+
+      C.creatives = Object.values(aggAds).map(d => ({...d, ctr: d.imp>0?(d.clk/d.imp*100):0, cpc: d.clk>0?(d.sp/d.clk):0}));
+      C.creativesLoaded = true;
+
+      document.getElementById('cri-loader').style.display = 'none';
+      document.getElementById('cri-content').style.display = 'block';
+      
+      // Reseta botão de sort para "Maior Volume"
+      document.querySelectorAll('.sort-hd .qbtn').forEach(b=>b.classList.remove('on'));
+      document.querySelector('.sort-hd .qbtn').classList.add('on');
+      renderCri('conv');
+    }
+  } catch (erro) {
+    console.error("Erro ao puxar imagens:", erro);
+    document.getElementById('cri-loader').innerHTML = '<div style="color:var(--v4-red);font-weight:bold;margin-top:20px">Houve uma falha ao baixar as imagens. Tente novamente mais tarde.</div>';
+  }
+}
+
+// ── UTILITÁRIOS ───────────────────────────────────────────────────────
+const charts={};
+function dc(id,cfg){if(charts[id])charts[id].destroy();try{charts[id]=new Chart(document.getElementById(id),cfg);}catch(e){}}
+
+// Função do Velocímetro (Gauge)
+function dg(id, val, max, color, label){
+    const safeVal = isNaN(val) || !isFinite(val) ? 0 : val;
+    const safeMax = isNaN(max) || max <= 0 || !isFinite(max) ? 1 : max;
+    const v = Math.min(safeVal, safeMax);
+    
+    dc(id, {
+        type: 'doughnut',
+        data: { datasets: [{ data: [v, safeMax-v], backgroundColor: [color, '#F3F4F6'], borderWidth: 0, borderRadius: [4,0] }] },
+        options: { rotation: 270, circumference: 180, cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { tooltip: {enabled: false} } }
+    });
+    document.getElementById(id+'-v').textContent = label;
+}
+
+function fr(n){return 'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function frr(n){return 'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fn(n){return Math.round(n||0).toLocaleString('pt-BR');}
+function fp(n){return (n||0).toFixed(2)+'%';}
+function sn(s,l=35){return String(s).replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/g,'').trim().substring(0,l);}
+function iso(d){return d.toISOString().split('T')[0];}
+const TK='#9CA3AF',GK='#F3F4F6';
+const BO={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:TK,font:{size:10,family:'Inter'}},grid:{display:false},border:{display:false}},y:{ticks:{color:TK,font:{size:10,family:'Inter'}},grid:{color:GK},border:{display:false}}}};
+
+// ── CONTROLE DE DATAS ─────────────────────────────────────────────────
+function setQ(preset,btn){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  let f,t=new Date(now);
+  if(preset==='this_month'){f=new Date(y,m,1);}
+  else if(preset==='prev_month'){f=new Date(y,m-1,1);t=new Date(y,m,0);}
+  else if(preset==='7d'){f=new Date(now);f.setDate(f.getDate()-7);}
+  else{f=new Date(now);f.setDate(f.getDate()-30);} 
+  
+  document.getElementById('d-from').value=iso(f);
+  document.getElementById('d-to').value=iso(t);
+  document.querySelectorAll('.nav-right .qbtn').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  
+  // Chama SÓ O RÁPIDO
+  sincronizarDadosGerais(iso(f), iso(t));
+}
+function customDate() {
+  document.querySelectorAll('.nav-right .qbtn').forEach(b=>b.classList.remove('on'));
+  const f = document.getElementById('d-from').value, t = document.getElementById('d-to').value;
+  if(f && t) sincronizarDadosGerais(f, t);
+}
+
+// NAVEGAÇÃO DE ABAS
+function showSec(id,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');
+  btn.classList.add('on');
+
+  // SE CLICOU EM CRIATIVOS E AINDA NÃO CARREGOU, BAIXA AS FOTOS
+  if(id === 'criativos' && !C.creativesLoaded) {
+      baixarCriativosImagens();
+  }
+}
+function kpi(l,v,s){return `<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div><div class="kpi-foot"><span>${s||''}</span></div></div>`;}
+
+// ── RENDERIZAÇÃO DA TELA (RÁPIDA) ─────────────────────────────────────
+function renderOV(){
+  const m=C.meta, g=C.google;
+  const ms=m.reduce((a,x)=>a+x.sp,0), gs=g.reduce((a,x)=>a+x.sp,0);
+  const imp = m.reduce((a,x)=>a+x.imp,0), clk = m.reduce((a,x)=>a+x.clk,0);
+  const globalCtr = imp > 0 ? (clk/imp*100) : 0;
+
+  if(C.tipo==='ec'){
+    const pur=m.reduce((a,x)=>a+(x.pur||0),0), msg=m.reduce((a,x)=>a+(x.msg||0),0);
+    const gconv=g.reduce((a,x)=>a+(x.conversions||0),0);
+    const mCpa = pur>0?ms/pur:0;
+    
+    document.getElementById('ov-kpi').innerHTML=[
+      kpi('Investimento (Ads)',fr(ms+gs),'Meta + Google'),
+      kpi('Total de Compras',fn(pur+gconv),'Omnichannel'),
+      kpi('Mensagens Iniciadas',fn(msg),'Potencial de vendas diretas'),
+      kpi('Cliques no Site',fn(clk),'Tráfego total gerado'),
+    ].join('');
+    
+    dg('g-cpa', mCpa, (mCpa*2)||150, '#10B981', frr(mCpa));
+    dg('g-ctr', globalCtr, 5, '#2563EB', fp(globalCtr));
+    const txConv = clk>0 ? ((pur+msg)/clk*100) : 0;
+    dg('g-conv', txConv, 10, '#E8000D', fp(txConv));
+
+  } else {
+    const wpp
