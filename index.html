@@ -155,12 +155,11 @@ body{min-height:100vh}
 
 <div id="nf">
   <div style="font-size:64px;font-weight:700;color:#eee">404</div>
-  <p style="color:var(--tx2)">Cliente não encontrado.</p>
-  <a href="home.html" style="color:var(--red);font-size:13px;font-weight:600;text-decoration:none">← Voltar</a>
+  <p style="color:var(--tx2)">Cliente não encontrado. Use ?cliente=aliancas, ?cliente=bsc ou ?cliente=starman na URL.</p>
 </div>
 
 <header class="nav" id="nav" style="display:none">
-  <a class="nav-logo" href="home.html">
+  <a class="nav-logo" href="#">
     <div class="nav-logo-mark"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polygon points="2,4 10,16 18,4" fill="white"/></svg></div>
     <span class="nav-brand">V4 Company</span>
   </a>
@@ -170,8 +169,6 @@ body{min-height:100vh}
     <input type="date" id="d-from" class="date-input">
     <span style="color:var(--tx3);font-size:11px">—</span>
     <input type="date" id="d-to" class="date-input">
-    <button class="qbtn" onclick="setQ('this_month',this)">Este mês</button>
-    <button class="qbtn" onclick="setQ('prev_month',this)">Mês anterior</button>
     <button class="qbtn on" id="qbtn-30" onclick="setQ('30d',this)">30 dias</button>
     <button class="qbtn" onclick="setQ('7d',this)">7 dias</button>
     <button class="btn-apply" onclick="renderAll()">Aplicar →</button>
@@ -205,7 +202,6 @@ body{min-height:100vh}
 
 <main class="main" id="main" style="display:none">
 
-  <!-- VISÃO GERAL -->
   <div class="sec on" id="sec-overview">
     <div class="page-hd">
       <div class="bc"><span>Métricas</span><span class="bc-sep">›</span><span>Visão Geral</span></div>
@@ -219,11 +215,10 @@ body{min-height:100vh}
         <div class="card-body"><div class="cwrap" style="height:170px"><canvas id="ov-c1" role="img" aria-label="Plataformas">.</canvas></div></div>
       </div>
       <div class="card">
-        <div class="card-hd"><div class="card-title" id="ov-c2-title">Performance</div><div class="card-sub" id="ov-c2-sub">Por campanha</div></div>
+        <div class="card-hd"><div class="card-title" id="ov-c2-title">Conversões</div><div class="card-sub" id="ov-c2-sub">Por campanha</div></div>
         <div class="card-body"><div class="cwrap" style="height:170px"><canvas id="ov-c2" role="img" aria-label="Performance">.</canvas></div></div>
       </div>
     </div>
-    <!-- FUNIL UNIFICADO -->
     <div class="card">
       <div class="card-hd" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div><div class="card-title">Funil de Performance</div><div class="card-sub">Jornada do usuário — Meta + Google</div></div>
@@ -237,7 +232,6 @@ body{min-height:100vh}
     </div>
   </div>
 
-  <!-- META ADS -->
   <div class="sec" id="sec-meta">
     <div class="page-hd">
       <div class="bc"><span>Métricas</span><span class="bc-sep">›</span><span>Meta Ads</span></div>
@@ -246,16 +240,15 @@ body{min-height:100vh}
     </div>
     <div class="kpi-grid" id="meta-kpi"></div>
     <div class="card">
-      <div class="card-hd"><div class="card-title">Investimento por campanha</div><div class="card-sub">Gasto vs Receita</div></div>
+      <div class="card-hd"><div class="card-title">Investimento por campanha</div><div class="card-sub">Gasto vs Conversões</div></div>
       <div class="card-body"><div class="cwrap" id="meta-cwrap"><canvas id="meta-c" role="img" aria-label="Meta campanhas">.</canvas></div></div>
     </div>
     <div class="card" style="padding:0">
       <div class="card-hd"><div class="card-title">Detalhamento de campanhas</div></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:26%">Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th id="meta-th-conv">Conversões</th><th id="meta-th-rev">Receita</th><th>CPA</th><th id="meta-th-extra">Msgs</th></tr></thead><tbody id="meta-tb"></tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:26%">Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th id="meta-th-conv">Conversões</th><th id="meta-th-extra">Msgs</th><th>CPA</th></tr></thead><tbody id="meta-tb"></tbody></table></div>
     </div>
   </div>
 
-  <!-- CRIATIVOS -->
   <div class="sec" id="sec-criativos">
     <div class="page-hd">
       <div class="bc"><span>Métricas</span><span class="bc-sep">›</span><span>Criativos</span></div>
@@ -276,7 +269,6 @@ body{min-height:100vh}
     </div>
   </div>
 
-  <!-- GOOGLE ADS -->
   <div class="sec" id="sec-google">
     <div class="page-hd">
       <div class="bc"><span>Métricas</span><span class="bc-sep">›</span><span>Google Ads</span></div>
@@ -302,7 +294,6 @@ body{min-height:100vh}
 
 </main>
 
-<!-- LIGHTBOX -->
 <div class="lb" id="lb" onclick="closeLB(event)">
   <div class="lb-box"><div class="lb-inner">
     <button class="lb-close" onclick="closeLB()">✕</button>
@@ -316,487 +307,15 @@ body{min-height:100vh}
 </div>
 
 <script>
-// ── DADOS POR CLIENTE (atualizados este mês) ──────────────────────────
+// ── DADOS POR CLIENTE ──────────────────────────
 const DB = {
 
 aliancas:{
   nome:"Alianças CS", tipo:"ec",
   meta:[
-    {c:"FAST-TRAFFIC 07/25",   sp:545.18, imp:47219,  clk:490,  ctr:1.04,cpc:1.11,pur:3,  rev:1539.68, msg:3},
-    {c:"ESTÁTICOS 08/07",      sp:701.46, imp:74793,  clk:1648, ctr:2.20,cpc:0.43,pur:29, rev:14217.29,msg:3},
-    {c:"VÍDEOS 08/07",         sp:1857.25,imp:107830, clk:1880, ctr:1.74,cpc:0.99,pur:27, rev:19730.50,msg:4},
-    {c:"REMARKETING 09-08",    sp:1147.44,imp:58147,  clk:889,  ctr:1.53,cpc:1.29,pur:18, rev:13488.68,msg:3},
-    {c:"ESTÁTICOS Preços",     sp:1160.42,imp:103683, clk:1803, ctr:1.74,cpc:0.64,pur:9,  rev:3557.88, msg:1},
-    {c:"CATÁLOGO #10",         sp:1874.76,imp:110671, clk:3205, ctr:2.90,cpc:0.58,pur:49, rev:23506.66,msg:3},
-    {c:"CATÁLOGO #12",         sp:1802.20,imp:123412, clk:3029, ctr:2.45,cpc:0.60,pur:34, rev:17072.61,msg:1},
-    {c:"LOJA FÍSICA 11/11",    sp:1939.49,imp:178410, clk:2274, ctr:1.27,cpc:0.85,pur:3,  rev:1099.92, msg:330},
-    {c:"CATÁLOGO 31/03",       sp:1597.03,imp:9264114,clk:76998,ctr:0.83,cpc:0.02,pur:29, rev:22531.77,msg:11},
-    {c:"VENDAS ABRIL",         sp:1848.87,imp:68574,  clk:892,  ctr:1.30,cpc:2.07,pur:17, rev:14545.92,msg:5},
-  ],
-  google:[
-    {c:"SEARCH CAD1",  sp:7753.08, imp:82173,  clk:6886,ctr:8.38,cpc:1.13,conv:61.0, cpa:127.08},
-    {c:"PMAX MERCHANT",sp:6725.76, imp:673084, clk:8295,ctr:1.23,cpc:0.81,conv:47.7, cpa:141.14},
-    {c:"DEMAND GEN",   sp:201.34,  imp:32711,  clk:451, ctr:1.38,cpc:0.45,conv:0,    cpa:0},
-  ],
-  creatives:[
-    {n:"AD2 [VD] CELEBRE O AMOR",        camp:"VÍDEOS 08/07",   sp:1857.25,pur:27,rev:19730.50,msg:4,  ctr:1.74,cpc:0.99,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t15.5256-10/516196334_731658266359464_4343151900587336754_n.jpg?_nc_cat=105&ccb=1-7&_nc_ohc=NFB89vE88n4Q7kNvwHYy091&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af19F_0sq_80mq6iNsL_Z4hZR9pnJe8umGVTBPyQAjnO7g&oe=69E214DE"},
-    {n:"CATÁLOGO #10 Lookalike",          camp:"CATÁLOGO #10",   sp:716.86, pur:25,rev:9802.70, msg:2,  ctr:3.25,cpc:0.56,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=1&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af04ULlk6_Q_KMz3y1eJGCE8CrHvQVPMVQ0jQj8R2N213A&oe=69E20744"},
-    {n:"CATÁLOGO #12",                    camp:"CATÁLOGO #12",   sp:1802.20,pur:34,rev:17072.61,msg:1,  ctr:2.45,cpc:0.60,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=1&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0UvHR7-LF36uqzh8X5MkanDNH7IjObjrhWKV71f6m4aA&oe=69E20744"},
-    {n:"AD1 [IU] BRINDE",                 camp:"REMARKETING",    sp:1147.44,pur:18,rev:13488.68,msg:3,  ctr:1.53,cpc:1.29,img:"https://scontent-fra5-1.xx.fbcdn.net/v/t45.1600-4/528542561_24169252426071646_6377900815693527292_n.png?_nc_cat=100&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0XWkpvqe3XybKrrXw48hfB79HLdN_rlUxEll57cHcXRw&oe=69E213B2"},
-    {n:"CATÁLOGO 2026",                   camp:"CATÁLOGO 31/03", sp:1597.03,pur:29,rev:22531.77,msg:11, ctr:0.83,cpc:0.02,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=1&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af3gb9eCH6j4E2OG-bJ0ykIm7TdkGdvILqBmnhphku0B8Q&oe=69E20744"},
-    {n:"40% Abril",                       camp:"VENDAS ABRIL",   sp:1848.87,pur:17,rev:14545.92,msg:5,  ctr:1.30,cpc:2.07,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t45.1600-4/661427260_122163609230819198_9152658126762018060_n.png?_nc_cat=111&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af28tJBE6KeUCN8-m-VlI1KImdZbAgg-vGoaiQtSeWtR5Q&oe=69E20760"},
-    {n:"AD 12 ALIANÇAS PRATA",            camp:"ESTÁTICOS 08/07",sp:701.46, pur:29,rev:14217.29,msg:3,  ctr:2.20,cpc:0.43,img:"https://scontent-fra5-1.xx.fbcdn.net/v/t45.1600-4/560387521_810739084768489_1612665709468580485_n.png?_nc_cat=100&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1Cvf9Dfj9_iG1qsk9-VHHUzFNrNJiZaMy_yHiabpuzng&oe=69E1FE28"},
-    {n:"AD 3 INFLUENCER",                 camp:"LOJA FÍSICA",    sp:451.90, pur:0, rev:0,        msg:110,ctr:1.56,cpc:0.84,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t15.13418-10/521360058_1780044752587562_8037159316885169997_n.jpg?_nc_cat=103&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af3BKv17EZpC0LlSe4z8kxEOzAyLtV2ZECXS0C82rFY1Zg&oe=69E20DFF"},
-    {n:"[251010] Descubra o Brilho",       camp:"ESTÁTICOS Preços",sp:582.78,pur:5, rev:1617.00, msg:1,  ctr:1.52,cpc:0.92,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t45.1600-4/562544544_813691614473236_6711833855096772830_n.png?_nc_cat=101&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af3j0qT3nL_YJ0MG9fCmqMgx9gg8QrkfKUx_-HQ68KN6wg&oe=69E20DCD"},
-    {n:"Seu ouro vale muito",              camp:"VENDAS ABRIL",   sp:617.83, pur:1, rev:1866.36, msg:0,  ctr:1.26,cpc:5.15,img:"https://scontent-fra5-2.xx.fbcdn.net/v/t45.1600-4/662947342_122163605312819198_4227304276507439178_n.png?_nc_cat=109&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af3b7rh7U3Le7EzBEh-msUmanuPzYNflOTYhu_DyKRBKgw&oe=69E21A9F"},
-    {n:"CATÁLOGO #10 Aberto",             camp:"CATÁLOGO #10",   sp:1153.96,pur:24,rev:13703.96,msg:1,  ctr:2.70,cpc:0.60,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=1&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1cikUGkOKlqe_D4odVOCON3t_YJLY9KNvPX1B29VZ_bg&oe=69E20744"},
-    {n:"AD4 [CS] SOLITÁRIOS",             camp:"FAST-TRAFFIC",   sp:545.18, pur:3, rev:1539.68, msg:3,  ctr:1.04,cpc:1.11,img:"https://external-fra3-2.xx.fbcdn.net/emg1/v/t13/2809342669108189045?url=https%3A%2F%2Fwww.facebook.com%2Fads%2Fimage%2F%3Fd%3DAQJYuQtre5DrKTCvdMSUxqzpPOAVZdwUxskwh7IRpCAKZ8p6awxSYjPgA0L5JwYFzzI-au09qQr7GI86nFcSkt4jrSnUEBrhva2XpKvu-dBAL5Ul6-_LFF7GumB169xe_yAb4cb-MMQ0J75M7AuppCNx&fb_obo=1&utld=facebook.com&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=06_Q3--AYMEfPLK3S_uC0ZiXV3NgJ50-tlT6_zEhK6yn_SEOUPw&oe=69DE3947"},
-  ]
-},
-
-starman:{
-  nome:"Star Man Net", tipo:"is",
-  meta:[
-    {c:"DISNEY+ 04/25",         sp:504.51, imp:62414,  clk:790,  ctr:1.27,cpc:0.64,wpp:1,  leads:45},
-    {c:"NOVOS CRIATIVOS 07/25", sp:946.60, imp:162250, clk:1224, ctr:0.75,cpc:0.77,wpp:0,  leads:50},
-    {c:"MELHORES CRIATIVOS WPP",sp:584.54, imp:43033,  clk:332,  ctr:0.77,cpc:1.76,wpp:48, leads:25},
-  ],
-  google:[
-    {c:"SEARCH LEADS LP-3", sp:1239.03,imp:1730, clk:256,ctr:14.80,cpc:4.84,conv:87, cpa:14.24},
-    {c:"PMAX CAD5 LEADS",   sp:554.36, imp:2942, clk:247,ctr:8.40, cpc:2.24,conv:55, cpa:10.08},
-  ],
-  creatives:[
-    {n:"[260501] Conexão que entende você",   camp:"NOVOS CRIATIVOS",   sp:662.83,wpp:0, leads:35,ctr:0.76,cpc:0.79,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t45.1600-4/609200886_880497691125961_94343582644873557_n.png?_nc_cat=101&ccb=1-7&_nc_ohc=VKbqWo7pybIQ7kNvwELOggN&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1nE0bM-MJ_LzM0r74BEE_gJxmYlx0U1JwW8bsWwJSN_g&oe=69E21FB7"},
-    {n:"[260406] 620 MB fibra óptica",        camp:"MELHORES CRIATIVOS", sp:241.46,wpp:24,leads:11,ctr:0.75,cpc:1.62,img:"https://scontent-fra5-2.xx.fbcdn.net/v/t45.1600-4/667663505_122164318334819198_5424263271839853047_n.png?_nc_cat=106&ccb=1-7&_nc_ohc=HMWRqPnthb4Q7kNvwFNLO8i&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af2ox8w2Ls8_ap54zeNe3d24BFFwg0Z-Df9t3BYPvkBbew&oe=69E21885"},
-    {n:"[260202] Ultra Velocidade",           camp:"MELHORES CRIATIVOS", sp:283.27,wpp:10,leads:5, ctr:0.72,cpc:2.07,img:"https://scontent-fra5-2.xx.fbcdn.net/v/t45.1600-4/625004739_122235895688119390_3696865388472116081_n.png?_nc_cat=109&ccb=1-7&_nc_ohc=papGCxojtrYQ7kNvwFcKYS7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0svKoSW7ny2hAnUS_hQdMmZp70Lm4_4Ou9ZNI_ANhQfQ&oe=69E2118C"},
-    {n:"[260501] Chega de travar",            camp:"DISNEY+",            sp:207.89,wpp:0, leads:18,ctr:1.18,cpc:0.67,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t45.1600-4/610491831_880501331125597_9190562545059778434_n.png?_nc_cat=108&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1aL9n4c09yaZxaIpxSgoFgfpBdM3ZJk_gGb9e3tH2Erg&oe=69E22787"},
-    {n:"AD1 [IU] PLANOS INFLUENCER",          camp:"MELHORES CRIATIVOS", sp:24.53, wpp:6, leads:3, ctr:1.42,cpc:0.94,img:"https://scontent-fra5-1.xx.fbcdn.net/v/t45.1600-4/515903880_3969210589890822_1260080059140398591_n.jpg?_nc_cat=100&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1xReMJASKIwfADk2-AyKDL2H2ziHM5pz35sAqJhvODXQ&oe=69E2183F"},
-    {n:"[260202] Conexão veloz streaming",    camp:"MELHORES CRIATIVOS", sp:32.00, wpp:8, leads:6, ctr:0.81,cpc:1.78,img:"https://scontent-fra5-2.xx.fbcdn.net/v/t45.1600-4/623849514_122235897272119390_6558498550604610360_n.png?_nc_cat=106&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1n1CdoaK_zTnxvBNZjuUWzr3n6mDCtpDSTn3hyQdiBiw&oe=69E1FF2C"},
-    {n:"[260501] Ultravelocidade rotina voar", camp:"NOVOS CRIATIVOS",   sp:203.43,wpp:0, leads:8, ctr:0.69,cpc:0.76,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t45.1600-4/612421715_880499227792474_1938622612357777492_n.png?_nc_cat=108&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1w5D7gQV4u910LVLrO4k4x8jSbg6ZQUpseDhJhoUhflg&oe=69E2135A"},
-    {n:"[260501] Conexão (Disney+)",           camp:"DISNEY+",            sp:170.90,wpp:1, leads:19,ctr:1.32,cpc:0.53,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t45.1600-4/609200886_880497691125961_94343582644873557_n.png?_nc_cat=101&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af3PzwOPpcZvprdTkBchraZC0ByQ0ZPhhPVbEus6HKI8Sw&oe=69E21FB7"},
-  ]
-},
-
-bsc:{
-  nome:"BSC Pickup Solutions", tipo:"ec",
-  meta:[
-    {c:"MENSAGEM VENDAS",    sp:1213.48,imp:97208, clk:1381,ctr:1.42,cpc:0.88,pur:0,rev:0,      msg:304},
-    {c:"SEGMENTAÇÃO+ 16/10", sp:189.36, imp:6203,  clk:126, ctr:2.03,cpc:1.50,pur:0,rev:0,      msg:2},
-    {c:"ADVANTAGE+ 11/24",   sp:240.65, imp:9437,  clk:240, ctr:2.54,cpc:1.00,pur:2,rev:3307.41,msg:4},
-    {c:"CATÁLOGO 04/26",     sp:1342.93,imp:74210, clk:1382,ctr:1.86,cpc:0.97,pur:4,rev:3667.25,msg:2},
-    {c:"ADVANTAGE+ 04/26",   sp:154.33, imp:65292, clk:3177,ctr:4.87,cpc:0.05,pur:0,rev:0,      msg:0},
-    {c:"SEGMENTAÇÃO+ 04/26", sp:156.72, imp:8178,  clk:162, ctr:1.98,cpc:0.97,pur:1,rev:1495.63,msg:1},
-  ],
-  google:[
-    {c:"PMAX MOT6 VENDAS",sp:990.59,imp:42124,clk:791,ctr:1.88,cpc:1.25,conv:3.98,cpa:248.89},
-  ],
-  creatives:[
-    {n:"Catálogo BSC",               camp:"CATÁLOGO 04/26",    sp:1342.93,pur:4,rev:3667.25,msg:2, ctr:1.86,cpc:0.97,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.30808-1/221539717_181680720608029_8920442178720579329_n.png?stp=dst-png_s200x200&_nc_cat=111&ccb=1-7&oh=00_Af3oP1BM03GiPSzSK2qAfOJ6N9tBTtCu-dL92PSSSeCmOg&oe=69E0E9E6"},
-    {n:"AD1 VÍDEO COM PREÇO BSC",    camp:"SEGMENTAÇÃO+ 04/26",sp:156.72, pur:1,rev:1495.63,msg:0, ctr:1.98,cpc:0.97,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t39.2147-6/75341531_494485104475166_2751028116179648512_n.png?_nc_cat=108&ccb=1-7&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af0oOIsorMS1JCUQimT7zvRoJsK407XBrGJw6XZjHSB1ag&oe=69E0EE04"},
-    {n:"ADVANTAGE+ ABERTO",          camp:"ADVANTAGE+ 11/24",  sp:240.65, pur:2,rev:3307.41,msg:4, ctr:2.54,cpc:1.00,img:null},
-    {n:"MENSAGEM FONTE VERDE",       camp:"MENSAGEM VENDAS",    sp:1213.48,pur:0,rev:0,       msg:304,ctr:1.42,cpc:0.88,img:null},
-  ]
-}
-
-};
-
-// ── ROUTING ───────────────────────────────────────────────────────────
-const cid=(new URLSearchParams(location.search).get('cliente')||new URLSearchParams(location.search).get('c')||'').toLowerCase();
-const C=DB[cid];
-if(!C){
-  document.getElementById('nf').classList.add('on');
-} else {
-  ['nav','sidebar','main'].forEach(id=>document.getElementById(id).style.display='');
-  document.getElementById('nav-client').textContent=C.nome;
-  document.title='V4 Company — '+C.nome;
-  setQ('30d',document.getElementById('qbtn-30'));
-  renderAll();
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────────
-const charts={};
-function dc(id,cfg){if(charts[id])charts[id].destroy();try{charts[id]=new Chart(document.getElementById(id),cfg);}catch(e){}}
-function fr(n){return 'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}
-function frr(n){return 'R$\u00a0'+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fn(n){return Math.round(n||0).toLocaleString('pt-BR');}
-function fp(n){return (n||0).toFixed(2)+'%';}
-function sn(s,l=32){return s.replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/g,'').trim().substring(0,l);}
-function iso(d){return d.toISOString().split('T')[0];}
-function pct(a,b){if(!b)return null;return((a-b)/b*100);}
-function dBadge(p,inv=false){
-  if(p===null||p===undefined)return '';
-  const up=inv?(p<0):(p>=0);
-  return `<span class="delta ${up?'du':'dd'}">${p>=0?'↑':'↓'} ${Math.abs(p).toFixed(1)}%</span>`;
-}
-const TK='#888',GK='rgba(0,0,0,.05)';
-const BO={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:TK,font:{size:11,family:'Inter'}},grid:{display:false},border:{display:false}},y:{ticks:{color:TK,font:{size:11,family:'Inter'}},grid:{color:GK},border:{display:false}}}};
-
-function setQ(preset,btn){
-  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
-  let f,t=new Date(now);
-  if(preset==='this_month'){f=new Date(y,m,1);}
-  else if(preset==='prev_month'){f=new Date(y,m-1,1);t=new Date(y,m,0);}
-  else if(preset==='7d'){f=new Date(now);f.setDate(f.getDate()-7);}
-  else{f=new Date(now);f.setDate(f.getDate()-30);}
-  document.getElementById('d-from').value=iso(f);
-  document.getElementById('d-to').value=iso(t);
-  document.querySelectorAll('.nav-right .qbtn').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  const opts={day:'2-digit',month:'short'};
-  document.getElementById('sb-period').textContent=f.toLocaleDateString('pt-BR',opts)+' – '+t.toLocaleDateString('pt-BR',opts);
-}
-
-function showSec(id,btn){
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
-  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('sec-'+id).classList.add('on');
-  document.getElementById('sb-'+id).classList.add('on');
-}
-
-function kpi(l,v,s,delta,inv=false){
-  return `<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div><div class="kpi-foot"><span>${s||''}</span>${dBadge(delta,inv)}</div></div>`;
-}
-
-// ── RENDER ALL ────────────────────────────────────────────────────────
-function renderAll(){
-  renderOV();
-  renderMeta();
-  renderCri('top');
-  renderGoogle();
-  switchFunil('all',document.querySelector('.ftab.on'));
-}
-
-// ── VISÃO GERAL ───────────────────────────────────────────────────────
-function renderOV(){
-  const m=C.meta, g=C.google;
-  const ms=m.reduce((a,x)=>a+x.sp,0);
-  const gs=g.reduce((a,x)=>a+x.sp,0);
-
-  if(C.tipo==='ec'){
-    const rev=m.reduce((a,x)=>a+(x.rev||0),0);
-    const pur=m.reduce((a,x)=>a+(x.pur||0),0);
-    const roas=ms>0&&rev>0?rev/ms:0;
-    const gconv=g.reduce((a,x)=>a+x.conv,0);
-    document.getElementById('ov-kpi').innerHTML=[
-      kpi('Investimento Total',fr(ms+gs),'Meta + Google',null),
-      kpi('Faturamento Meta',fr(rev),fn(pur)+' vendas',null),
-      kpi('ROAS Meta',roas.toFixed(2)+'x','Retorno sobre gasto',null),
-      kpi('Conversões Google',fn(Math.round(gconv)),'CPA: '+fr(gconv?(gs/gconv):0),null),
-    ].join('');
-    document.getElementById('ov-c2-title').textContent='Receita vs Gasto';
-    document.getElementById('ov-c2-sub').textContent='Top campanhas Meta';
-  } else {
-    const totalWpp=m.reduce((a,x)=>a+(x.wpp||0),0);
-    const totalLeads=m.reduce((a,x)=>a+(x.leads||0),0);
-    const gconv=g.reduce((a,x)=>a+x.conv,0);
-    document.getElementById('ov-kpi').innerHTML=[
-      kpi('Investimento Total',fr(ms+gs),'Meta + Google',null),
-      kpi('WhatsApp Meta',fn(totalWpp),'C/conv: '+fr(totalWpp?ms/totalWpp:0),null),
-      kpi('Leads Meta',fn(totalLeads),'C/lead: '+fr(totalLeads?ms/totalLeads:0),null),
-      kpi('Conversões Google',fn(Math.round(gconv)),'CPA: '+fr(gconv?(gs/gconv):0),null),
-    ].join('');
-    document.getElementById('ov-c2-title').textContent='Conversões por campanha';
-    document.getElementById('ov-c2-sub').textContent='WhatsApp + Leads Meta';
-  }
-
-  setTimeout(()=>{
-    dc('ov-c1',{type:'bar',data:{labels:['Meta Ads','Google Ads'],datasets:[{data:[ms,gs],backgroundColor:['#1877F2','#EA4335'],borderRadius:8,barThickness:52}]},options:{...BO,indexAxis:'y',scales:{x:{ticks:{color:TK,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:GK},border:{display:false}},y:{ticks:{color:TK,font:{size:13,weight:'600'}},grid:{display:false},border:{display:false}}}}});
-    if(C.tipo==='ec'){
-      const topR=[...m].filter(d=>d.rev>0).sort((a,b)=>b.rev-a.rev).slice(0,5);
-      dc('ov-c2',{type:'bar',data:{labels:topR.map(d=>sn(d.c,16)),datasets:[{label:'Receita',data:topR.map(d=>Math.round(d.rev)),backgroundColor:'#1A7A3C',borderRadius:4},{label:'Gasto',data:topR.map(d=>Math.round(d.sp)),backgroundColor:'#E5E5E5',borderRadius:4}]},options:{...BO,plugins:{legend:{display:true,labels:{color:TK,font:{size:11},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:TK,font:{size:9},maxRotation:30,autoSkip:false},grid:{display:false},border:{display:false}},y:{ticks:{color:TK,font:{size:9},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:GK},border:{display:false}}}}});
-    } else {
-      dc('ov-c2',{type:'bar',data:{labels:m.map(d=>sn(d.c,16)),datasets:[{label:'WhatsApp',data:m.map(d=>d.wpp||0),backgroundColor:'#CC0000',borderRadius:4},{label:'Leads',data:m.map(d=>d.leads||0),backgroundColor:'#1A7A3C',borderRadius:4}]},options:{...BO,plugins:{legend:{display:true,labels:{color:TK,font:{size:11},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:TK,font:{size:9},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:TK,font:{size:9}},grid:{color:GK},border:{display:false}}}}});
-    }
-  },0);
-}
-
-// ── FUNIL EM BLOCOS ───────────────────────────────────────────────────
-const PALETTES={
-  all:['#0d0d0d','#1877F2','#CC0000','#1A7A3C','#7C3AED'],
-  meta:['#0d47a1','#1565c0','#1877F2','#2196F3','#64b5f6'],
-  google:['#b71c1c','#c62828','#EA4335','#ef5350','#ef9a9a']
-};
-
-function getFunilSteps(plat){
-  const m=C.meta,g=C.google;
-  const mImp=m.reduce((a,x)=>a+(x.imp||0),0);
-  const mClk=m.reduce((a,x)=>a+(x.clk||0),0);
-  const mSp=m.reduce((a,x)=>a+x.sp,0);
-  const gImp=g.reduce((a,x)=>a+(x.imp||0),0);
-  const gClk=g.reduce((a,x)=>a+x.clk,0);
-  const gConv=g.reduce((a,x)=>a+x.conv,0);
-  const gSp=g.reduce((a,x)=>a+x.sp,0);
-
-  if(plat==='meta'){
-    if(C.tipo==='ec'){
-      const pur=m.reduce((a,x)=>a+(x.pur||0),0);
-      const msg=m.reduce((a,x)=>a+(x.msg||0),0);
-      return [
-        {l:'Impressões',v:mImp,cpa:null},
-        {l:'Cliques',v:mClk,cpa:null},
-        {l:'Compras',v:pur,cpa:mSp},
-        ...(msg>0?[{l:'Mensagens',v:msg,cpa:null}]:[])
-      ];
-    } else {
-      const wpp=m.reduce((a,x)=>a+(x.wpp||0),0);
-      const leads=m.reduce((a,x)=>a+(x.leads||0),0);
-      return [
-        {l:'Impressões',v:mImp,cpa:null},
-        {l:'Cliques',v:mClk,cpa:null},
-        {l:'WhatsApp',v:wpp,cpa:mSp},
-        {l:'Leads',v:leads,cpa:mSp},
-      ];
-    }
-  }
-  if(plat==='google'){
-    return [
-      {l:'Impressões',v:gImp,cpa:null},
-      {l:'Cliques',v:gClk,cpa:null},
-      {l:'Conversões',v:Math.round(gConv),cpa:gSp},
-    ];
-  }
-  // all
-  if(C.tipo==='ec'){
-    const pur=m.reduce((a,x)=>a+(x.pur||0),0);
-    return [
-      {l:'Impressões',v:mImp+gImp,cpa:null},
-      {l:'Cliques',v:mClk+gClk,cpa:null},
-      {l:'Compras',v:pur,cpa:mSp},
-      {l:'Conv. Google',v:Math.round(gConv),cpa:gSp},
-    ];
-  } else {
-    const wpp=m.reduce((a,x)=>a+(x.wpp||0),0);
-    const leads=m.reduce((a,x)=>a+(x.leads||0),0);
-    return [
-      {l:'Impressões',v:mImp+gImp,cpa:null},
-      {l:'Cliques',v:mClk+gClk,cpa:null},
-      {l:'WhatsApp',v:wpp,cpa:mSp},
-      {l:'Leads',v:leads,cpa:mSp},
-      {l:'Conv. Google',v:Math.round(gConv),cpa:gSp},
-    ];
-  }
-}
-
-function switchFunil(plat,btn){
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  const steps=getFunilSteps(plat);
-  const pal=PALETTES[plat]||PALETTES.all;
-  const maxV=steps[0]?.v||1;
-  function blockH(v){
-    if(v===0)return 30;
-    return Math.round(30+Math.log(v+1)/Math.log(maxV+1)*70);
-  }
-  const numFmt=v=>v>=1e6?(v/1e6).toFixed(1)+'M':(v>=1000?(v/1000).toFixed(1)+'k':fn(v));
-
-  let blocksHtml='<div class="funil-row">';
-  let footerHtml='<div class="funil-footer">';
-  steps.forEach((s,i)=>{
-    const h=blockH(s.v);
-    const rate=i>0&&steps[i-1].v>0?(s.v/steps[i-1].v*100):100;
-    const col=pal[Math.min(i,pal.length-1)];
-    const cpaStr=s.cpa&&s.v>0?` · CPA ${fr(s.cpa/s.v)}`:'';
-    blocksHtml+=`<div class="funil-block" style="height:${h}%;background:${col}">
-      <div class="funil-num">${numFmt(s.v)}</div>
-      <div class="funil-lbl">${s.l}</div>
-      ${i>0?`<div class="funil-rate">${rate.toFixed(2)}%</div>`:''}
-    </div>`;
-    footerHtml+=`<div class="funil-foot-cell"><div class="funil-foot-v">${fn(s.v)}</div><div class="funil-foot-l">${s.l}${cpaStr}</div></div>`;
-  });
-  blocksHtml+='</div>';
-  footerHtml+='</div>';
-  document.getElementById('funil-body').innerHTML=`<div class="funil-outer">${blocksHtml}${footerHtml}</div>`;
-}
-
-// ── META ADS ──────────────────────────────────────────────────────────
-function renderMeta(){
-  const m=C.meta;
-  const ms=m.reduce((a,x)=>a+x.sp,0);
-  const isEc=C.tipo==='ec';
-  if(isEc){
-    const rev=m.reduce((a,x)=>a+(x.rev||0),0);
-    const pur=m.reduce((a,x)=>a+(x.pur||0),0);
-    const msg=m.reduce((a,x)=>a+(x.msg||0),0);
-    const roas=ms>0&&rev>0?rev/ms:0;
-    document.getElementById('meta-kpi').innerHTML=[
-      kpi('Investimento',frr(ms),m.length+' campanhas',null),
-      kpi('Faturamento',fr(rev),fn(pur)+' vendas',null),
-      kpi('ROAS',roas.toFixed(2)+'x','Retorno',null),
-      kpi('Mensagens',fn(msg),'Conversas',null),
-    ].join('');
-    document.getElementById('meta-th-conv').textContent='Compras';
-    document.getElementById('meta-th-rev').textContent='Receita';
-    document.getElementById('meta-th-extra').textContent='Msgs';
-  } else {
-    const wpp=m.reduce((a,x)=>a+(x.wpp||0),0);
-    const leads=m.reduce((a,x)=>a+(x.leads||0),0);
-    document.getElementById('meta-kpi').innerHTML=[
-      kpi('Investimento',frr(ms),m.length+' campanhas',null),
-      kpi('WhatsApp',fn(wpp),'C/conv: '+fr(wpp?ms/wpp:0),null),
-      kpi('Leads Nativos',fn(leads),'C/lead: '+fr(leads?ms/leads:0),null),
-      kpi('Total Conv.',fn(wpp+leads),'WPP + Leads',null),
-    ].join('');
-    document.getElementById('meta-th-conv').textContent='WhatsApp';
-    document.getElementById('meta-th-rev').textContent='Leads';
-    document.getElementById('meta-th-extra').textContent='C/WPP';
-  }
-
-  const sorted=[...m].sort((a,b)=>b.sp-a.sp);
-  const h=Math.max(180,sorted.length*38+60);
-  document.getElementById('meta-cwrap').style.height=h+'px';
-
-  setTimeout(()=>{
-    if(isEc){
-      dc('meta-c',{type:'bar',data:{labels:sorted.map(d=>sn(d.c,24)),datasets:[{label:'Receita',data:sorted.map(d=>Math.round(d.rev||0)),backgroundColor:'#1A7A3C',borderRadius:4,barThickness:12},{label:'Gasto',data:sorted.map(d=>Math.round(d.sp)),backgroundColor:'#CC0000',borderRadius:4,barThickness:12}]},options:{...BO,indexAxis:'y',plugins:{legend:{display:true,labels:{color:TK,font:{size:11},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:TK,font:{size:9},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:GK},border:{display:false}},y:{ticks:{color:TK,font:{size:10}},grid:{display:false},border:{display:false}}}}});
-    } else {
-      dc('meta-c',{type:'bar',data:{labels:sorted.map(d=>sn(d.c,24)),datasets:[{label:'WhatsApp',data:sorted.map(d=>d.wpp||0),backgroundColor:'#CC0000',borderRadius:4,barThickness:14},{label:'Leads',data:sorted.map(d=>d.leads||0),backgroundColor:'#1A7A3C',borderRadius:4,barThickness:14}]},options:{...BO,indexAxis:'y',plugins:{legend:{display:true,labels:{color:TK,font:{size:11},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:TK,font:{size:9}},grid:{color:GK},border:{display:false}},y:{ticks:{color:TK,font:{size:10}},grid:{display:false},border:{display:false}}}}});
-    }
-  },0);
-
-  const tb=document.getElementById('meta-tb');tb.innerHTML='';
-  m.forEach(d=>{
-    const tr=document.createElement('tr');
-    if(isEc){
-      const cpa=d.pur?d.sp/d.pur:0;
-      const cls=cpa===0?'bb':(cpa<100?'bg':cpa<250?'ba':'br');
-      tr.innerHTML=`<td class="hi" title="${d.c}">${sn(d.c,28)}</td><td>${frr(d.sp)}</td><td>${d.imp>=1e6?(d.imp/1e6).toFixed(1)+'M':fn(d.imp)}</td><td>${fn(d.clk)}</td><td>${fp(d.ctr)}</td><td>R$${(d.cpc||0).toFixed(2)}</td><td>${fn(d.pur||0)}</td><td>${fr(d.rev||0)}</td><td>${cpa?'<span class="badge '+cls+'">'+fr(cpa)+'</span>':'—'}</td><td>${fn(d.msg||0)}</td>`;
-    } else {
-      const cpaW=d.wpp?d.sp/d.wpp:0;
-      tr.innerHTML=`<td class="hi" title="${d.c}">${sn(d.c,28)}</td><td>${frr(d.sp)}</td><td>${d.imp>=1e6?(d.imp/1e6).toFixed(1)+'M':fn(d.imp)}</td><td>${fn(d.clk)}</td><td>${fp(d.ctr)}</td><td>R$${(d.cpc||0).toFixed(2)}</td><td>${fn(d.wpp||0)}</td><td>${fn(d.leads||0)}</td><td>${cpaW?'<span class="badge br">'+frr(cpaW)+'</span>':'—'}</td><td>—</td>`;
-    }
-    tb.appendChild(tr);
-  });
-}
-
-// ── CRIATIVOS ─────────────────────────────────────────────────────────
-function renderCri(sk){
-  const cri=C.creatives;
-  const isEc=C.tipo==='ec';
-  if(isEc){
-    const trev=cri.reduce((a,x)=>a+(x.rev||0),0);
-    const tpur=cri.reduce((a,x)=>a+(x.pur||0),0);
-    const tsp=cri.reduce((a,x)=>a+x.sp,0);
-    document.getElementById('cri-kpi').innerHTML=[
-      kpi('Criativos ativos',cri.length,'Com investimento',null),
-      kpi('Receita gerada',fr(trev),fn(tpur)+' vendas',null),
-      kpi('Gasto total',fr(tsp),'Meta Ads',null),
-      kpi('ROAS',tsp>0&&trev>0?(trev/tsp).toFixed(2)+'x':'—','',null),
-    ].join('');
-  } else {
-    const tw=cri.reduce((a,x)=>a+(x.wpp||0),0);
-    const tl=cri.reduce((a,x)=>a+(x.leads||0),0);
-    const tsp=cri.reduce((a,x)=>a+x.sp,0);
-    document.getElementById('cri-kpi').innerHTML=[
-      kpi('Criativos ativos',cri.length,'Com investimento',null),
-      kpi('Total WhatsApp',fn(tw),'Via criativos',null),
-      kpi('Total Leads',fn(tl),'Via criativos',null),
-      kpi('Gasto total',fr(tsp),'Meta Ads',null),
-    ].join('');
-  }
-
-  let sorted=[...cri];
-  if(sk==='top') sorted.sort((a,b)=>{const sa=(a.rev||0)+(a.wpp||0)*50+(a.leads||0)*30,sb=(b.rev||0)+(b.wpp||0)*50+(b.leads||0)*30;return sb-sa;});
-  else if(sk==='spend') sorted.sort((a,b)=>b.sp-a.sp);
-  else if(sk==='conv') sorted.sort((a,b)=>{const ac=(a.pur||0)+(a.wpp||0)+(a.leads||0),bc=(b.pur||0)+(b.wpp||0)+(b.leads||0);return bc-ac;});
-  else if(sk==='cpa'){sorted.sort((a,b)=>{const f=x=>x.pur?x.sp/x.pur:(x.wpp?x.sp/x.wpp:(x.leads?x.sp/x.leads:999999));return f(a)-f(b);});}
-  else if(sk==='ctr') sorted.sort((a,b)=>b.ctr-a.ctr);
-
-  const grid=document.getElementById('cri-grid');grid.innerHTML='';
-  sorted.forEach((c,i)=>{
-    const cpa=c.pur?c.sp/c.pur:0;
-    const cpaW=c.wpp?c.sp/c.wpp:0;
-    const cpaL=c.leads?c.sp/c.leads:0;
-    const div=document.createElement('div');
-    div.className='cri-card'+(i===0?' rank1':'');
-    div.onclick=()=>openLB(c,i+1);
-    div.innerHTML=`${c.img
-      ?`<div class="cri-img-wrap"><img class="cri-img" src="${c.img}" alt="${c.n}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'cri-nopic\\'>Sem imagem</div>'"><div class="cri-badge ${i===0?'gold':'rank'}">${i===0?'👑 #1':'#'+(i+1)}</div></div>`
-      :`<div class="cri-nopic">Sem imagem</div>`}
-    <div class="cri-body">
-      <div class="cri-name" title="${c.n}">${c.n}</div>
-      <div class="cri-stats">
-        <div class="cs"><div class="cs-l">Gasto</div><div class="cs-v">${fr(c.sp)}</div></div>
-        ${isEc
-          ?`<div class="cs"><div class="cs-l">Receita</div><div class="cs-v green">${fr(c.rev||0)}</div></div>
-             <div class="cs"><div class="cs-l">Compras</div><div class="cs-v">${fn(c.pur||0)}</div></div>
-             <div class="cs"><div class="cs-l">CPA</div><div class="cs-v ${cpa?'red':''}">${cpa?fr(cpa):'—'}</div></div>
-             <div class="cs"><div class="cs-l">Mensagens</div><div class="cs-v">${fn(c.msg||0)}</div></div>
-             <div class="cs"><div class="cs-l">CTR</div><div class="cs-v">${fp(c.ctr)}</div></div>`
-          :`<div class="cs"><div class="cs-l">WhatsApp</div><div class="cs-v ${c.wpp?'red':''}">${fn(c.wpp||0)}</div></div>
-             <div class="cs"><div class="cs-l">Leads</div><div class="cs-v ${c.leads?'green':''}">${fn(c.leads||0)}</div></div>
-             <div class="cs"><div class="cs-l">C/WPP</div><div class="cs-v">${cpaW?fr(cpaW):'—'}</div></div>
-             <div class="cs"><div class="cs-l">C/Lead</div><div class="cs-v">${cpaL?fr(cpaL):'—'}</div></div>
-             <div class="cs"><div class="cs-l">CTR</div><div class="cs-v">${fp(c.ctr)}</div></div>`
-        }
-      </div>
-    </div>`;
-    grid.appendChild(div);
-  });
-}
-function sortCri(k,btn){document.querySelectorAll('.sort-hd .qbtn').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderCri(k);}
-
-// ── GOOGLE ADS ────────────────────────────────────────────────────────
-function renderGoogle(){
-  const g=C.google;
-  const gs=g.reduce((a,x)=>a+x.sp,0);
-  const conv=g.reduce((a,x)=>a+x.conv,0);
-  const clk=g.reduce((a,x)=>a+x.clk,0);
-  const bestCpa=g.filter(d=>d.cpa>0).length?Math.min(...g.filter(d=>d.cpa>0).map(d=>d.cpa)):0;
-  document.getElementById('google-kpi').innerHTML=[
-    kpi('Investimento Google',frr(gs),g.length+' campanhas',null),
-    kpi('Conversões',fn(Math.round(conv)),'CPA médio: '+fr(conv?gs/conv:0),null),
-    kpi('Cliques',fn(clk),'',null),
-    kpi('Melhor CPA',bestCpa?frr(bestCpa):'—','Menor custo/conv',null),
-  ].join('');
-
-  setTimeout(()=>{
-    dc('g-c1',{type:'doughnut',data:{labels:g.map(d=>sn(d.c,20)),datasets:[{data:g.map(d=>Math.round(d.sp)),backgroundColor:['#CC0000','#1877F2','#1A7A3C','#F59E0B','#7C3AED'].slice(0,g.length),borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{color:TK,font:{size:11,family:'Inter'},boxWidth:10,padding:7}}}}});
-    dc('g-c2',{type:'bar',data:{labels:g.map(d=>sn(d.c,16)),datasets:[{data:g.map(d=>Math.round(d.cpa)),backgroundColor:g.map(d=>d.cpa===0?'#ccc':(d.cpa<50?'#1A7A3C':d.cpa<200?'#F59E0B':'#CC0000')),borderRadius:7,barThickness:44}]},options:{...BO,scales:{x:{ticks:{color:TK,font:{size:10},maxRotation:20},grid:{display:false},border:{display:false}},y:{ticks:{color:TK,font:{size:10},callback:v=>'R$'+v},grid:{color:GK},border:{display:false}}}}});
-  },0);
-
-  const tb=document.getElementById('google-tb');tb.innerHTML='';
-  g.forEach(d=>{
-    const cls=d.cpa===0?'dn':(d.cpa<50?'bg':d.cpa<200?'ba':'br');
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="hi" title="${d.c}">${sn(d.c,28)}</td><td>${frr(d.sp)}</td><td>${d.imp>=1e6?(d.imp/1e6).toFixed(1)+'M':fn(d.imp||0)}</td><td>${fn(d.clk)}</td><td>${fp(d.ctr)}</td><td>R$${(d.cpc||0).toFixed(2)}</td><td>${fn(Math.round(d.conv))}</td><td>${d.cpa?'<span class="badge '+cls+'">'+frr(d.cpa)+'</span>':'—'}</td>`;
-    tb.appendChild(tr);
-  });
-}
-
-// ── LIGHTBOX ──────────────────────────────────────────────────────────
-function openLB(c,rank){
-  const isEc=C.tipo==='ec';
-  const cpa=c.pur?c.sp/c.pur:0;
-  const cpaW=c.wpp?c.sp/c.wpp:0;
-  const cpaL=c.leads?c.sp/c.leads:0;
-  document.getElementById('lb-img-wrap').innerHTML=c.img
-    ?`<img class="lb-img" src="${c.img}" alt="${c.n}" onerror="this.parentElement.innerHTML='<div class=\\'lb-nopic\\'>Sem imagem disponível</div>'">`
-    :`<div class="lb-nopic">Sem imagem disponível</div>`;
-  document.getElementById('lb-title').textContent=c.n;
-  document.getElementById('lb-camp').textContent=c.camp;
-  document.getElementById('lb-stats').innerHTML=isEc?[
-    `<div class="lb-stat"><div class="lb-stat-l">Gasto</div><div class="lb-stat-v">${frr(c.sp)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">Receita</div><div class="lb-stat-v">${fr(c.rev||0)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">Compras</div><div class="lb-stat-v">${fn(c.pur||0)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">CPA</div><div class="lb-stat-v">${cpa?fr(cpa):'—'}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">Mensagens</div><div class="lb-stat-v">${fn(c.msg||0)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">CTR</div><div class="lb-stat-v">${fp(c.ctr)}</div></div>`,
-  ].join(''):[
-    `<div class="lb-stat"><div class="lb-stat-l">Gasto</div><div class="lb-stat-v">${frr(c.sp)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">WhatsApp</div><div class="lb-stat-v">${fn(c.wpp||0)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">Leads</div><div class="lb-stat-v">${fn(c.leads||0)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">C/WPP</div><div class="lb-stat-v">${cpaW?frr(cpaW):'—'}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">C/Lead</div><div class="lb-stat-v">${cpaL?frr(cpaL):'—'}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">CTR</div><div class="lb-stat-v">${fp(c.ctr)}</div></div>`,
-  ].join('');
-  document.getElementById('lb').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeLB(e){
-  if(e&&e.target!==document.getElementById('lb')&&!e.target.classList.contains('lb-close'))return;
-  document.getElementById('lb').classList.remove('open');
-  document.body.style.overflow='';
-}
-</script>
-</body>
-</html>
+    {c:"FAST-TRAFFIC 07/25",   sp:545.18, imp:47219,  clk:490,  ctr:1.04,cpc:1.11,pur:3,  msg:3},
+    {c:"ESTÁTICOS 08/07",      sp:701.46, imp:74793,  clk:1648, ctr:2.20,cpc:0.43,pur:29, msg:3},
+    {c:"VÍDEOS 08/07",         sp:1857.25,imp:107830, clk:1880, ctr:1.74,cpc:0.99,pur:27, msg:4},
+    {c:"REMARKETING 09-08",    sp:1147.44,imp:58147,  clk:889,  ctr:1.53,cpc:1.29,pur:18, msg:3},
+    {c:"ESTÁTICOS Preços",     sp:1160.42,imp:103683, clk:1803, ctr:1.74,cpc:0.64,pur:9,  msg:1},
+    {c:"CATÁLOGO #
