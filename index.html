@@ -6,7 +6,7 @@
     <title>V4 RDR — Intelligence Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f4f6f8; --card: #ffffff; --tx: #161d25; --tx2: #637381; --brd: #dfe3e8;
@@ -15,14 +15,23 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { background: var(--bg); color: var(--tx); font-family: 'Inter', sans-serif; }
 
-        /* HOME SCREEN */
+        /* --- HOME STYLE FIXO (image_9f8867) --- */
         #home-screen { padding: 60px 20px; max-width: 1100px; margin: 0 auto; display: none; }
-        .client-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
-        .client-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: var(--sh); cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
+        .home-header { margin-bottom: 40px; text-align: left; }
+        .home-header h1 { font-size: 32px; font-weight: 800; color: #1a1a1a; }
+        .client-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .client-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: var(--sh); cursor: pointer; border: 1px solid transparent; transition: 0.3s; position: relative; }
         .client-card:hover { border-color: var(--v4-red); transform: translateY(-5px); }
-        .client-avatar { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #fff; margin-bottom: 15px; }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .client-avatar { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #fff; }
+        .status-pill { background: #e8f5ee; color: #1a7a3c; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        .status-dot { width: 6px; height: 6px; background: #1a7a3c; border-radius: 50%; }
+        .mini-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f9fafb; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .mk-label { font-size: 10px; color: var(--tx3); text-transform: uppercase; font-weight: 700; }
+        .mk-val { font-size: 15px; font-weight: 800; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f1f1f1; color: var(--v4-red); font-weight: 700; }
 
-        /* DASHBOARD UI */
+        /* --- DASHBOARD UI --- */
         #app-ui { display: none; }
         .nav { background: #fff; border-bottom: 1px solid var(--brd); height: 64px; display: flex; align-items: center; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
         .nav-logo { width: 32px; height: 32px; background: var(--v4-red); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; }
@@ -35,54 +44,66 @@
 
         .main { margin-left: 240px; padding: 32px 40px; }
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-        .kpi-card { background: #fff; padding: 24px; border-radius: var(--r); box-shadow: var(--sh); border-top: 4px solid var(--v4-red); }
+        .kpi-card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: var(--sh); border: 1px solid var(--brd); }
         .kpi-label { font-size: 11px; color: var(--tx2); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
-        .kpi-val { font-size: 24px; font-weight: 800; }
+        .kpi-val { font-size: 24px; font-weight: 800; color: #1a1a1a; }
 
         /* TABLES */
-        .card { background: #fff; border-radius: 12px; box-shadow: var(--sh); border: 1px solid var(--brd); margin-bottom: 24px; overflow: hidden; }
-        .card-hd { padding: 16px 24px; border-bottom: 1px solid var(--brd); font-weight: 800; background: #f9fafb; }
+        .card { background: #fff; border-radius: 10px; box-shadow: var(--sh); border: 1px solid var(--brd); margin-bottom: 24px; overflow: hidden; }
+        .card-hd { padding: 16px 24px; border-bottom: 1px solid var(--brd); font-weight: 800; background: #f9fafb; font-size: 14px; }
         .tbl-wrap { overflow-x: auto; }
         .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
         .tbl th { text-align: left; padding: 14px 20px; background: #f4f6f8; color: var(--tx2); font-size: 11px; text-transform: uppercase; }
-        .tbl td { padding: 14px 20px; border-bottom: 1px solid var(--brd); }
+        .tbl td { padding: 14px 20px; border-bottom: 1px solid var(--brd); color: #1a1a1a; }
 
-        /* ADS GALLERY */
+        /* ADS */
         .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px; }
         .ad-card { background: #fff; border-radius: 12px; border: 1px solid var(--brd); overflow: hidden; box-shadow: var(--sh); }
         .ad-img { width: 100%; aspect-ratio: 1; object-fit: cover; }
-        .ad-body { padding: 12px; }
+        .ad-body { padding: 12px; font-size: 12px; }
 
-        /* CALENDAR */
+        /* INPUTS */
         .date-picker { display: flex; align-items: center; background: #fff; border-radius: 8px; border: 1px solid var(--brd); padding: 4px 8px; }
         .date-input { border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 700; padding: 6px; outline: none; }
         .apply-btn { background: var(--v4-red); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 800; cursor: pointer; }
 
-        .status-bar { position: fixed; bottom: 0; width: 100%; background: #000; color: #0f0; font-size: 10px; text-align: center; padding: 4px; z-index: 1000; }
+        @media(max-width:1000px){ .client-grid { grid-template-columns: 1fr; } .sidebar { display: none; } .main { margin-left: 0; } .kpi-grid { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
 
     <div id="home-screen">
-        <div style="text-align: left; margin-bottom: 40px;">
-            <p style="color: var(--tx2); font-size: 12px;">Início > Clientes</p>
-            <h1 style="font-size: 32px; font-weight: 800;">Dashboards de Performance</h1>
+        <div class="home-header">
+            <p style="font-size:12px; color:var(--tx2)">Início > Clientes</p>
+            <h1>Dashboards de Performance</h1>
         </div>
         <div class="client-grid">
             <div class="client-card" onclick="window.location.search='?cliente=aliancas'">
-                <div class="client-avatar" style="background:#c084fc">AC</div>
+                <div class="card-top"><div class="client-avatar" style="background:#c084fc">AC</div><div class="status-pill"><div class="status-dot"></div> Ativo</div></div>
                 <h2>Alianças CS</h2>
-                <p style="color: var(--tx2); font-size: 12px; margin-top: 10px;">Acessar Painel ></p>
+                <div class="mini-kpis">
+                    <div><div class="mk-label">Mídia</div><div class="mk-val">Meta + G</div></div>
+                    <div><div class="mk-label">Modelo</div><div class="mk-val">E-com</div></div>
+                </div>
+                <div class="card-footer">Abrir dashboard ></div>
             </div>
             <div class="client-card" onclick="window.location.search='?cliente=starman'">
-                <div class="client-avatar" style="background:#3b82f6">SM</div>
+                <div class="card-top"><div class="client-avatar" style="background:#3b82f6">SM</div><div class="status-pill"><div class="status-dot"></div> Ativo</div></div>
                 <h2>Star Man Net</h2>
-                <p style="color: var(--tx2); font-size: 12px; margin-top: 10px;">Acessar Painel ></p>
+                <div class="mini-kpis">
+                    <div><div class="mk-label">Foco</div><div class="mk-val">Leads</div></div>
+                    <div><div class="mk-label">Modelo</div><div class="mk-val">Inside S.</div></div>
+                </div>
+                <div class="card-footer">Abrir dashboard ></div>
             </div>
             <div class="client-card" onclick="window.location.search='?cliente=bsc'">
-                <div class="client-avatar" style="background:#059669">BS</div>
+                <div class="card-top"><div class="client-avatar" style="background:#059669">BS</div><div class="status-pill"><div class="status-dot"></div> Ativo</div></div>
                 <h2>BSC Pickup</h2>
-                <p style="color: var(--tx2); font-size: 12px; margin-top: 10px;">Acessar Painel ></p>
+                <div class="mini-kpis">
+                    <div><div class="mk-label">Estratégia</div><div class="mk-val">WPP</div></div>
+                    <div><div class="mk-label">Modelo</div><div class="mk-val">E-com B2B</div></div>
+                </div>
+                <div class="card-footer">Abrir dashboard ></div>
             </div>
         </div>
     </div>
@@ -108,12 +129,7 @@
 
         <main class="main">
             <div id="sec-overview" class="section">
-                <div class="kpi-grid">
-                    <div class="kpi-card"><div class="kpi-label">Investimento Total</div><div class="kpi-val" id="k-sp">R$ 0</div></div>
-                    <div class="kpi-card"><div class="kpi-label">Faturamento</div><div class="kpi-val" id="k-fat">R$ 0</div></div>
-                    <div class="kpi-card"><div class="kpi-label">Vendas Totais</div><div class="kpi-val" id="k-v">0</div></div>
-                    <div class="kpi-card" style="border-top-color:var(--green)"><div class="kpi-label">ROAS Real</div><div class="kpi-val" id="k-roas">0.0x</div></div>
-                </div>
+                <div class="kpi-grid" id="kpi-box"></div>
                 <div class="card">
                     <div class="card-hd">Investimento por Canal</div>
                     <div style="padding: 20px; height: 300px;"><canvas id="c-main"></canvas></div>
@@ -121,44 +137,34 @@
             </div>
 
             <div id="sec-meta" class="section" style="display:none">
-                <div class="card">
-                    <div class="card-hd">Desempenho Meta Ads</div>
-                    <div class="tbl-wrap"><table class="tbl" id="tb-meta"></table></div>
-                </div>
+                <div class="card"><div class="card-hd">Campanhas Meta Ads</div><div class="tbl-wrap"><table class="tbl" id="tb-meta"></table></div></div>
             </div>
 
             <div id="sec-google" class="section" style="display:none">
-                <div class="card">
-                    <div class="card-hd">Desempenho Google Ads</div>
-                    <div class="tbl-wrap"><table class="tbl" id="tb-google"></table></div>
-                </div>
+                <div class="card"><div class="card-hd">Campanhas Google Ads</div><div class="tbl-wrap"><table class="tbl" id="tb-google"></table></div></div>
             </div>
 
             <div id="sec-ads" class="section" style="display:none">
-                <div class="ad-grid" id="ad-grid"></div>
+                <div class="ad-grid" id="ad-box"></div>
             </div>
         </main>
     </div>
 
-    <div class="status-bar" id="status">SISTEMA V4 RDR CONECTADO</div>
-
     <script>
         const DB = {
             aliancas: { nome: "Alianças CS", ids: ["2429115943910453", "6704265990"], sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTsMuSXIpzP3kg-v1c_8peav-AaSKPWQ7irMj3padTTA8J8OR24do9Y0_RRfeKa5Tr6W0WjYCRwTQNi/pub?output=csv" },
-            bsc: { nome: "BSC Pickup Solutions", ids: ["1707098029742717", "4837726517"], sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIqsXutKII_DYsFBQMEeo1I5SJq9b8I-RZxWoX3Ur8StELc9nYnntV_Dgnt20PLlD9nUeExeMjjihp/pub?output=csv" },
+            bsc: { nome: "BSC Pickup", ids: ["1707098029742717", "4837726517"], sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIqsXutKII_DYsFBQMEeo1I5SJq9b8I-RZxWoX3Ur8StELc9nYnntV_Dgnt20PLlD9nUeExeMjjihp/pub?output=csv" },
             starman: { nome: "Star Man Net", ids: ["465598168178564", "6835774127"], sheet: null }
         };
 
         const cid = new URLSearchParams(window.location.search).get('cliente');
         const C = DB[cid];
         const API_KEY = "2d4d1d577551f238260e5e6e150a4d7b4f24";
-        let midia = { meta: [], google: [], sp: 0 };
+        let midia = { m: [], g: [], sp: 0, mSp: 0, gSp: 0 };
         let fin = { fat: 0, v: 0 };
-        const charts = {};
 
-        if (!cid) {
-            document.getElementById('home-screen').style.display = 'block';
-        } else if (C) {
+        if (!cid) { document.getElementById('home-screen').style.display = 'block'; }
+        else if (C) {
             document.getElementById('app-ui').style.display = 'block';
             document.getElementById('cli-display').textContent = "| " + C.nome;
             const t = new Date(); const f = new Date(); f.setDate(t.getDate() - 30);
@@ -170,31 +176,32 @@
         async function refresh() {
             const f = document.getElementById('d-f').value;
             const t = document.getElementById('d-t').value;
-            document.getElementById('status').textContent = "SINCRONIZANDO...";
-
+            
+            // 1. Windsor (Mídia)
             const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${f}&date_to=${t}&fields=source,account_id,spend,campaign,clicks,conversions`;
             const r = await fetch(url);
             const j = await r.json();
 
-            midia = { meta: [], google: [], sp: 0 };
+            midia = { m: [], g: [], sp: 0, mSp: 0, gSp: 0 };
             j.data.forEach(row => {
                 if (C.ids.includes(String(row.account_id))) {
                     const v = parseFloat(row.spend || 0);
                     midia.sp += v;
-                    if (row.source.includes('facebook')) midia.meta.push(row);
-                    else if (row.source.includes('google')) midia.google.push(row);
+                    if (row.source.includes('facebook')) { midia.m.push(row); midia.mSp += v; }
+                    else { midia.g.push(row); midia.gSp += v; }
                 }
             });
 
+            // 2. Google Sheets (Financeiro)
             if (C.sheet) {
                 Papa.parse(C.sheet, {
                     download: true, header: true,
                     complete: (res) => {
                         const mes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(t)).toLowerCase();
                         res.data.forEach(row => {
-                            if (String(row['Mês'] || '').toLowerCase().includes(mes)) {
-                                fin.fat = parseFloat(String(row['Faturamento'] || 0).replace(/[R$\s.]/g, '').replace(',', '.'));
-                                fin.v = parseInt(row['Vendas'] || 0);
+                            if (String(row['Mês']||'').toLowerCase().includes(mes)) {
+                                fin.fat = parseFloat(String(row['Faturamento']||0).replace(/[R$\s.]/g,'').replace(',','.'));
+                                fin.v = parseInt(row['Vendas']||0);
                             }
                         });
                         render();
@@ -204,51 +211,43 @@
         }
 
         function render() {
-            document.getElementById('k-sp').textContent = "R$ " + midia.sp.toLocaleString('pt-BR');
-            document.getElementById('k-fat').textContent = "R$ " + fin.fat.toLocaleString('pt-BR');
-            document.getElementById('k-v').textContent = fin.v;
-            document.getElementById('k-roas').textContent = (fin.fat / (midia.sp || 1)).toFixed(2) + "x";
+            const isEcom = (cid !== 'starman');
+            const kBox = document.getElementById('kpi-box');
+            kBox.innerHTML = `
+                <div class="kpi-card"><div class="kpi-label">Investimento</div><div class="kpi-val">R$ ${midia.sp.toLocaleString('pt-BR')}</div></div>
+                <div class="kpi-card"><div class="kpi-label">${isEcom?'Faturamento':'Leads'}</div><div class="kpi-val">${isEcom?'R$ '+fin.fat.toLocaleString('pt-BR'):midia.m.reduce((a,x)=>a+parseInt(x.conversions),0)}</div></div>
+                <div class="kpi-card"><div class="kpi-label">${isEcom?'Vendas':'CPA'}</div><div class="kpi-val">${isEcom?fin.v:'R$ '+(midia.sp/(midia.m.reduce((a,x)=>a+parseInt(x.conversions),0)||1)).toFixed(2)}</div></div>
+                <div class="kpi-card"><div class="kpi-label">${isEcom?'ROAS':'CTR'}</div><div class="kpi-val">${isEcom?(fin.fat/(midia.sp||1)).toFixed(2)+'x':((midia.m.reduce((a,x)=>a+parseInt(x.clicks),0)/midia.m.reduce((a,x)=>a+100000,0))*100).toFixed(2)+'%'}</div></div>
+            `;
 
-            // TABELA META
-            const head = `<thead><tr><th>Campanha</th><th>Gasto</th><th>Cliques</th><th>Resultados</th></tr></thead><tbody>`;
-            document.getElementById('tb-meta').innerHTML = head + midia.meta.map(r => `<tr><td style="font-weight:700">${r.campaign.substring(0,35)}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td>${r.conversions}</td></tr>`).join('') + `</tbody>`;
-            document.getElementById('tb-google').innerHTML = head + midia.google.map(r => `<tr><td style="font-weight:700">${r.campaign.substring(0,35)}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td>${r.conversions}</td></tr>`).join('') + `</tbody>`;
+            // Tabelas
+            const h = `<thead><tr><th>Campanha</th><th>Investido</th><th>Cliques</th><th>Resultado</th></tr></thead><tbody>`;
+            document.getElementById('tb-meta').innerHTML = h + midia.m.map(r=>`<tr><td>${r.campaign.substring(0,35)}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td>${r.conversions}</td></tr>`).join('') + "</tbody>";
+            document.getElementById('tb-google').innerHTML = h + midia.g.map(r=>`<tr><td>${r.campaign.substring(0,35)}</td><td>R$ ${parseFloat(r.spend).toFixed(2)}</td><td>${r.clicks}</td><td>${r.conversions}</td></tr>`).join('') + "</tbody>";
 
-            renderMainChart();
-            document.getElementById('status').textContent = "✅ DADOS ATUALIZADOS";
-        }
-
-        function renderMainChart() {
-            const ctx = document.getElementById('c-main');
-            if (charts.main) charts.main.destroy();
-            charts.main = new Chart(ctx, {
+            // Gráfico
+            new Chart(document.getElementById('c-main'), {
                 type: 'bar',
-                data: {
-                    labels: ['Google Ads', 'Meta Ads'],
-                    datasets: [{ label: 'Investimento', data: [midia.google.reduce((a,b)=>a+parseFloat(b.spend),0), midia.meta.reduce((a,b)=>a+parseFloat(b.spend),0)], backgroundColor: '#e8000d', borderRadius: 8 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                data: { labels: ['Meta Ads', 'Google Ads'], datasets: [{ data: [midia.mSp, midia.gSp], backgroundColor: '#e8000d' }] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        function tab(name, btn) {
+        async function tab(name, btn) {
             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
             document.getElementById('sec-' + name).style.display = 'block';
             document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            if (name === 'ads') loadAds();
-        }
-
-        async function loadAds() {
-            const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${document.getElementById('d-f').value}&date_to=${document.getElementById('d-t').value}&fields=account_id,ad_name,picture,spend,conversions`;
-            const r = await fetch(url);
-            const j = await r.json();
-            const grid = document.getElementById('ad-grid'); grid.innerHTML = '';
-            j.data.forEach(ad => {
-                if (C.ids.includes(String(ad.account_id)) && ad.picture) {
-                    grid.innerHTML += `<div class="ad-card"><img src="${ad.picture}" class="ad-img"><div class="ad-body"><b>${ad.ad_name}</b><br><small>Gasto: R$ ${parseFloat(ad.spend).toFixed(2)}</small></div></div>`;
-                }
-            });
+            if (name === 'ads') {
+                const url = `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${document.getElementById('d-f').value}&date_to=${document.getElementById('d-t').value}&fields=account_id,ad_name,picture,spend,conversions`;
+                const r = await fetch(url); const j = await r.json();
+                const adBox = document.getElementById('ad-box'); adBox.innerHTML = '';
+                j.data.forEach(ad => {
+                    if (C.ids.includes(String(ad.account_id)) && ad.picture) {
+                        adBox.innerHTML += `<div class="ad-card"><img src="${ad.picture}" class="ad-img"><div class="ad-body"><b>${ad.ad_name.substring(0,25)}</b><br>Gasto: R$ ${parseFloat(ad.spend).toFixed(0)}</div></div>`;
+                    }
+                });
+            }
         }
     </script>
 </body>
