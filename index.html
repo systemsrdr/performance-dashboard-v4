@@ -169,6 +169,27 @@ body{min-height:100vh}
 #nf{display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center}
 #nf.on{display:flex}
 
+/* FUNIL VISUAL EM BLOCOS (estilo Econodata) */
+.funilv-wrap{padding:20px 20px 24px;overflow-x:auto}
+.funilv-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--brd)}
+.funilv-tab{padding:8px 20px;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.funilv-tab.on{color:var(--tx);border-bottom-color:#111}
+.funilv-blocks{display:flex;align-items:flex-end;gap:0;min-width:600px;height:200px;position:relative}
+.funilv-block{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;position:relative;transition:filter .2s;border-radius:0}
+.funilv-block:hover{filter:brightness(1.08)}
+.funilv-block:first-child{border-radius:10px 0 0 10px}
+.funilv-block:last-child{border-radius:0 10px 10px 0}
+.funilv-block-inner{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;position:relative}
+.funilv-num{font-family:'Inter',sans-serif;font-size:24px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px;letter-spacing:-.5px}
+.funilv-label{font-size:10px;font-weight:600;color:rgba(255,255,255,.8);text-align:center;text-transform:uppercase;letter-spacing:.06em;line-height:1.3}
+.funilv-conv{font-size:10px;font-weight:700;color:rgba(255,255,255,.65);margin-top:6px;background:rgba(0,0,0,.15);border-radius:10px;padding:2px 8px}
+.funilv-plus{position:absolute;bottom:10px;right:10px;width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:12px;font-weight:700}
+.funilv-connector{width:0;height:0;border-top:100px solid transparent;border-bottom:100px solid transparent;z-index:2;flex-shrink:0}
+.funilv-sub-row{display:flex;gap:0;min-width:600px;margin-top:12px}
+.funilv-sub{flex:1;text-align:center;font-size:11px;color:var(--tx2);padding:6px 4px;border-top:2px solid var(--brd)}
+.funilv-sub-v{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.funilv-sub-l{font-size:10px;color:var(--tx3)}
+
 /* GOOGLE ADS */
 .ga-camp-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--brd)}
 .ga-camp-row:last-child{border-bottom:none}
@@ -260,9 +281,20 @@ body{min-height:100vh}
         <div class="card-body"><div class="cwrap" style="height:160px"><canvas id="ov-c2" role="img" aria-label="Performance">.</canvas></div></div>
       </div>
     </div>
-    <div class="card" id="ov-funil-card" style="display:none">
-      <div class="card-hd"><div><div class="card-title">Funil de Conversão — Meta Ads</div><div class="card-sub">Impressões → Cliques → Conversões</div></div></div>
-      <div id="ov-funil"></div>
+    <!-- FUNIL VISUAL UNIFICADO -->
+    <div class="card" id="ov-funil-card">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Funil de Performance — Meta Ads + Google Ads</div>
+          <div class="card-sub">Jornada completa do usuário em todas as plataformas</div>
+        </div>
+        <div class="funilv-tabs" style="border:none;margin:0">
+          <div class="funilv-tab on" onclick="switchFunil('all',this)">Todas</div>
+          <div class="funilv-tab" onclick="switchFunil('meta',this)">Meta Ads</div>
+          <div class="funilv-tab" onclick="switchFunil('google',this)">Google Ads</div>
+        </div>
+      </div>
+      <div id="ov-funil-body"></div>
     </div>
   </div>
 
@@ -375,9 +407,9 @@ starman:{
   ],
   meta_prev:{sp:5800,wpp:85,leads:68},
   google:[
-    {c:"SEARCH CAD1",sp:8120.05,clk:7584,ctr:8.67,cpc:1.07,conv:64,cpa:126.88,conv_prev:52},
-    {c:"PMAX MERCHANT",sp:6202.81,clk:8301,ctr:1.35,cpc:0.75,conv:47,cpa:131.97,conv_prev:38},
-    {c:"PMAX MOT6",sp:940.32,clk:775,ctr:1.96,cpc:1.21,conv:3,cpa:313.44,conv_prev:2}
+    {c:"SEARCH CAD1",sp:8120.05,clk:7584,impressions:38247,ctr:8.67,cpc:1.07,conv:64,cpa:126.88,conv_prev:52},
+    {c:"PMAX MERCHANT",sp:6202.81,clk:8301,impressions:333341,ctr:1.35,cpc:0.75,conv:47,cpa:131.97,conv_prev:38},
+    {c:"PMAX MOT6",sp:940.32,clk:775,impressions:39530,ctr:1.96,cpc:1.21,conv:3,cpa:313.44,conv_prev:2}
   ],
   creatives:[
     {n:"[260501] Conexão que entende você",camp:"NOVOS CRIATIVOS",sp:662.83,wpp:0,leads:35,ctr:0.76,cpc:0.79,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t45.1600-4/609200886_880497691125961_94343582644873557_n.png?_nc_cat=101&ccb=1-7&_nc_ohc=VKbqWo7pybIQ7kNvwELOggN&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af1nE0bM-MJ_LzM0r74BEE_gJxmYlx0U1JwW8bsWwJSN_g&oe=69E21FB7"},
@@ -407,8 +439,8 @@ aliancas:{
   ],
   meta_prev:{sp:44726,rev:240285,pur:440},
   google:[
-    {c:"SEARCH LEADS LP-3",sp:1223.00,clk:316,ctr:16.83,cpc:3.87,conv:94,cpa:13.01,conv_prev:198},
-    {c:"PMAX CAD5 LEADS",sp:591.19,clk:309,ctr:8.63,cpc:1.91,conv:44,cpa:13.43,conv_prev:87}
+    {c:"SEARCH LEADS LP-3",sp:1223.00,clk:316,impressions:1875,ctr:16.83,cpc:3.87,conv:94,cpa:13.01,conv_prev:198},
+    {c:"PMAX CAD5 LEADS",sp:591.19,clk:309,impressions:3584,ctr:8.63,cpc:1.91,conv:44,cpa:13.43,conv_prev:87}
   ],
   creatives:[
     {n:"AD2 [VD] CELEBRE O AMOR",camp:"VÍDEOS 08/07",sp:1853.04,pur:27,rev:19730.50,msg:4,ctr:1.75,cpc:0.99,img:"https://scontent-fra3-1.xx.fbcdn.net/v/t15.5256-10/516196334_731658266359464_4343151900587336754_n.jpg?_nc_cat=105&ccb=1-7&_nc_ohc=NFB89vE88n4Q7kNvwHYy091&stp=c0.5000x0.5000f_dst-emg0_p1024x1024_q75_tt6&oh=00_Af19F_0sq_80mq6iNsL_Z4hZR9pnJe8umGVTBPyQAjnO7g&oe=69E214DE"},
@@ -436,7 +468,7 @@ bsc:{
   ],
   meta_prev:{sp:1500,rev:2000,pur:3},
   google:[
-    {c:"PMAX MOT6 VENDAS",sp:940.32,clk:775,ctr:1.96,cpc:1.21,conv:3,cpa:313.44,conv_prev:4}
+    {c:"PMAX MOT6 VENDAS",sp:940.32,clk:775,impressions:39530,ctr:1.96,cpc:1.21,conv:3,cpa:313.44,conv_prev:4}
   ],
   creatives:[
     {n:"Catálogo BSC",camp:"CATÁLOGO 04/26",sp:1282.05,pur:4,rev:3667.25,msg:2,ctr:1.83,cpc:0.98,img:"https://scontent-fra3-2.xx.fbcdn.net/v/t39.30808-1/221539717_181680720608029_8920442178720579329_n.png?stp=dst-png_s200x200&_nc_cat=111&ccb=1-7&oh=00_Af3oP1BM03GiPSzSK2qAfOJ6N9tBTtCu-dL92PSSSeCmOg&oe=69E0E9E6"},
@@ -532,8 +564,7 @@ function renderOV(){
     document.getElementById('ov-funil-card').style.display='none';
     document.getElementById('ov-right-title').textContent='Conversões por campanha';
     document.getElementById('ov-right-sub').textContent='WhatsApp + Leads';
-  } else {
-    const pur=m.reduce((a,x)=>a+(x.pur||0),0);
+  } else {    const pur=m.reduce((a,x)=>a+(x.pur||0),0);
     const rev=m.reduce((a,x)=>a+(x.rev||0),0);
     const roas=ms>0&&rev>0?rev/ms:0;
     document.getElementById('ov-kpi').innerHTML=[
@@ -542,14 +573,12 @@ function renderOV(){
       kpi('ROAS',roas.toFixed(2)+'x','Retorno sobre gasto',pct(roas,p.rev/p.sp)),
       kpi('CPA Médio',fr(pur?ms/pur:0),'Custo por venda',null,true),
     ].join('');
-    document.getElementById('ov-funil-card').style.display='';
     document.getElementById('ov-right-title').textContent='Receita vs Gasto';
     document.getElementById('ov-right-sub').textContent='Top campanhas';
-    // Funil OV
-    const imp=m.reduce((a,x)=>a+(x.imp||0),0);
-    const clk=m.reduce((a,x)=>a+(x.clk||0),0);
-    renderFunil('ov-funil',[{l:'Impressões',v:imp},{l:'Cliques',v:clk},{l:'Vendas',v:pur}]);
   }
+
+  // Funil unificado (sempre renderiza)
+  renderFunilBlocks('all');
 
   setTimeout(()=>{
     dc('ov-c1',{type:'bar',data:{labels:['Meta Ads','Google Ads'],datasets:[{data:[ms,gs],backgroundColor:['#1877F2','#EA4335'],borderRadius:8,barThickness:52}]},options:{...BO,indexAxis:'y',scales:{x:{ticks:{color:TK,font:{size:11},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:GK},border:{display:false}},y:{ticks:{color:TK,font:{size:13,weight:'600'}},grid:{display:false},border:{display:false}}}}});
@@ -563,11 +592,137 @@ function renderOV(){
   },0);
 }
 
-// Funil visual com escala logarítmica
+// ── FUNIL EM BLOCOS (estilo Econodata) ────────────────────────────────
+function getFunilData(plat){
+  const m=C.meta, g=C.google;
+  const mImp=m.reduce((a,x)=>a+(x.imp||0),0);
+  const mClk=m.reduce((a,x)=>a+(x.clk||0),0);
+  const mConv=C.tipo==='ec'
+    ?m.reduce((a,x)=>a+(x.pur||0),0)
+    :m.reduce((a,x)=>a+(x.wpp||0)+(x.leads||0),0);
+  const mMsg=C.tipo==='ec'?m.reduce((a,x)=>a+(x.msg||0),0):0;
+  const mSp=m.reduce((a,x)=>a+x.sp,0);
+  const gImp=g.reduce((a,x)=>a+(x.impressions||0),0);
+  const gClk=g.reduce((a,x)=>a+x.clk,0);
+  const gConv=g.reduce((a,x)=>a+x.conv,0);
+  const gSp=g.reduce((a,x)=>a+x.sp,0);
+
+  if(plat==='meta') return {
+    steps:[
+      {l:'Impressões',v:mImp,sp:null},
+      {l:'Alcance',v:m.reduce((a,x)=>a+(x.rch||0),0),sp:null},
+      {l:'Cliques',v:mClk,sp:null},
+      {l:C.tipo==='ec'?'Compras':'Conversões',v:mConv,sp:mSp},
+      ...(C.tipo==='ec'&&mMsg>0?[{l:'Mensagens',v:mMsg,sp:null}]:[])
+    ],
+    platform:'meta'
+  };
+  if(plat==='google') return {
+    steps:[
+      {l:'Impressões',v:gImp,sp:null},
+      {l:'Cliques',v:gClk,sp:null},
+      {l:'Conversões',v:Math.round(gConv),sp:gSp},
+    ],
+    platform:'google'
+  };
+  // all — unifica
+  const totalImp=mImp+gImp;
+  const totalClk=mClk+gClk;
+  const totalConv=mConv+Math.round(gConv);
+  const totalSp=mSp+gSp;
+  return {
+    steps:[
+      {l:'Impressões',v:totalImp,sp:null},
+      {l:'Cliques',v:totalClk,sp:null},
+      {l:'Conversões',v:totalConv,sp:totalSp},
+      ...(C.tipo==='ec'&&mMsg>0?[{l:'Mensagens\nMeta',v:mMsg,sp:null}]:[])
+    ],
+    platform:'all'
+  };
+}
+
+const FUNIL_PALETTES={
+  all:[
+    ['#0A0A0A','#1a1a2e'],
+    ['#1A3A6B','#1e4d9b'],
+    ['#CC0000','#e50000'],
+    ['#1A7A3C','#22a050'],
+    ['#5B21B6','#7c3aed']
+  ],
+  meta:[
+    ['#1877F2','#2d8aff'],
+    ['#0a5bd4','#1470ed'],
+    ['#CC0000','#e50000'],
+    ['#1A7A3C','#22a050'],
+  ],
+  google:[
+    ['#EA4335','#f55a4e'],
+    ['#FBBC04','#fcd34d'],
+    ['#1A7A3C','#22a050'],
+  ]
+};
+
+function switchFunil(plat,btn){
+  document.querySelectorAll('.funilv-tab').forEach(t=>t.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderFunilBlocks(plat);
+}
+
+function renderFunilBlocks(plat){
+  const {steps,platform}=getFunilData(plat);
+  const palette=FUNIL_PALETTES[platform]||FUNIL_PALETTES.all;
+  const maxV=steps[0].v||1;
+
+  // Altura de cada bloco: proporcional em log scale entre 60% e 100% do container
+  function blockH(v){
+    if(v===0)return 40;
+    const ratio=Math.log(v+1)/Math.log(maxV+1);
+    return Math.round(60+ratio*40); // 60% a 100%
+  }
+
+  let blocksHtml='<div class="funilv-blocks">';
+  let subHtml='<div class="funilv-sub-row">';
+
+  steps.forEach((s,i)=>{
+    const h=blockH(s.v);
+    const [c1,c2]=palette[i]||palette[palette.length-1];
+    const convRate=i>0&&steps[i-1].v>0?(s.v/steps[i-1].v*100):100;
+    const convTxt=i===0?'100%':convRate.toFixed(2)+'%';
+    const numFmt=s.v>=1e6?(s.v/1e6).toFixed(1)+'M':(s.v>=1000?(s.v/1000).toFixed(1)+'k':fn(s.v));
+    const cpaVal=s.sp&&s.v>0?` · CPA ${fr(s.sp/s.v)}`:'';
+
+    // Conector triangular entre blocos
+    if(i>0){
+      blocksHtml+=`<div style="width:0;height:0;border-top:${Math.round(blockH(steps[i-1].v)/2*2)}px solid transparent;border-bottom:${Math.round(blockH(steps[i-1].v)/2*2)}px solid transparent;border-left:16px solid ${palette[i-1][0]};flex-shrink:0;align-self:center;z-index:2;"></div>`;
+    }
+
+    blocksHtml+=`<div class="funilv-block" style="height:${h}%">
+      <div class="funilv-block-inner" style="background:linear-gradient(135deg,${c1},${c2});height:100%">
+        <div class="funilv-num">${numFmt}</div>
+        <div class="funilv-label">${s.l}</div>
+        ${i>0?`<div class="funilv-conv">${convTxt}</div>`:''}
+        <div class="funilv-plus">+</div>
+      </div>
+    </div>`;
+
+    subHtml+=`<div class="funilv-sub">
+      <div class="funilv-sub-v">${fn(s.v)}</div>
+      <div class="funilv-sub-l">${s.l}${cpaVal}</div>
+    </div>`;
+  });
+
+  blocksHtml+='</div>';
+  subHtml+='</div>';
+
+  document.getElementById('ov-funil-body').innerHTML=
+    `<div class="funilv-wrap">${blocksHtml}${subHtml}</div>`;
+}
+
+// Funil visual com escala logarítmica (usado nas campanhas)
 function renderFunil(containerId,steps){
   const container=document.getElementById(containerId);
+  if(!container)return;
   const maxV=steps[0].v||1;
-  // Usar log scale: width = (log(v+1)/log(max+1))*100 com mínimo 4%
   const cols=['#111','#CC0000','#1A7A3C'];
   let html='<div class="funil-wrap">';
   steps.forEach((s,i)=>{
@@ -592,6 +747,7 @@ function renderFunil(containerId,steps){
   html+='</div>';
   container.innerHTML=html;
 }
+
 
 function renderIS(){
   document.getElementById('is-view').style.display='';
