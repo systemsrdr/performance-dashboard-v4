@@ -807,47 +807,53 @@ function build4(mG,gG,section){
   const bscTicketMsg=bscVMsg>0?bscFatMsg/bscVMsg:0;
 
   if(isEc&&!isBsc){
-    // CS — Ordem: Investimento, Compras Meta, CPA Meta, Ticket Meta, ROAS Meta | Google box | Total
+    // CS — Fix 3: Investimento = Meta + Google somados no primeiro box
+    const totalRev2 = metaRev + (state.fin.gFat||0);
+    const totalV2   = metaV   + (state.fin.gV  ||0);
     return [
-      m4('💻','Investimento Meta',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads. Google Ads e total consolidado aparecem abaixo.'),
-      m4('🛒','Compras (Meta)',fn(metaV),`Receita: ${fr(metaRev)}`,deltaHtml(metaV,p.v),'grn','Compras atribuídas ao Meta Ads no período. Fonte: Planilha financeira quando disponível.'),
-      m4('🎯','CPA Meta',fr(metaCpa),`Custo por compra`,deltaHtml(metaCpa,p.mSp>0&&p.v>0?p.mSp/p.v:null,true),'blu','Custo por Aquisição: gasto Meta ÷ compras. Menor = mais eficiente.'),
-      m4('🎫','Ticket Médio',fr(metaTicket),`${fn(metaV)} vendas`,deltaHtml(metaTicket,p.v>0&&p.rev>0?p.rev/p.v:null),'amb','Valor médio por venda. Faturamento ÷ Número de vendas.'),
-      m4('📈','ROAS Meta',metaRoas.toFixed(2)+'x',`Ret. sobre gasto`,deltaHtml(metaRoas,p.mSp>0&&p.rev>0?p.rev/p.mSp:null),'pur','ROAS = Faturamento ÷ Gasto Meta. Ex: 5x = cada R$1 gerou R$5.'),
-      m4('🌐','ROAS Google',gRoas>0?gRoas.toFixed(2)+'x':'—',gV>0?`${fn(gV)} conv · CPA ${fr(gCpa)}`:'Planilha necessária',''  ,'red','ROAS Google = Faturamento Google ÷ Gasto Google. Requer coluna "Faturamento Google" na planilha.'),
-      m4('🏷️','Ticket Médio Google',gTicket>0?fr(gTicket):'—',gV>0?`${fn(gV)} vendas`:'Planilha necessária','','grn','Ticket médio das vendas atribuídas ao Google Ads. Requer coluna "Vendas Google" na planilha.'),
-      m4('🏆','ROAS Total',totalRoas>0?totalRoas.toFixed(2)+'x':'—',`Meta + Google · ${fn(totalV)} vendas`,'','amb','ROAS consolidado de todas as plataformas. Meta + Google.'),
+      m4('💻','Investimento Total',fr(totalSp),`Meta: ${fr(mSp)} · Google: ${fr(gSp)}`,deltaHtml(totalSp,p.mSp+p.gSp),'red','Gasto total consolidado: Meta Ads + Google Ads.'),
+      m4('🛒','Compras (Meta)',fn(metaV),`Receita: ${fr(metaRev)}`,deltaHtml(metaV,p.v),'grn','Compras atribuídas ao Meta Ads no período. Fonte: Planilha financeira.'),
+      m4('🎯','CPA Meta',fr(metaCpa),`Custo por compra`,deltaHtml(metaCpa,p.mSp>0&&p.v>0?p.mSp/p.v:null,true),'blu','Custo por Aquisição Meta: Gasto Meta ÷ Compras. Menor = mais eficiente.'),
+      m4('🎫','Ticket Médio Meta',fr(metaTicket),`${fn(metaV)} vendas`,deltaHtml(metaTicket,p.v>0&&p.rev>0?p.rev/p.v:null),'amb','Valor médio por venda Meta. Faturamento ÷ Número de vendas.'),
+      m4('📈','ROAS Meta',metaRoas.toFixed(2)+'x','Retorno sobre gasto',deltaHtml(metaRoas,p.mSp>0&&p.rev>0?p.rev/p.mSp:null),'pur','ROAS = Faturamento ÷ Gasto Meta. Ex: 5x = cada R$1 gerou R$5.'),
+      m4('🌐','ROAS Google',gRoas>0?gRoas.toFixed(2)+'x':'—',gV>0?`${fn(gV)} vendas · CPA ${fr(gCpa)}`:'Planilha necessária','','red','ROAS Google = Receita Google ÷ Gasto Google. Requer "Faturamento Google" na planilha.'),
+      m4('🏷️','Ticket Google',gTicket>0?fr(gTicket):'—',gV>0?`${fn(gV)} vendas`:'Planilha necessária','','grn','Ticket médio Google. Requer colunas "Faturamento Google" e "Vendas Google" na planilha.'),
+      m4('🏆','ROAS Total',totalRoas>0?totalRoas.toFixed(2)+'x':'—',`Meta+Google · ${fn(totalV2)} vendas`,'','amb','ROAS consolidado: toda receita ÷ todo investimento.'),
     ].join('');
   }
 
   if(isEc&&isBsc){
-    const fatTray  = state.fin.fatTray;          // Google + Meta (site)
-    const vTray    = state.fin.vTray;            // vendas Google + Meta
-    const ticketTr = state.fin.ticketTray>0 ? state.fin.ticketTray : (vTray>0?fatTray/vTray:0);
-    const fatMsg   = state.fin.fatMsg;           // Faturamento Campanha Mensagens
-    const vMsg     = state.fin.vMsg;             // Numero de vendas Campanha Mensagens
-    const ticketMsg= state.fin.ticketMsg;
-    const fatTotal = state.fin.fatTotal||fatTray+fatMsg;
-    const vTotal   = state.fin.vTotal  ||vTray+vMsg;
+    // Dados diretos da planilha BSC
+    const fatTray   = state.fin.fatTray;   // Google Tray + Meta Tray
+    const vTray     = state.fin.vTray;     // vendas Google + Meta
+    const fatMsg    = state.fin.fatMsg;    // Receita wpp
+    const vMsg      = state.fin.vMsg;      // vendas wpp
+    const fatTotal  = state.fin.fatTotal||fatTray+fatMsg;
+    const vTotal    = state.fin.vTotal||vTray+vMsg;
     const ticketGeral = state.fin.ticket>0 ? state.fin.ticket : (vTotal>0?fatTotal/vTotal:0);
-    const gFat     = state.fin.gFat;
-    const gV       = state.fin.gV;
-    const roasGoogle = gSp>0&&gFat>0 ? gFat/gSp : 0;
-    // Gasto em campanhas de mensagem (filtra pelo nome da campanha)
-    const msgCamp  = mG.filter(d=>d.type==='msg');
-    const spMsg    = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : allWpp>0?mSp:0;
-    const roasMsg  = spMsg>0&&fatMsg>0 ? fatMsg/spMsg : 0;
-    const cpaWpp   = vMsg>0?spMsg/vMsg : (allWpp>0?spMsg/allWpp:0);
-    const roasTotal= totalSp>0&&fatTotal>0 ? fatTotal/totalSp : 0;
+    const ticketMsg  = state.fin.ticketMsg;
+    // Gasto campanhas mensagem
+    const msgCamp   = mG.filter(d=>d.type==='msg');
+    const spMsgCamp = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : allWpp>0?mSp:0;
+    const roasMsg   = spMsgCamp>0&&fatMsg>0 ? fatMsg/spMsgCamp : 0;
+    // ROAS Google (planilha)
+    const roasGoogle= gSp>0&&state.fin.gFat>0 ? state.fin.gFat/gSp : 0;
+    // ROAS Total
+    const roasTotal = totalSp>0&&fatTotal>0 ? fatTotal/totalSp : 0;
+    // CPA Tray
+    const cpaTray   = vTray>0 ? mSp/vTray : 0;
     return [
-      m4('💻','Investimento',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads. Google Ads e total abaixo.'),
-      m4('🛒','Vendas Site (Tray)',vTray>0?fn(vTray):'—',fatTray>0?`Google ${fr(gFat)} + Meta ${fr(fatTray-gFat)}`:'Aguardando planilha',deltaHtml(vTray,p.v),'grn','Vendas realizadas no site Tray. Google + Meta. Fonte: planilha financeira.'),
-      m4('💬','Vendas WPP',vMsg>0?fn(vMsg):'—',fatMsg>0?`Receita: ${fr(fatMsg)}`:'Aguardando planilha',deltaHtml(allWpp,p.wpp),'blu','Vendas fechadas via WhatsApp. Fonte: planilha — coluna "Numero de vendas Campanha Mensagens".'),
-      m4('📲','Receita WPP',fatMsg>0?fr(fatMsg):'—',`CPA: ${fr(cpaWpp)} · WPP: ${fn(allWpp)}`,'','amb','Faturamento gerado pelas campanhas de mensagem. Fonte: "Faturamento Campanha Mensagens" na planilha.'),
-      m4('🎫','Ticket Médio',ticketGeral>0?fr(ticketGeral):'—',vTotal>0?`${fn(vTotal)} vendas totais`:'','','pur','Ticket médio geral. Fonte: coluna "TKT Médio" ou Faturamento ÷ Total Vendas.'),
-      m4('📈','ROAS Mensagens',roasMsg>0?roasMsg.toFixed(2)+'x':'—',vMsg>0?`${fn(vMsg)} vendas · Ticket ${fr(ticketMsg)}`:'Planilha necessária','','red','Receita WPP ÷ Gasto campanhas de mensagem.'),
-      m4('🌐','ROAS Google',roasGoogle>0?roasGoogle.toFixed(2)+'x':'—',gV>0?`${fn(gV)} vendas · CPA ${fr(gV?gSp/gV:0)}`:'','','grn','Receita Google ÷ Gasto Google Ads. Fonte: planilha.'),
-      m4('🏆','ROAS Total',roasTotal>0?roasTotal.toFixed(2)+'x':'—',fatTotal>0?`Total: ${fr(fatTotal)} · ${fn(vTotal)} vendas`:'','','amb','(Receita Tray + WPP) ÷ (Meta + Google). Consolidado de todas as plataformas.'),
+      // Fix 3: Investimento = Meta + Google sempre
+      m4('💻','Investimento Total',fr(totalSp),`Meta: ${fr(mSp)} · Google: ${fr(gSp)}`,deltaHtml(totalSp,p.mSp+p.gSp),'red','Investimento total: Meta Ads + Google Ads no período.'),
+      // Fix 1: Vendas Tray da planilha
+      m4('🛒','Vendas Tray (Site)',vTray>0?fn(vTray):'—',fatTray>0?`Receita: ${fr(fatTray)}`:'Aguardando planilha',deltaHtml(vTray,p.v),'grn','Vendas no site Tray. Google Tray + Meta Tray. Fonte: planilha financeira.'),
+      // Fix 2: Vendas WPP da planilha
+      m4('💬','Vendas WPP',vMsg>0?fn(vMsg):'—',fatMsg>0?`Receita: ${fr(fatMsg)}`:'Aguardando planilha',deltaHtml(allWpp,p.wpp),'blu','Vendas via WhatsApp. Fonte: coluna "vendas wpp" na planilha.'),
+      m4('📲','Receita WPP',fatMsg>0?fr(fatMsg):'—',vMsg>0?`${fn(vMsg)} vendas · Ticket ${fr(ticketMsg)}`:'Aguardando planilha','','amb','Faturamento das campanhas de mensagem. Fonte: "Receita wpp" na planilha.'),
+      m4('🎫','Ticket Médio',ticketGeral>0?fr(ticketGeral):'—',vTotal>0?`${fn(vTotal)} vendas totais`:'','','pur','Ticket médio geral. Fonte: coluna "TKT Médio" da planilha.'),
+      m4('📈','ROAS Mensagens',roasMsg>0?roasMsg.toFixed(2)+'x':'—',vMsg>0?`${fn(vMsg)} vendas · ${fr(spMsgCamp)} investido`:'Planilha necessária','','red','Receita WPP ÷ Gasto campanhas de mensagem.'),
+      m4('🌐','ROAS Google',roasGoogle>0?roasGoogle.toFixed(2)+'x':'—',state.fin.gV>0?`${fn(state.fin.gV)} vendas · CPA ${fr(state.fin.gV?gSp/state.fin.gV:0)}`:'Planilha necessária','','grn','Receita Google Tray ÷ Gasto Google Ads. Fonte: planilha.'),
+      m4('🏆','ROAS Total',roasTotal>0?roasTotal.toFixed(2)+'x':'—',fatTotal>0?`Total: ${fr(fatTotal)} · ${fn(vTotal)} vendas`:'','','amb','(Receita Tray + WPP) ÷ (Meta + Google).'),
     ].join('');
   }
 
@@ -1017,18 +1023,38 @@ function showCampType(type,btn){document.querySelectorAll('.camp-sec').forEach(s
 // ── GOOGLE ADS ────────────────────────────────────────
 function renderGoogle(){
   const gG=groupGoogle();const mG=groupMeta();
-  const gSp=gG.reduce((a,x)=>a+x.sp,0),conv=gG.reduce((a,x)=>a+x.conv,0),clk=gG.reduce((a,x)=>a+x.clk,0);
-  const bestCpa=gG.filter(d=>d.cpa>0).length?Math.min(...gG.filter(d=>d.cpa>0).map(d=>d.cpa)):0;
+  const isBsc=cid==='bsc';
+  const gSp=gG.reduce((a,x)=>a+x.sp,0);
+  const mSp=mG.reduce((a,x)=>a+x.sp,0);
+  const conv=gG.reduce((a,x)=>a+x.conv,0);
+  const clk=gG.reduce((a,x)=>a+x.clk,0);
   const p=state.prev;
-  const isEc=C.tipo==='ec';
-  const fatV=state.fin.fat||mG.reduce((a,x)=>a+(x.rev||0),0);
-  const nV=state.fin.v||mG.reduce((a,x)=>a+(x.pur||0),0);
-  document.getElementById('google-m4').innerHTML=[
-    m4('💻','Investimento Google',frr(gSp),gG.length+' campanhas',deltaHtml(gSp,p.gSp),'red','Gasto total nas campanhas do Google Ads no período selecionado.'),
-    m4('🎯','Conversões Google',fn(Math.round(conv)),'CPA: '+fr(conv?gSp/conv:0),deltaHtml(conv,p.conv),'grn','Total de conversões registradas no Google Ads (cliques, leads, compras conforme configuração).'),
-    m4('🖱️','Cliques',fn(clk),'','','blu','Total de cliques recebidos em todos os anúncios do Google Ads.'),
-    m4('🏆','Melhor CPA',bestCpa?frr(bestCpa):'—','Menor custo/conv','','amb','CPA (Custo por Aquisição) da campanha mais eficiente. Indica qual campanha gera conversões mais baratas.'),
-  ].join('');
+
+  // Fix 5: Para BSC, usa dados da planilha no Google
+  const gFatSheet = state.fin.gFat||0;   // "Vendas site tray" = receita Google
+  const gVSheet   = state.fin.gV||0;     // vendas Google da planilha
+  const gTicket   = gVSheet>0&&gFatSheet>0 ? gFatSheet/gVSheet : 0;
+  const gRoas     = gSp>0&&gFatSheet>0   ? gFatSheet/gSp       : 0;
+  const gCpa      = gVSheet>0            ? gSp/gVSheet          : (conv>0?gSp/conv:0);
+  const bestCpa   = isBsc&&gVSheet>0 ? gCpa : (gG.filter(d=>d.cpa>0).length?Math.min(...gG.filter(d=>d.cpa>0).map(d=>d.cpa)):0);
+
+  if(isBsc){
+    // BSC Google: 4 boxes com dados da planilha
+    document.getElementById('google-m4').innerHTML=[
+      m4('💻','Investimento Google',frr(gSp),gG.length+' campanhas',deltaHtml(gSp,p.gSp),'red','Gasto total no Google Ads no período.'),
+      m4('🛒','Vendas Google (Tray)',gVSheet>0?fn(gVSheet):'—',gFatSheet>0?`Receita: ${fr(gFatSheet)}`:'Aguardando planilha',deltaHtml(gVSheet,0),'grn','Vendas Google na Tray. Fonte: coluna "Vendas site tray" da planilha.'),
+      m4('🎯','CPA Google',gCpa>0?fr(gCpa):'—',gVSheet>0?`${fn(gVSheet)} vendas`:'','','blu','Custo por venda Google: Gasto ÷ Vendas da planilha.'),
+      m4('📈','ROAS Google',gRoas>0?gRoas.toFixed(2)+'x':'—',gTicket>0?`Ticket: ${fr(gTicket)}`:'Planilha necessária','','amb','Receita Google Tray ÷ Gasto Google Ads.'),
+    ].join('');
+  } else {
+    const bestCpaG=gG.filter(d=>d.cpa>0).length?Math.min(...gG.filter(d=>d.cpa>0).map(d=>d.cpa)):0;
+    document.getElementById('google-m4').innerHTML=[
+      m4('💻','Investimento Google',frr(gSp),gG.length+' campanhas',deltaHtml(gSp,p.gSp),'red','Gasto total nas campanhas do Google Ads no período selecionado.'),
+      m4('🎯','Conversões Google',fn(Math.round(conv)),'CPA: '+fr(conv?gSp/conv:0),deltaHtml(conv,p.conv),'grn','Total de conversões registradas no Google Ads.'),
+      m4('🖱️','Cliques',fn(clk),'','','blu','Total de cliques em todos os anúncios do Google Ads.'),
+      m4('🏆','Melhor CPA',bestCpaG?frr(bestCpaG):'—','Menor custo/conv','','amb','CPA da campanha mais eficiente.'),
+    ].join('');
+  }
   setTimeout(()=>{
     const bo=BO();
     dc('g-c1',{type:'doughnut',data:{labels:gG.map(d=>snC(d.c,18)),datasets:[{data:gG.map(d=>Math.round(d.sp)),backgroundColor:['rgba(255,26,38,.85)','rgba(77,159,255,.85)','rgba(0,240,119,.85)','rgba(255,190,0,.85)'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{color:bo.scales.x.ticks.color,font:{size:11,family:'Sora'},boxWidth:10,padding:7}},datalabels:{display:false}}}});
