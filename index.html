@@ -752,10 +752,23 @@ function tipIcon(txt){return `<span class="info-icon">?<span class="tooltip">${t
 
 function campType(row){
   const obj=String(row.objective||'').toUpperCase();
-  const nm=String(row.campaign||'').toLowerCase();
-  if(obj.includes('LEADS')||nm.includes('lead')||nm.includes('formulário')||nm.includes('formulario'))return'lead';
-  if(parseFloat(row.actions_onsite_conversion_messaging_conversation_started_7d||0)>0||nm.includes('wpp')||nm.includes('mensagem')||nm.includes('msg'))return'msg';
+  const nm=String(row.campaign||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // remove acentos
+  // Mensagens: tem WPP > 0 OU tem palavra-chave no nome
+  const isMsg = parseFloat(row.actions_onsite_conversion_messaging_conversation_started_7d||0)>0
+    || nm.includes('wpp') || nm.includes('mensagem') || nm.includes('mensag')
+    || nm.includes('msg') || nm.includes('whatsapp') || nm.includes('[mensagem]')
+    || nm.includes('message');
+  // Leads: formulário nativo
+  if(obj.includes('LEADS')||nm.includes('lead')||nm.includes('formulario'))return'lead';
+  // Prioridade: se tem WPP E compra, classifica pelo que tem mais
+  if(isMsg){
+    const wpp=parseFloat(row.actions_onsite_conversion_messaging_conversation_started_7d||0);
+    const pur=parseFloat(row.actions_omni_purchase||0);
+    if(wpp>=pur)return'msg'; // mais mensagens que compras = msg
+  }
   if(parseFloat(row.actions_omni_purchase||0)>0||obj.includes('SALES'))return'compra';
+  if(isMsg)return'msg';
   return'outro';
 }
 
@@ -771,7 +784,13 @@ function groupMeta(){
   });
   return Object.values(m).map(d=>{
     d.ctr=d.imp>0?d.clk/d.imp*100:0;d.cpc=d.clk>0?d.sp/d.clk:0;
-    d.type=campType(d.rawRows[0]||{objective:d.obj,campaign:d.c,actions_omni_purchase:d.pur,actions_onsite_conversion_messaging_conversation_started_7d:d.wpp,actions_lead:d.leads});
+    d.type=campType({
+      objective:d.obj,
+      campaign:d.c,
+      actions_omni_purchase:d.pur,
+      actions_onsite_conversion_messaging_conversation_started_7d:d.wpp,
+      actions_lead:d.leads
+    });
     return d;
   }).sort((a,b)=>b.sp-a.sp);
 }
