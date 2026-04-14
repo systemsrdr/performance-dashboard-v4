@@ -568,74 +568,75 @@ async function fetchAll(){
     if(C.sheet){
       setL('Carregando dados financeiros...');
       await new Promise(resolve=>{
-        Papa.parse(C.sheet,{download:true,header:true,skipEmptyLines:true,complete:(res)=>{
+        // header:false = lemos como array de arrays, controlamos tudo
+        Papa.parse(C.sheet,{download:true,header:false,skipEmptyLines:true,complete:(res)=>{
           const mes=new Intl.DateTimeFormat('pt-BR',{month:'long'}).format(new Date(t)).toLowerCase();
-          if(res.data&&res.data[0]){
-            console.log('[Sheet] Colunas:',Object.keys(res.data[0]));
-            console.log('[Sheet] Linha 1:',res.data[0]);
-          }
-          // Parse robusto: R$ 1.234,56 → 1234.56
+          console.log('[Sheet] Total de linhas:',res.data.length);
+          console.log('[Sheet] Linha 0:',res.data[0]);
+          console.log('[Sheet] Linha 1:',res.data[1]);
+          console.log('[Sheet] Linha 2:',res.data[2]);
+
+          // Parse de valor monetário BR: "R$ 1.234,56" → 1234.56
           const p=v=>{
-            if(!v)return 0;
+            if(!v&&v!==0)return 0;
             const s=String(v).replace(/R\$\s*/g,'').replace(/\s/g,'').trim();
-            if(!s||s==='-'||s==='')return 0;
+            if(!s||s==='-')return 0;
+            // Formato BR: 1.234,56 — remove pontos de milhar, troca vírgula
             if(/^\d{1,3}(\.\d{3})*(,\d*)?$/.test(s)) return parseFloat(s.replace(/\./g,'').replace(',','.'))||0;
-            return parseFloat(s.replace(/,/g,''))||0;
+            // Formato simples: 1234.56 ou 1234,56
+            return parseFloat(s.replace(',','.'))||0;
           };
           const pi=v=>Math.round(p(v));
 
-          res.data.forEach(row=>{
-            // Coluna do mês é sempre a primeira coluna (col A)
-            const allKeys=Object.keys(row);
-            const rowMes=String(row[allKeys[0]]||'').toLowerCase().trim();
-            if(!rowMes.includes(mes))return;
+          // Encontra a linha do mês procurando na coluna 0 (col A)
+          // A planilha BSC tem 2 headers então dados começam na linha 2+
+          res.data.forEach((row,idx)=>{
+            const colA=String(row[0]||'').toLowerCase().trim();
+            if(!colA.includes(mes))return;
 
-            // ═══════════════════════════════════════════════════
-            // MAPEAMENTO EXATO DA PLANILHA BSC (imagem enviada):
+            // Log da linha encontrada
+            console.log('[Sheet] Linha do mês encontrada (idx='+idx+'):',row);
+
+            // ═══════════════════════════════════════════════════════
+            // ESTRUTURA DA PLANILHA BSC (por posição de coluna):
             //
-            //  FATURAMENTO:
-            //    "Vendas site tray"       = fat Google (col B)
-            //    "Meta Vendas site tray"  = fat Meta   (col C)
-            //    "Receita wpp"            = fat WPP    (col D)
-            //    Tik tok                  = ignorar    (col E)
-            //    "GERAL"                  = fat total  (col F)
-            //    "TKT Médio"              = ticket     (col G)
-            //
-            //  NUMERO DE VENDAS:
-            //    "Google"                 = vendas Google (col H)
-            //    "Meta"                   = vendas Meta   (col I)
-            //    "vendas wpp"             = vendas WPP    (col J)
-            //    Tik tok                  = ignorar       (col K)
-            //    "TOTAL VENDAS"           = total vendas  (col L)
-            // ═══════════════════════════════════════════════════
+            //  Col 0  = Mês
+            //  Col 1  = Faturamento Google (Vendas site tray)
+            //  Col 2  = Faturamento Meta   (Meta Vendas site tray)
+            //  Col 3  = Receita wpp        (Faturamento Campanha Mensagens)
+            //  Col 4  = Tik tok            (ignorar)
+            //  Col 5  = GERAL              (fat total)
+            //  Col 6  = TKT Médio          (ticket médio)
+            //  Col 7  = Vendas Google
+            //  Col 8  = Vendas Meta
+            //  Col 9  = vendas wpp
+            //  Col 10 = Tik tok            (ignorar)
+            //  Col 11 = TOTAL VENDAS
+            // ═══════════════════════════════════════════════════════
 
-            // Pega valores por posição de coluna (mais robusto que nome)
-            const vals=allKeys.map(k=>row[k]);
-            // col B(1)=fat Google, C(2)=fat Meta, D(3)=fat WPP, E(4)=Tiktok, F(5)=GERAL, G(6)=TKT
-            // col H(7)=vd Google, I(8)=vd Meta, J(9)=vd WPP, K(10)=Tiktok, L(11)=TOTAL VENDAS
-            state.fin.gFat   = p(vals[1]);
-            const metaFat    = p(vals[2]);
-            state.fin.fatMsg = p(vals[3]);
-            state.fin.fatTotal=p(vals[5]);
-            const tktGeral   = p(vals[6]);
-            state.fin.gV     = pi(vals[7]);
-            const metaV      = pi(vals[8]);
-            state.fin.vMsg   = pi(vals[9]);
-            state.fin.vTotal = pi(vals[11]);
+            state.fin.gFat    = p(row[1]);
+            const metaFat     = p(row[2]);
+            state.fin.fatMsg  = p(row[3]);
+            state.fin.fatTotal= p(row[5]);
+            const tktGeral    = p(row[6]);
+            state.fin.gV      = pi(row[7]);
+            const metaV       = pi(row[8]);
+            state.fin.vMsg    = pi(row[9]);
+            state.fin.vTotal  = pi(row[11]);
 
-            // ── Calculados ──────────────────────────────────────
-            state.fin.fatTray  = state.fin.gFat + metaFat;
-            state.fin.vTray    = state.fin.gV   + metaV;
-            if(state.fin.fatTotal===0) state.fin.fatTotal = state.fin.fatTray + state.fin.fatMsg;
-            if(state.fin.vTotal===0)   state.fin.vTotal   = state.fin.vTray   + state.fin.vMsg;
-            state.fin.fat      = state.fin.fatTotal;
-            state.fin.v        = state.fin.vTotal;
-            state.fin.ticket      = tktGeral>0 ? tktGeral : (state.fin.v>0   ? state.fin.fat/state.fin.v      : 0);
-            state.fin.ticketTray  = state.fin.vTray>0     ? state.fin.fatTray/state.fin.vTray  : 0;
-            state.fin.ticketMsg   = state.fin.vMsg>0      ? state.fin.fatMsg /state.fin.vMsg   : 0;
-            state.fin.gTicket     = state.fin.gV>0        ? state.fin.gFat   /state.fin.gV     : 0;
+            // Calculados
+            state.fin.fatTray   = state.fin.gFat + metaFat;
+            state.fin.vTray     = state.fin.gV   + metaV;
+            if(!state.fin.fatTotal) state.fin.fatTotal = state.fin.fatTray + state.fin.fatMsg;
+            if(!state.fin.vTotal)   state.fin.vTotal   = state.fin.vTray   + state.fin.vMsg;
+            state.fin.fat       = state.fin.fatTotal;
+            state.fin.v         = state.fin.vTotal;
+            state.fin.ticket    = tktGeral>0 ? tktGeral : (state.fin.v>0 ? state.fin.fat/state.fin.v : 0);
+            state.fin.ticketTray= state.fin.vTray>0 ? state.fin.fatTray/state.fin.vTray : 0;
+            state.fin.ticketMsg = state.fin.vMsg>0  ? state.fin.fatMsg/state.fin.vMsg   : 0;
+            state.fin.gTicket   = state.fin.gV>0    ? state.fin.gFat/state.fin.gV       : 0;
 
-            console.log('[Sheet] Mês:',rowMes,'| gFat:',state.fin.gFat,'| metaFat:',metaFat,'| fatMsg:',state.fin.fatMsg,'| GERAL:',state.fin.fatTotal,'| gV:',state.fin.gV,'| metaV:',metaV,'| vMsg:',state.fin.vMsg,'| vTotal:',state.fin.vTotal,'| ticket:',state.fin.ticket);
+            console.log('[Sheet] RESULTADO → gFat:',state.fin.gFat,'| metaFat:',metaFat,'| fatMsg:',state.fin.fatMsg,'| GERAL:',state.fin.fatTotal,'| gV:',state.fin.gV,'| metaV:',metaV,'| vMsg:',state.fin.vMsg,'| vTotal:',state.fin.vTotal,'| ticket:',state.fin.ticket);
           });
           resolve();
         },error:(e)=>{console.error('[Sheet erro]',e);resolve();}});
