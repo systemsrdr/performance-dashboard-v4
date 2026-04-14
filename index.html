@@ -564,32 +564,43 @@ async function fetchAll(){
     };
 
     // Financeiro
-    state.fin={fat:0,v:0,ticket:0,gFat:0,gV:0,gTicket:0,fatMsg:0,vMsg:0,ticketMsg:0};
+    state.fin={fat:0,v:0,ticket:0,gFat:0,gV:0,gTicket:0,fatMsg:0,vMsg:0,ticketMsg:0,fatTray:0,vTray:0,ticketTray:0,fatTotal:0,vTotal:0};
     if(C.sheet){
       setL('Carregando dados financeiros...');
       await new Promise(resolve=>{
         Papa.parse(C.sheet,{download:true,header:true,complete:(res)=>{
           const mes=new Intl.DateTimeFormat('pt-BR',{month:'long'}).format(new Date(t)).toLowerCase();
+          // Debug: log colunas disponíveis
+          if(res.data&&res.data[0]) console.log('[Planilha] Colunas encontradas:',Object.keys(res.data[0]));
           res.data.forEach(row=>{
-            const rm=String(row['Mês']||row['mes']||'').toLowerCase();
-            if(rm.includes(mes)){
-              const p=v=>parseFloat(String(v||0).replace(/[R$\s.]/g,'').replace(',','.'))||0;
-              // Faturamento geral (Meta)
-              state.fin.fat+=p(row['Faturamento']||row['faturamento']||row['Receita']||0);
-              state.fin.v+=parseInt(row['Vendas']||row['vendas']||0)||0;
-              // Google (CS planilha)
-              state.fin.gFat+=p(row['Faturamento Google']||row['Receita Google']||row['Faturamento google']||0);
-              state.fin.gV+=parseInt(row['Vendas Google']||row['vendas google']||0)||0;
-              // BSC mensagens
-              state.fin.fatMsg+=p(row['Faturamento Campanha Mensagens']||row['Faturamento Mensagens']||0);
-              state.fin.vMsg+=parseInt(row['Numero de vendas Campanha Mensagens']||row['Número de Vendas Mensagens']||row['Vendas Mensagens']||0)||0;
-            }
+            const rm=String(row['Mês']||row['mes']||row['MES']||row['mês']||'').toLowerCase();
+            if(!rm.includes(mes))return;
+            const p=v=>parseFloat(String(v||0).replace(/[R$\s.]/g,'').replace(/\./g,'').replace(',','.'))||0;
+            const pi=v=>parseInt(String(v||0).replace(/[^\d]/g,''))||0;
+            // Faturamento geral / Tray (site)
+            state.fin.fat   +=p(row['Faturamento']||row['faturamento']||row['Receita']||row['receita']||0);
+            state.fin.v     +=pi(row['Vendas']||row['vendas']||row['Pedidos']||row['pedidos']||0);
+            // Tray específico
+            state.fin.fatTray+=p(row['Faturamento Tray']||row['Receita Tray']||row['faturamento tray']||row['Fat. Tray']||row['Faturamento Site']||row['faturamento site']||0);
+            state.fin.vTray  +=pi(row['Vendas Tray']||row['vendas tray']||row['Pedidos Tray']||row['Pedidos Site']||row['vendas site']||0);
+            // Google
+            state.fin.gFat  +=p(row['Faturamento Google']||row['Receita Google']||row['faturamento google']||0);
+            state.fin.gV    +=pi(row['Vendas Google']||row['vendas google']||0);
+            // Mensagens WhatsApp
+            state.fin.fatMsg+=p(row['Faturamento Campanha Mensagens']||row['Faturamento Mensagens']||row['faturamento mensagens']||row['Fat. Mensagens']||row['Fat. WPP']||row['Receita Mensagens']||0);
+            state.fin.vMsg  +=pi(row['Numero de vendas Campanha Mensagens']||row['Número de Vendas Mensagens']||row['Vendas Mensagens']||row['vendas mensagens']||row['Vendas WPP']||row['vendas wpp']||0);
           });
-          state.fin.ticket=state.fin.v>0?state.fin.fat/state.fin.v:0;
-          state.fin.gTicket=state.fin.gV>0?state.fin.gFat/state.fin.gV:0;
-          state.fin.ticketMsg=state.fin.vMsg>0?state.fin.fatMsg/state.fin.vMsg:0;
+          // Calcular totais e tickets
+          state.fin.ticket     =state.fin.v>0?state.fin.fat/state.fin.v:0;
+          state.fin.gTicket    =state.fin.gV>0?state.fin.gFat/state.fin.gV:0;
+          state.fin.ticketMsg  =state.fin.vMsg>0?state.fin.fatMsg/state.fin.vMsg:0;
+          state.fin.ticketTray =state.fin.vTray>0?state.fin.fatTray/state.fin.vTray:0;
+          // Total consolidado (Tray + Mensagens, evita dupla contagem com fat geral)
+          state.fin.fatTotal   =Math.max(state.fin.fat,state.fin.fatTray+state.fin.fatMsg);
+          state.fin.vTotal     =Math.max(state.fin.v,state.fin.vTray+state.fin.vMsg);
+          console.log('[Planilha BSC] fin=',JSON.stringify(state.fin));
           resolve();
-        },error:resolve});
+        },error:(e)=>{console.error('[Planilha erro]',e);resolve();}});
       });
     }else{
       const w=state.meta.reduce((a,r)=>a+parseFloat(r.actions_onsite_conversion_messaging_conversation_started_7d||0),0);
@@ -772,16 +783,31 @@ function build4(mG,gG,section){
   }
 
   if(isEc&&isBsc){
-    // BSC — Foco mensagens assistidas + e-commerce
+    // BSC — Tray (site) + Mensagens WPP separados
+    const fatTray  = state.fin.fatTray  || metaRev;
+    const vTray    = state.fin.vTray    || metaV;
+    const ticketTr = state.fin.ticketTray>0 ? state.fin.ticketTray : (vTray>0?fatTray/vTray:0);
+    const cpaTray  = vTray>0 ? mSp/vTray : 0;
+    const fatMsg   = state.fin.fatMsg   || 0;
+    const vMsg     = state.fin.vMsg     || 0;
+    const ticketMsg= state.fin.ticketMsg>0 ? state.fin.ticketMsg : (vMsg>0?fatMsg/vMsg:0);
+    // Gasto só em campanhas de mensagem
+    const msgCamp  = mG.filter(d=>d.type==='msg');
+    const spMsg    = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : allWpp>0?mSp:0;
+    const roasMsg  = spMsg>0&&fatMsg>0 ? fatMsg/spMsg : 0;
+    const cpaMsg2  = vMsg>0?spMsg/vMsg : (allWpp>0?spMsg/allWpp:0);
+    // Totais consolidados
+    const fatTotal = state.fin.fatTotal || fatTray+fatMsg || metaRev;
+    const roasTotal= totalSp>0&&fatTotal>0 ? fatTotal/totalSp : 0;
     return [
-      m4('💻','Investimento Meta',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads no período selecionado.'),
-      m4('🛒','Vendas (Site)',fn(metaV),`Receita: ${fr(metaRev)}`,deltaHtml(metaV,p.v),'grn','Compras diretas no site atribuídas ao Meta Ads.'),
-      m4('🎯','CPA Compras',fr(metaCpa),`Custo por venda`,''  ,'blu','Custo por venda direta no site.'),
-      m4('🎫','Ticket Médio',fr(metaTicket),`${fn(metaV)} vendas`,'','amb','Valor médio por venda no site.'),
-      m4('💬','Vendas via WPP',fn(allWpp),`Fat. msg: ${fr(bscFatMsg)}`,deltaHtml(allWpp,p.wpp),'pur','Conversas WhatsApp iniciadas. Faturamento mensagens = dado da planilha.'),
-      m4('📲','ROAS Mensagens',bscRoasMsg>0?bscRoasMsg.toFixed(2)+'x':'—',bscVMsg>0?`${fn(bscVMsg)} vendas msg · Ticket ${fr(bscTicketMsg)}`:'Planilha necessária','','red','ROAS da campanha de mensagens: Fat. Mensagens ÷ Gasto Mensagens.'),
-      m4('🎯','CPA WPP',fr(cpaMsg),`${fn(allWpp)} conversas`,'','grn','Quanto custou cada conversa iniciada via WhatsApp.'),
-      m4('🏆','ROAS Total',totalRoas>0?totalRoas.toFixed(2)+'x':'—',`Todas plataformas`,'','amb','ROAS consolidado Meta + Google.'),
+      m4('💻','Investimento',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads. Google Ads e total consolidado aparecem abaixo.'),
+      m4('🛒','Vendas Tray (Site)',vTray>0?fn(vTray):'Planilha',fatTray>0?`Receita: ${fr(fatTray)}`:'Sem dados da planilha',deltaHtml(vTray,p.v),'grn','Vendas realizadas diretamente no site (Tray). Fonte: planilha financeira.'),
+      m4('🎫','Ticket Médio Tray',ticketTr>0?fr(ticketTr):'—',vTray>0?`${fn(vTray)} pedidos`:'','','amb','Valor médio por pedido no site Tray. Faturamento Tray ÷ Vendas Tray.'),
+      m4('📈','ROAS Tray',cpaTray>0?(fatTray/mSp).toFixed(2)+'x':'—',cpaTray>0?`CPA: ${fr(cpaTray)}`:'','','pur','ROAS das campanhas de e-commerce: Receita Tray ÷ Gasto Meta.'),
+      m4('💬','Vendas via WPP',fn(allWpp),fatMsg>0?`Receita: ${fr(fatMsg)}`:vMsg>0?`${fn(vMsg)} vendas msg`:'CPA: '+fr(allWpp>0?spMsg/allWpp:0),deltaHtml(allWpp,p.wpp),'blu','Conversas WhatsApp iniciadas. Faturamento vem da planilha.'),
+      m4('📲','ROAS Mensagens',roasMsg>0?roasMsg.toFixed(2)+'x':'—',vMsg>0?`${fn(vMsg)} vendas · Ticket ${fr(ticketMsg)}`:fatMsg>0?`Receita: ${fr(fatMsg)}`:'Planilha necessária','','red','ROAS = Receita Mensagens ÷ Gasto Campanhas Mensagem.'),
+      m4('🎯','CPA WPP',fr(cpaMsg2),`${fn(allWpp)} conversas`,'','grn','Custo por conversa iniciada via WhatsApp. Ou custo por venda WPP se planilha preenchida.'),
+      m4('🏆','ROAS Total',roasTotal>0?roasTotal.toFixed(2)+'x':'—',`Tray + WPP · Total: ${fr(fatTotal)}`,'','amb','ROAS consolidado: toda receita ÷ todo investimento (Meta + Google).'),
     ].join('');
   }
 
