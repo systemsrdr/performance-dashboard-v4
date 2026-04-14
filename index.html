@@ -824,37 +824,49 @@ function build4(mG,gG,section){
   }
 
   if(isEc&&isBsc){
-    // Dados diretos da planilha BSC
-    const fatTray   = state.fin.fatTray;   // Google Tray + Meta Tray
-    const vTray     = state.fin.vTray;     // vendas Google + Meta
-    const fatMsg    = state.fin.fatMsg;    // Receita wpp
-    const vMsg      = state.fin.vMsg;      // vendas wpp
-    const fatTotal  = state.fin.fatTotal||fatTray+fatMsg;
-    const vTotal    = state.fin.vTotal||vTray+vMsg;
-    const ticketGeral = state.fin.ticket>0 ? state.fin.ticket : (vTotal>0?fatTotal/vTotal:0);
-    const ticketMsg  = state.fin.ticketMsg;
-    // Gasto campanhas mensagem
-    const msgCamp   = mG.filter(d=>d.type==='msg');
-    const spMsgCamp = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : allWpp>0?mSp:0;
-    const roasMsg   = spMsgCamp>0&&fatMsg>0 ? fatMsg/spMsgCamp : 0;
-    // ROAS Google (planilha)
-    const roasGoogle= gSp>0&&state.fin.gFat>0 ? state.fin.gFat/gSp : 0;
-    // ROAS Total
-    const roasTotal = totalSp>0&&fatTotal>0 ? fatTotal/totalSp : 0;
-    // CPA Tray
-    const cpaTray   = vTray>0 ? mSp/vTray : 0;
+    const fatTray    = state.fin.fatTray;
+    const vTray      = state.fin.vTray;
+    const fatMsg     = state.fin.fatMsg;
+    const vMsg       = state.fin.vMsg;
+    const fatTotal   = state.fin.fatTotal||fatTray+fatMsg;
+    const vTotal     = state.fin.vTotal||vTray+vMsg;
+    const tkt        = state.fin.ticket>0 ? state.fin.ticket : (vTotal>0?fatTotal/vTotal:0);
+    const tktMsg     = state.fin.ticketMsg;
+    const tktTray    = state.fin.ticketTray;
+    const gFat       = state.fin.gFat;
+    const gV         = state.fin.gV;
+    const tktG       = state.fin.gTicket;
+    // Investimentos separados por tipo
+    const msgCamp    = mG.filter(d=>d.type==='msg');
+    const spMsg      = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : 0;
+    const spSite     = mSp - spMsg;
+    // ROAS
+    const roasMsg    = spMsg>0&&fatMsg>0   ? fatMsg/spMsg     : 0;
+    const roasTray   = spSite>0&&fatTray>0 ? fatTray/spSite   : 0;
+    const roasGoogle = gSp>0&&gFat>0       ? gFat/gSp         : 0;
+    const roasTotal  = totalSp>0&&fatTotal>0? fatTotal/totalSp : 0;
+    // CPA
+    const cpaMsg     = vMsg>0   ? spMsg/vMsg   : 0;
+    const cpaTray    = vTray>0  ? spSite/vTray : 0;
+    const cpaGoogle  = gV>0     ? gSp/gV       : 0;
+    const cpaTotal   = vTotal>0 ? totalSp/vTotal: 0;
+
     return [
-      // Fix 3: Investimento = Meta + Google sempre
-      m4('💻','Investimento Total',fr(totalSp),`Meta: ${fr(mSp)} · Google: ${fr(gSp)}`,deltaHtml(totalSp,p.mSp+p.gSp),'red','Investimento total: Meta Ads + Google Ads no período.'),
-      // Fix 1: Vendas Tray da planilha
-      m4('🛒','Vendas Tray (Site)',vTray>0?fn(vTray):'—',fatTray>0?`Receita: ${fr(fatTray)}`:'Aguardando planilha',deltaHtml(vTray,p.v),'grn','Vendas no site Tray. Google Tray + Meta Tray. Fonte: planilha financeira.'),
-      // Fix 2: Vendas WPP da planilha
-      m4('💬','Vendas WPP',vMsg>0?fn(vMsg):'—',fatMsg>0?`Receita: ${fr(fatMsg)}`:'Aguardando planilha',deltaHtml(allWpp,p.wpp),'blu','Vendas via WhatsApp. Fonte: coluna "vendas wpp" na planilha.'),
-      m4('📲','Receita WPP',fatMsg>0?fr(fatMsg):'—',vMsg>0?`${fn(vMsg)} vendas · Ticket ${fr(ticketMsg)}`:'Aguardando planilha','','amb','Faturamento das campanhas de mensagem. Fonte: "Receita wpp" na planilha.'),
-      m4('🎫','Ticket Médio',ticketGeral>0?fr(ticketGeral):'—',vTotal>0?`${fn(vTotal)} vendas totais`:'','','pur','Ticket médio geral. Fonte: coluna "TKT Médio" da planilha.'),
-      m4('📈','ROAS Mensagens',roasMsg>0?roasMsg.toFixed(2)+'x':'—',vMsg>0?`${fn(vMsg)} vendas · ${fr(spMsgCamp)} investido`:'Planilha necessária','','red','Receita WPP ÷ Gasto campanhas de mensagem.'),
-      m4('🌐','ROAS Google',roasGoogle>0?roasGoogle.toFixed(2)+'x':'—',state.fin.gV>0?`${fn(state.fin.gV)} vendas · CPA ${fr(state.fin.gV?gSp/state.fin.gV:0)}`:'Planilha necessária','','grn','Receita Google Tray ÷ Gasto Google Ads. Fonte: planilha.'),
-      m4('🏆','ROAS Total',roasTotal>0?roasTotal.toFixed(2)+'x':'—',fatTotal>0?`Total: ${fr(fatTotal)} · ${fn(vTotal)} vendas`:'','','amb','(Receita Tray + WPP) ÷ (Meta + Google).'),
+      // ── VISÃO GERAL CONSOLIDADA (linha 1)
+      m4('💻','Investimento Total',fr(totalSp),`Meta: ${fr(mSp)} · Google: ${fr(gSp)}`,deltaHtml(totalSp,p.mSp+p.gSp),'red','Soma de todo investimento em anúncios: Meta Ads + Google Ads.'),
+      m4('💰','Receita Total',fatTotal>0?fr(fatTotal):'—',vTotal>0?`${fn(vTotal)} vendas`:'Aguardando planilha',deltaHtml(fatTotal,p.rev),'grn','Soma de toda receita gerada: Tray (Google+Meta) + WhatsApp.'),
+      m4('🏆','ROAS Total',roasTotal>0?roasTotal.toFixed(2)+'x':'—',`Receita ÷ Investimento total`,'','amb','Retorno total sobre investimento consolidado. Meta + Google.'),
+      m4('🎫','Ticket Médio',tkt>0?fr(tkt):'—',vTotal>0?`${fn(vTotal)} vendas`:'','','pur','Ticket médio geral: Receita Total ÷ Total de Vendas.'),
+      // ── META (linha 2)
+      m4('📱','Inv. Meta Mensagens',spMsg>0?fr(spMsg):'—',`CPA: ${fr(cpaMsg)} · ROAS: ${roasMsg>0?roasMsg.toFixed(2)+'x':'—'}`,'','red','Gasto em campanhas de mensagem (WhatsApp). CPA = Gasto ÷ Vendas WPP.'),
+      m4('💬','Meta WPP',vMsg>0?fn(vMsg):'—',fatMsg>0?`Receita: ${fr(fatMsg)} · Ticket: ${fr(tktMsg)}`:'Aguardando planilha',deltaHtml(vMsg,p.wpp),'blu','Vendas e receita via WhatsApp. Fonte: planilha BSC.'),
+      m4('🛒','Meta Vendas Diretas',vTray>0?fn(vTray):'—',fatTray>0?`Receita: ${fr(fatTray)} · Ticket: ${fr(tktTray)}`:'Aguardando planilha',deltaHtml(vTray,p.v),'grn','Vendas diretas na Tray atribuídas ao Meta. Fonte: planilha BSC.'),
+      m4('📈','ROAS Meta (Geral)',roasTray>0||roasMsg>0?(((fatTray+fatMsg)/(spSite+spMsg||1))).toFixed(2)+'x':'—',`CPA geral: ${fr(cpaTray||cpaMsg)}`,'','amb','ROAS consolidado de todas as campanhas Meta.'),
+      // ── GOOGLE (linha 3)
+      m4('🌐','Inv. Google',fr(gSp),`${gG.length} campanhas`,deltaHtml(gSp,p.gSp),'red','Investimento total no Google Ads.'),
+      m4('🛍️','Google Vendas',gV>0?fn(gV):'—',gFat>0?`Receita: ${fr(gFat)} · Ticket: ${fr(tktG)}`:'Aguardando planilha','','grn','Vendas Google na Tray. Fonte: planilha BSC.'),
+      m4('🎯','CPA Google',cpaGoogle>0?fr(cpaGoogle):'—',gV>0?`${fn(gV)} vendas`:'','','blu','Custo por venda Google: Gasto ÷ Vendas planilha.'),
+      m4('📊','ROAS Google',roasGoogle>0?roasGoogle.toFixed(2)+'x':'—',gFat>0?`Receita: ${fr(gFat)}`:'Planilha necessária','','pur','Receita Google Tray ÷ Gasto Google Ads.'),
     ].join('');
   }
 
@@ -924,6 +936,8 @@ function renderOV(){
   const mG=groupMeta(),gG=groupGoogle();
   const mSp=mG.reduce((a,x)=>a+x.sp,0),gSp=gG.reduce((a,x)=>a+x.sp,0);
   document.getElementById('ov-m4').innerHTML=build4(mG,gG,'ov');
+  // BSC tem 12 boxes — garante 4 colunas
+  if(cid==='bsc') document.getElementById('ov-m4').style.gridTemplateColumns='repeat(4,minmax(0,1fr))';
   renderGauges(mG,gG);
   const isEc=C.tipo==='ec';
   const p=state.prev;
@@ -980,6 +994,7 @@ function renderMeta(){
   const p=state.prev;
   // 4 boxes
   document.getElementById('meta-m4').innerHTML=build4(mG,gG,'meta');
+  if(cid==='bsc') document.getElementById('meta-m4').style.gridTemplateColumns='repeat(4,minmax(0,1fr))';
   // Gráfico horizontal
   const h=Math.max(200,mG.length*44+60);
   document.getElementById('meta-cwrap').style.height=h+'px';
