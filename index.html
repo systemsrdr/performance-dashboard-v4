@@ -1067,13 +1067,52 @@ function sortAds(sk,btn){
   document.querySelectorAll('.ads-sort .qb').forEach(b=>b.classList.remove('on'));
   if(btn)btn.classList.add('on');
   let s=[...state.ads];
-  if(sk==='top')s.sort((a,b)=>{const f=x=>(x.rev||0)+(x.wpp||0)*50+(x.leads||0)*30;return f(b)-f(a);});
-  else if(sk==='spend')s.sort((a,b)=>b.sp-a.sp);
-  else if(sk==='conv')s.sort((a,b)=>{const c=x=>(x.pur||0)+(x.wpp||0)+(x.leads||0);return c(b)-c(a);});
-  else if(sk==='cpa'){s.sort((a,b)=>{const f=x=>x.pur?x.sp/x.pur:(x.wpp?x.sp/x.wpp:(x.leads?x.sp/x.leads:999999));return f(a)-f(b);});}
-  else if(sk==='ctr')s.sort((a,b)=>b.ctr-a.ctr);
   const isEc=C.tipo==='ec';
+  const isBsc=cid==='bsc';
   const tsp=state.ads.reduce((a,x)=>a+x.sp,0);
+
+  if(sk==='top'){
+    if(isEc){
+      // EC: Destaque = quem gerou receita/vendas reais
+      // Quem não vendeu vai pro final, independente de WPP ou gasto
+      s.sort((a,b)=>{
+        const tsp_=tsp||1;
+        const aRev=state.fin.fat>0?(a.sp/tsp_)*state.fin.fat:a.rev||0;
+        const bRev=state.fin.fat>0?(b.sp/tsp_)*state.fin.fat:b.rev||0;
+        const aV  =state.fin.v>0?Math.round((a.sp/tsp_)*state.fin.v):a.pur||0;
+        const bV  =state.fin.v>0?Math.round((b.sp/tsp_)*state.fin.v):b.pur||0;
+        // Sem venda = sempre atrás de quem vendeu
+        if(aV===0&&bV>0)return 1;
+        if(bV===0&&aV>0)return -1;
+        // Ambos venderam: ordena por receita desc
+        if(aRev!==bRev)return bRev-aRev;
+        // Mesma receita: ordena por ROAS (menor gasto pra mesma receita é melhor)
+        const aRoas=a.sp>0?aRev/a.sp:0;
+        const bRoas=b.sp>0?bRev/b.sp:0;
+        return bRoas-aRoas;
+      });
+    } else {
+      // IS (Starman): prioriza leads > WPP
+      s.sort((a,b)=>{
+        const sa=(a.leads||0)*100+(a.wpp||0)*50;
+        const sb=(b.leads||0)*100+(b.wpp||0)*50;
+        return sb-sa;
+      });
+    }
+  }
+  else if(sk==='spend')s.sort((a,b)=>b.sp-a.sp);
+  else if(sk==='conv'){
+    if(isEc) s.sort((a,b)=>(b.pur||0)-(a.pur||0));
+    else     s.sort((a,b)=>((b.wpp||0)+(b.leads||0))-((a.wpp||0)+(a.leads||0)));
+  }
+  else if(sk==='cpa'){
+    s.sort((a,b)=>{
+      const fa=a.pur?a.sp/a.pur:(a.wpp?a.sp/a.wpp:(a.leads?a.sp/a.leads:999999));
+      const fb=b.pur?b.sp/b.pur:(b.wpp?b.sp/b.wpp:(b.leads?b.sp/b.leads:999999));
+      return fa-fb;
+    });
+  }
+  else if(sk==='ctr')s.sort((a,b)=>b.ctr-a.ctr);
   const box=document.getElementById('ad-box');box.innerHTML='';
   s.forEach((ad,i)=>{
     const cpa=ad.pur?ad.sp/ad.pur:0,cpaW=ad.wpp?ad.sp/ad.wpp:0;
