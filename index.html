@@ -230,14 +230,19 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
 .ltxt{font-size:13px;font-weight:600;color:var(--tx2)}
 
 /* ─── SEÇÃO BSC ───────────────────────────────────── */
-.sec-block{margin-bottom:8px}
-.sec-block-hd{display:flex;align-items:center;gap:9px;padding:10px 0 6px;margin-bottom:2px}
-.sec-block-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+.sec-block{margin-bottom:14px}
+.sec-block-hd{display:flex;align-items:center;gap:9px;padding:8px 0 5px;margin-bottom:6px}
+.sec-block-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);white-space:nowrap}
 .sec-block-line{flex:1;height:1px;background:var(--brd)}
-.m4grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
-.m4grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
-.m4grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
-.m4grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.m4grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:0}
+.m4grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:0}
+.m4grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:0}
+.m4grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:0}
+/* Boxes BSC mais compactos para caber em 5 colunas */
+.m4grid-5 .m4,.m4grid-4 .m4{padding:16px 16px}
+.m4grid-5 .m4 .m4-value{font-size:20px}
+.m4grid-5 .m4 .m4-label{font-size:9px}
+@media(max-width:1200px){.m4grid-5{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.m4grid-2,.m4grid-3,.m4grid-4,.m4grid-5{grid-template-columns:repeat(2,1fr)}}
 
 @media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.m4grid{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.nav{padding:0 14px}.main{padding:16px}.cgrid{grid-template-columns:1fr}.lb-stats{grid-template-columns:repeat(2,1fr)}}
@@ -245,7 +250,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
 </head>
 <body>
 
-<div id="nf"><div style="font-size:60px;font-weight:800;color:var(--card3)">404</div><p style="color:var(--tx2)">Cliente não encontrado.</p><a href="?" style="color:var(--red);font-size:13px;font-weight:700;text-decoration:none">← Voltar</a></div>
+<div id="nf" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center"><div style="font-size:60px;font-weight:800;color:var(--card3)">404</div><p style="color:var(--tx2)">Cliente não encontrado.</p><a href="?" style="color:var(--red);font-size:13px;font-weight:700;text-decoration:none">← Voltar</a></div>
 
 <!-- HOME -->
 <div id="home">
@@ -343,15 +348,15 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
         </div>
         <div class="sec-block">
           <div class="sec-block-hd"><span class="sec-block-title">💬 Meta — Mensagens (WhatsApp)</span><div class="sec-block-line"></div></div>
-          <div class="m4grid-4" id="ov-bsc-wpp"></div>
+          <div class="m4grid-5" id="ov-bsc-wpp"></div>
         </div>
         <div class="sec-block">
           <div class="sec-block-hd"><span class="sec-block-title">🛒 Meta — Vendas Diretas (Tray)</span><div class="sec-block-line"></div></div>
-          <div class="m4grid-4" id="ov-bsc-tray"></div>
+          <div class="m4grid-5" id="ov-bsc-tray"></div>
         </div>
         <div class="sec-block">
           <div class="sec-block-hd"><span class="sec-block-title">🌐 Google Ads (Tray)</span><div class="sec-block-line"></div></div>
-          <div class="m4grid-4" id="ov-bsc-google"></div>
+          <div class="m4grid-5" id="ov-bsc-google"></div>
         </div>
       </div>
       <!-- Outros clientes: grid padrão -->
@@ -428,7 +433,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
       <div id="google-bsc-blocks" style="display:none">
         <div class="sec-block">
           <div class="sec-block-hd"><span class="sec-block-title">📊 Performance Google (Tray)</span><div class="sec-block-line"></div></div>
-          <div class="m4grid-4" id="google-bsc-kpi"></div>
+          <div class="m4grid-5" id="google-bsc-kpi"></div>
         </div>
       </div>
       <div class="m4grid" id="google-m4"></div>
@@ -518,7 +523,7 @@ window.onload=()=>{
   applyTheme(localStorage.getItem('v4theme')||'dark');
   if(!cid||!C){
     if(!cid){buildHome();document.getElementById('home').style.display='block';}
-    else document.getElementById('nf').classList.add('on');
+    else document.getElementById('nf').style.display='flex';
     return;
   }
   document.getElementById('app').style.display='block';
