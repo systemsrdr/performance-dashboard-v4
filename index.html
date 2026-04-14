@@ -546,12 +546,13 @@ async function fetchAll(){
     const gJ=gRes?await gRes.json().catch(()=>({data:[]})):{data:[]};
     const gPJ=gPRes?await gPRes.json().catch(()=>({data:[]})):{data:[]};
 
-    state.meta=(mJ.data||[]).filter(r=>C.metaIds.includes(String(r.account_id)));
-    state.google=(gJ.data||[]).filter(r=>C.googleIds.includes(String(r.account_id)));
+    const normId=id=>String(id).replace(/-/g,'');
+    state.meta=(mJ.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id)));
+    state.google=(gJ.data||[]).filter(r=>C.googleIds.map(normId).includes(normId(r.account_id)));
 
     // Período anterior
-    const mPrev=(mPJ.data||[]).filter(r=>C.metaIds.includes(String(r.account_id)));
-    const gPrev=(gPJ.data||[]).filter(r=>C.googleIds.includes(String(r.account_id)));
+    const mPrev=(mPJ.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id)));
+    const gPrev=(gPJ.data||[]).filter(r=>C.googleIds.map(normId).includes(normId(r.account_id)));
     state.prev={
       mSp:mPrev.reduce((a,r)=>a+parseFloat(r.spend||0),0),
       gSp:gPrev.reduce((a,r)=>a+parseFloat(r.spend||0),0),
@@ -679,10 +680,18 @@ function groupGoogle(){
   state.google.forEach(r=>{
     const k=r.campaign||'Sem campanha';
     if(!g[k])g[k]={c:k,sp:0,imp:0,clk:0,conv:0,n:0};
-    g[k].sp+=parseFloat(r.spend||0);g[k].imp+=parseFloat(r.impressions||0);
-    g[k].clk+=parseFloat(r.clicks||0);g[k].conv+=parseFloat(r.conversions||0);g[k].n++;
+    g[k].sp+=parseFloat(r.spend||0);
+    g[k].imp+=parseFloat(r.impressions||r.imp||0);
+    g[k].clk+=parseFloat(r.clicks||r.clk||0);
+    g[k].conv+=parseFloat(r.conversions||0);
+    g[k].n++;
   });
-  return Object.values(g).map(d=>{d.cpa=d.conv>0?d.sp/d.conv:0;d.ctr=d.imp>0?d.clk/d.imp*100:0;d.cpc=d.clk>0?d.sp/d.clk:0;return d;}).sort((a,b)=>b.sp-a.sp);
+  return Object.values(g).map(d=>{
+    d.cpa=d.conv>0?d.sp/d.conv:0;
+    d.ctr=d.imp>0?d.clk/d.imp*100:0;
+    d.cpc=d.clk>0?d.sp/d.clk:0;
+    return d;
+  }).sort((a,b)=>b.sp-a.sp);
 }
 
 function dc(id,cfg){if(charts[id])charts[id].destroy();try{charts[id]=new Chart(document.getElementById(id),cfg);}catch(e){}}
