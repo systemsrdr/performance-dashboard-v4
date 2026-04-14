@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V4 RDR — Intelligence Dashboard</title>
+<title>V4 RDR — Intelligence Dashboard v9</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -390,12 +390,16 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
       <!-- BSC: blocos separados por canal -->
       <div id="meta-bsc-blocks" style="display:none">
         <div class="sec-block">
-          <div class="sec-block-hd"><span class="sec-block-title">💬 Mensagens (WhatsApp)</span><div class="sec-block-line"></div></div>
-          <div class="m4grid-4" id="meta-bsc-wpp"></div>
+          <div class="sec-block-hd"><span class="sec-block-title">📊 Meta Ads — Resumo Geral</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-5" id="meta-bsc-resumo"></div>
         </div>
         <div class="sec-block">
-          <div class="sec-block-hd"><span class="sec-block-title">🛒 Vendas Diretas (Tray via Meta)</span><div class="sec-block-line"></div></div>
-          <div class="m4grid-4" id="meta-bsc-tray"></div>
+          <div class="sec-block-hd"><span class="sec-block-title">🛒 Tray (Vendas Diretas via Meta)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-5" id="meta-bsc-tray"></div>
+        </div>
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">💬 WhatsApp (Mensagens via Meta)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-5" id="meta-bsc-wpp"></div>
         </div>
       </div>
       <!-- Outros clientes: grid padrão -->
@@ -1127,43 +1131,56 @@ function renderMeta(){
   if(isBsc){
     document.getElementById('meta-bsc-blocks').style.display='block';
     document.getElementById('meta-m4').style.display='none';
-    document.getElementById('meta-sub').textContent='Meta Ads separado por canal · Mensagens (WPP) · Vendas Diretas (Tray)';
+    document.getElementById('meta-sub').textContent='Meta Ads separado por canal: Resumo · Tray · WhatsApp';
 
-    // Reutiliza os mesmos dados calculados no renderOV
-    const fatMsg   = state.fin.fatMsg;
-    const vMsg     = state.fin.vMsg;
-    const fatTray  = state.fin.fatTray;
-    const vTray    = state.fin.vTray;
-    const gFat     = state.fin.gFat;
-    const gV       = state.fin.gV;
-    const metaTrayFat = fatTray - gFat;
-    const metaTrayV   = vTray   - gV;
-    const tktMsg   = state.fin.ticketMsg;
-    const tktTray  = state.fin.ticketTray;
-    const msgCamp  = mG.filter(d=>d.type==='msg');
-    const spMsg    = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : 0;
-    const spTray   = mSp - spMsg;
-    const roasMsg  = spMsg>0&&fatMsg>0       ? fatMsg/spMsg        : 0;
-    const roasTray = spTray>0&&metaTrayFat>0 ? metaTrayFat/spTray  : 0;
-    const cpaMsg   = vMsg>0       ? spMsg/vMsg      : 0;
-    const cpaTray  = metaTrayV>0  ? spTray/metaTrayV: 0;
+    const fatMsg      = state.fin.fatMsg;
+    const vMsg        = state.fin.vMsg;
+    const fatTray     = state.fin.fatTray;
+    const vTray       = state.fin.vTray;
+    const gFat        = state.fin.gFat;
+    const gV          = state.fin.gV;
+    const metaTrayFat = fatTray - gFat;       // receita Meta → Tray
+    const metaTrayV   = vTray   - gV;         // vendas Meta → Tray
+    const tktMsg      = state.fin.ticketMsg;
+    const tktTray     = state.fin.ticketTray;
+    const msgCamp     = mG.filter(d=>d.type==='msg');
+    const spMsg       = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : 0;
+    const spTray      = mSp - spMsg;
+    const fatMetaTotal= metaTrayFat + fatMsg;  // toda receita Meta
+    const vMetaTotal  = metaTrayV   + vMsg;
+    const tktMetaGeral= vMetaTotal>0 ? fatMetaTotal/vMetaTotal : 0;
+    const roasMetaTotal= mSp>0&&fatMetaTotal>0 ? fatMetaTotal/mSp : 0;
+    const cpaMetaTotal = vMetaTotal>0 ? mSp/vMetaTotal : 0;
+    const roasMsg     = spMsg>0&&fatMsg>0       ? fatMsg/spMsg        : 0;
+    const roasTray    = spTray>0&&metaTrayFat>0 ? metaTrayFat/spTray  : 0;
+    const cpaMsg      = vMsg>0       ? spMsg/vMsg       : 0;
+    const cpaTray     = metaTrayV>0  ? spTray/metaTrayV : 0;
 
-    // Bloco WPP: Inv | Receita | ROAS | Ticket | CPA
-    document.getElementById('meta-bsc-wpp').innerHTML=[
-      m4('📱','Inv. Mensagens',spMsg>0?fr(spMsg):'—',`${msgCamp.length} campanhas`,'','red','Gasto Meta em campanhas de WhatsApp.'),
-      m4('💬','Receita WPP',fatMsg>0?fr(fatMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'Planilha',deltaHtml(vMsg,p.wpp),'grn','Receita via WhatsApp. Fonte: planilha.'),
-      m4('📈','ROAS WPP',roasMsg>0?roasMsg.toFixed(2)+'x':'—',`Inv: ${fr(spMsg)}`,'','pur','Receita WPP ÷ Gasto MSG.'),
-      m4('🎫','Ticket WPP',tktMsg>0?fr(tktMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'','','amb','Ticket médio por venda WPP.'),
-      m4('🎯','CPA WPP',cpaMsg>0?fr(cpaMsg):'—',`${fn(vMsg)} vendas`,'','blu','Custo por venda WPP.'),
+    // Linha 1: Resumo Meta — Inv | Receita | Ticket | CPA | ROAS
+    document.getElementById('meta-bsc-resumo').innerHTML=[
+      m4('💻','Inv. Meta Total',fr(mSp),`Tray: ${fr(spTray)} · WPP: ${fr(spMsg)}`,'','red','Investimento total no Meta: campanhas de site + campanhas de mensagem.'),
+      m4('💰','Receita Total Meta',fatMetaTotal>0?fr(fatMetaTotal):'—',vMetaTotal>0?`${fn(vMetaTotal)} vendas`:'Aguardando planilha','','grn','Toda receita atribuída ao Meta: Tray + WhatsApp.'),
+      m4('🎫','Ticket Médio Meta',tktMetaGeral>0?fr(tktMetaGeral):'—',vMetaTotal>0?`${fn(vMetaTotal)} vendas`:'','','amb','Ticket médio geral do Meta.'),
+      m4('🎯','CPA Meta',cpaMetaTotal>0?fr(cpaMetaTotal):'—',vMetaTotal>0?`${fn(vMetaTotal)} vendas`:'','','blu','Custo por aquisição Meta: Inv. Meta ÷ Total de vendas Meta.'),
+      m4('📈','ROAS Meta',roasMetaTotal>0?roasMetaTotal.toFixed(2)+'x':'—','Receita Meta ÷ Inv. Meta','','pur','Retorno total do Meta: (Receita Tray + WPP) ÷ Gasto Meta.'),
     ].join('');
 
-    // Bloco Tray: Inv | Receita | ROAS | Ticket | CPA
+    // Linha 2: Tray — Inv | Receita | Ticket | CPA | ROAS
     document.getElementById('meta-bsc-tray').innerHTML=[
-      m4('🛒','Inv. Vendas Diretas',spTray>0?fr(spTray):'—',`Meta → Site`,'','red','Gasto Meta em campanhas de tráfego para o site Tray.'),
-      m4('💰','Receita Meta Tray',metaTrayFat>0?fr(metaTrayFat):'—',metaTrayV>0?`${fn(metaTrayV)} vendas`:'Planilha',deltaHtml(metaTrayV,p.v),'grn','Receita Meta na Tray. Fonte: planilha.'),
-      m4('📈','ROAS Vendas Diretas',roasTray>0?roasTray.toFixed(2)+'x':'—',`Inv: ${fr(spTray)}`,'','pur','Receita Tray ÷ Gasto campanhas de site.'),
-      m4('🎫','Ticket Tray',tktTray>0?fr(tktTray):'—',vTray>0?`${fn(vTray)} total Tray`:'','','amb','Ticket médio vendas diretas Tray.'),
+      m4('🛒','Inv. Tray',spTray>0?fr(spTray):'—',`Meta → Site Tray`,'','red','Gasto Meta em campanhas com destino ao site.'),
+      m4('💰','Receita Tray',metaTrayFat>0?fr(metaTrayFat):'—',metaTrayV>0?`${fn(metaTrayV)} vendas`:'Planilha',deltaHtml(metaTrayV,p.v),'grn','Receita gerada pelo Meta direto na Tray.'),
+      m4('🎫','Ticket Tray',tktTray>0?fr(tktTray):'—',metaTrayV>0?`${fn(metaTrayV)} vendas`:'','','amb','Ticket médio vendas Tray via Meta.'),
       m4('🎯','CPA Tray',cpaTray>0?fr(cpaTray):'—',`${fn(metaTrayV)} vendas`,'','blu','Custo por venda Meta → Tray.'),
+      m4('📈','ROAS Tray',roasTray>0?roasTray.toFixed(2)+'x':'—',`Inv: ${fr(spTray)}`,'','pur','Receita Tray ÷ Gasto campanhas de site.'),
+    ].join('');
+
+    // Linha 3: WPP — Inv | Receita | Ticket | CPA | ROAS
+    document.getElementById('meta-bsc-wpp').innerHTML=[
+      m4('📱','Inv. WPP',spMsg>0?fr(spMsg):'—',`${msgCamp.length} campanhas MSG`,'','red','Gasto Meta em campanhas de WhatsApp.'),
+      m4('💬','Receita WPP',fatMsg>0?fr(fatMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'Planilha',deltaHtml(vMsg,p.wpp),'grn','Receita via WhatsApp. Fonte: planilha.'),
+      m4('🎫','Ticket WPP',tktMsg>0?fr(tktMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'','','amb','Ticket médio por venda WPP.'),
+      m4('🎯','CPA WPP',cpaMsg>0?fr(cpaMsg):'—',`${fn(vMsg)} vendas`,'','blu','Custo por venda WPP.'),
+      m4('📈','ROAS WPP',roasMsg>0?roasMsg.toFixed(2)+'x':'—',`Inv: ${fr(spMsg)}`,'','pur','Receita WPP ÷ Gasto campanhas MSG.'),
     ].join('');
   } else {
     document.getElementById('meta-bsc-blocks').style.display='none';
