@@ -229,9 +229,16 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
 @keyframes spin{to{transform:rotate(360deg)}}
 .ltxt{font-size:13px;font-weight:600;color:var(--tx2)}
 
-/* ─── 404 ────────────────────────────────────────── */
-#nf{display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center}
-#nf.on{display:flex}
+/* ─── SEÇÃO BSC ───────────────────────────────────── */
+.sec-block{margin-bottom:8px}
+.sec-block-hd{display:flex;align-items:center;gap:9px;padding:10px 0 6px;margin-bottom:2px}
+.sec-block-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+.sec-block-line{flex:1;height:1px;background:var(--brd)}
+.m4grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.m4grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.m4grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.m4grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:14px}
+@media(max-width:900px){.m4grid-2,.m4grid-3,.m4grid-4,.m4grid-5{grid-template-columns:repeat(2,1fr)}}
 
 @media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.m4grid{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.nav{padding:0 14px}.main{padding:16px}.cgrid{grid-template-columns:1fr}.lb-stats{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -328,6 +335,26 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
         <div class="pgtitle">Visão Geral</div>
         <div class="pgsub">Consolidado — Meta Ads + Google Ads · vs período anterior</div>
       </div>
+      <!-- BSC: blocos separados -->
+      <div id="ov-bsc-blocks" style="display:none">
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">📊 Consolidado Geral</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-5" id="ov-bsc-geral"></div>
+        </div>
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">💬 Meta — Mensagens (WhatsApp)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-4" id="ov-bsc-wpp"></div>
+        </div>
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">🛒 Meta — Vendas Diretas (Tray)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-4" id="ov-bsc-tray"></div>
+        </div>
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">🌐 Google Ads (Tray)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-4" id="ov-bsc-google"></div>
+        </div>
+      </div>
+      <!-- Outros clientes: grid padrão -->
       <div class="m4grid" id="ov-m4"></div>
       <div class="g3" id="gauge-wrap"></div>
       <div class="card">
@@ -358,8 +385,20 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
       <div class="pghd">
         <div class="bc">Métricas › Meta Ads</div>
         <div class="pgtitle">Meta Ads</div>
-        <div class="pgsub">Campanhas separadas por tipo · Compras · Mensagens · Leads</div>
+        <div class="pgsub" id="meta-sub">Campanhas separadas por tipo · Compras · Mensagens · Leads</div>
       </div>
+      <!-- BSC: blocos separados por canal -->
+      <div id="meta-bsc-blocks" style="display:none">
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">💬 Mensagens (WhatsApp)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-4" id="meta-bsc-wpp"></div>
+        </div>
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">🛒 Vendas Diretas (Tray via Meta)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-4" id="meta-bsc-tray"></div>
+        </div>
+      </div>
+      <!-- Outros clientes: grid padrão -->
       <div class="m4grid" id="meta-m4"></div>
       <div class="card">
         <div class="chd"><div><div class="ctitle">Gasto vs Conversão por campanha</div></div></div>
@@ -380,6 +419,13 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font);font-size
         <div class="bc">Métricas › Google Ads</div>
         <div class="pgtitle">Google Ads</div>
         <div class="pgsub">Performance e conversões</div>
+      </div>
+      <!-- BSC: blocos da planilha -->
+      <div id="google-bsc-blocks" style="display:none">
+        <div class="sec-block">
+          <div class="sec-block-hd"><span class="sec-block-title">📊 Performance Google (Tray)</span><div class="sec-block-line"></div></div>
+          <div class="m4grid-4" id="google-bsc-kpi"></div>
+        </div>
       </div>
       <div class="m4grid" id="google-m4"></div>
       <div class="g2">
@@ -935,10 +981,93 @@ function renderGauges(mG,gG){
 function renderOV(){
   const mG=groupMeta(),gG=groupGoogle();
   const mSp=mG.reduce((a,x)=>a+x.sp,0),gSp=gG.reduce((a,x)=>a+x.sp,0);
-  document.getElementById('ov-m4').innerHTML=build4(mG,gG,'ov');
-  // BSC tem 12 boxes — garante 4 colunas
-  if(cid==='bsc') document.getElementById('ov-m4').style.gridTemplateColumns='repeat(4,minmax(0,1fr))';
-  renderGauges(mG,gG);
+  const isBsc=cid==='bsc';
+
+  if(isBsc){
+    // Mostrar blocos BSC, esconder grid padrão
+    document.getElementById('ov-bsc-blocks').style.display='block';
+    document.getElementById('ov-m4').style.display='none';
+
+    // Dados financeiros
+    const fatMsg  = state.fin.fatMsg;
+    const vMsg    = state.fin.vMsg;
+    const fatTray = state.fin.fatTray;  // Google Tray + Meta Tray
+    const vTray   = state.fin.vTray;
+    const gFat    = state.fin.gFat;
+    const gV      = state.fin.gV;
+    const metaTrayFat = fatTray - gFat;
+    const metaTrayV   = vTray   - gV;
+    const fatTotal= state.fin.fatTotal||fatTray+fatMsg;
+    const vTotal  = state.fin.vTotal||vTray+vMsg;
+    const tkt     = state.fin.ticket>0?state.fin.ticket:(vTotal>0?fatTotal/vTotal:0);
+    const tktMsg  = state.fin.ticketMsg;
+    const tktTray = state.fin.ticketTray;
+    const tktG    = state.fin.gTicket;
+    const totalSp = mSp+gSp;
+    const p = state.prev;
+
+    // Investimentos por canal
+    const msgCamp = mG.filter(d=>d.type==='msg');
+    const spMsg   = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : 0;
+    const spTray  = mSp - spMsg; // gasto Meta em campanhas de site
+
+    // ROAS
+    const roasMsg  = spMsg>0&&fatMsg>0   ? fatMsg/spMsg    : 0;
+    const roasTray = spTray>0&&metaTrayFat>0 ? metaTrayFat/spTray : 0;
+    const roasG    = gSp>0&&gFat>0       ? gFat/gSp        : 0;
+    const roasTotal= totalSp>0&&fatTotal>0? fatTotal/totalSp: 0;
+
+    // CPA
+    const cpaMsg  = vMsg>0        ? spMsg/vMsg         : 0;
+    const cpaTray = metaTrayV>0   ? spTray/metaTrayV   : 0;
+    const cpaG    = gV>0          ? gSp/gV             : 0;
+    const cpaTotal= vTotal>0      ? totalSp/vTotal      : 0;
+
+    // ── BLOCO 1: Consolidado (5 colunas simétricas) ────────
+    // Col: Investimento | Receita | ROAS | Ticket | CPA
+    document.getElementById('ov-bsc-geral').innerHTML=[
+      m4('💻','Investimento',fr(totalSp),`Meta: ${fr(mSp)} · Google: ${fr(gSp)}`,deltaHtml(totalSp,p.mSp+p.gSp),'red','Soma total investida em anúncios: Meta + Google.'),
+      m4('💰','Receita Total',fatTotal>0?fr(fatTotal):'—',vTotal>0?`${fn(vTotal)} vendas`:'Aguardando planilha',deltaHtml(fatTotal,p.rev),'grn','Soma de toda receita gerada: Tray (Google+Meta) + WhatsApp.'),
+      m4('📈','ROAS Total',roasTotal>0?roasTotal.toFixed(2)+'x':'—','Receita ÷ Investimento','','pur','ROAS consolidado: toda receita ÷ todo investimento.'),
+      m4('🎫','Ticket Médio',tkt>0?fr(tkt):'—',vTotal>0?`${fn(vTotal)} vendas`:'','','amb','Valor médio por venda geral.'),
+      m4('🎯','CPA Total',cpaTotal>0?fr(cpaTotal):'—',vTotal>0?`${fn(vTotal)} vendas`:'','','blu','Custo por aquisição consolidado: Investimento ÷ Vendas.'),
+    ].join('');
+
+    // ── BLOCO 2: Meta Mensagens (5 colunas simétricas) ─────
+    // Inv. | Receita | ROAS | Ticket | CPA
+    document.getElementById('ov-bsc-wpp').innerHTML=[
+      m4('📱','Inv. Mensagens',spMsg>0?fr(spMsg):'—',`${msgCamp.length} camp. MSG`,'','red','Gasto em campanhas de WhatsApp no Meta.'),
+      m4('💬','Receita WPP',fatMsg>0?fr(fatMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'Planilha',deltaHtml(vMsg,p.wpp),'grn','Receita via WhatsApp. Fonte: planilha BSC.'),
+      m4('📈','ROAS WPP',roasMsg>0?roasMsg.toFixed(2)+'x':'—',`Inv: ${fr(spMsg)}`,'','pur','Receita WPP ÷ Gasto campanhas MSG.'),
+      m4('🎫','Ticket WPP',tktMsg>0?fr(tktMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'','','amb','Ticket médio WhatsApp.'),
+      m4('🎯','CPA WPP',cpaMsg>0?fr(cpaMsg):'—',`${fn(vMsg)} vendas`,'','blu','Custo por venda WhatsApp: Inv. MSG ÷ Vendas WPP.'),
+    ].join('');
+
+    // ── BLOCO 3: Meta Vendas Diretas (5 colunas simétricas) ───
+    document.getElementById('ov-bsc-tray').innerHTML=[
+      m4('🛒','Inv. Vendas Diretas',spTray>0?fr(spTray):'—',`Meta → Tray`,'','red','Gasto Meta em campanhas com destino ao site Tray.'),
+      m4('💰','Receita Meta Tray',metaTrayFat>0?fr(metaTrayFat):'—',metaTrayV>0?`${fn(metaTrayV)} vendas`:'Planilha',deltaHtml(metaTrayV,p.v),'grn','Receita Meta direto na Tray. Fonte: planilha.'),
+      m4('📈','ROAS Vendas Diretas',roasTray>0?roasTray.toFixed(2)+'x':'—',`Inv: ${fr(spTray)}`,'','pur','Receita Meta Tray ÷ Gasto campanhas de site.'),
+      m4('🎫','Ticket Tray',tktTray>0?fr(tktTray):'—',vTray>0?`${fn(vTray)} total Tray`:'','','amb','Ticket médio das vendas diretas Tray.'),
+      m4('🎯','CPA Tray (Meta)',cpaTray>0?fr(cpaTray):'—',`${fn(metaTrayV)} vendas`,'','blu','Custo por venda Meta → Tray.'),
+    ].join('');
+
+    // ── BLOCO 4: Google Ads (5 colunas simétricas) ─────────
+    document.getElementById('ov-bsc-google').innerHTML=[
+      m4('🌐','Inv. Google',fr(gSp),`${gG.length} campanhas`,deltaHtml(gSp,p.gSp),'red','Investimento total no Google Ads.'),
+      m4('💰','Receita Google',gFat>0?fr(gFat):'—',gV>0?`${fn(gV)} vendas`:'Planilha','','grn','Receita Google na Tray. Fonte: planilha BSC.'),
+      m4('📈','ROAS Google',roasG>0?roasG.toFixed(2)+'x':'—',`Inv: ${fr(gSp)}`,'','pur','Receita Google ÷ Gasto Google Ads.'),
+      m4('🎫','Ticket Google',tktG>0?fr(tktG):'—',gV>0?`${fn(gV)} vendas`:'','','amb','Ticket médio Google Ads.'),
+      m4('🎯','CPA Google',cpaG>0?fr(cpaG):'—',`${fn(gV)} vendas`,'','blu','Custo por venda Google: Gasto ÷ Vendas planilha.'),
+    ].join('');
+
+    renderGauges(mG,gG);
+  } else {
+    document.getElementById('ov-bsc-blocks').style.display='none';
+    document.getElementById('ov-m4').style.display='';
+    document.getElementById('ov-m4').innerHTML=build4(mG,gG,'ov');
+    renderGauges(mG,gG);
+  }
   const isEc=C.tipo==='ec';
   const p=state.prev;
   setTimeout(()=>{
@@ -990,11 +1119,57 @@ function switchFunil(plat,btn){
 function renderMeta(){
   const mG=groupMeta(),gG=groupGoogle();
   const mSp=mG.reduce((a,x)=>a+x.sp,0);
+  const gSp=gG.reduce((a,x)=>a+x.sp,0);
   const isEc=C.tipo==='ec';
+  const isBsc=cid==='bsc';
   const p=state.prev;
-  // 4 boxes
-  document.getElementById('meta-m4').innerHTML=build4(mG,gG,'meta');
-  if(cid==='bsc') document.getElementById('meta-m4').style.gridTemplateColumns='repeat(4,minmax(0,1fr))';
+
+  if(isBsc){
+    document.getElementById('meta-bsc-blocks').style.display='block';
+    document.getElementById('meta-m4').style.display='none';
+    document.getElementById('meta-sub').textContent='Meta Ads separado por canal · Mensagens (WPP) · Vendas Diretas (Tray)';
+
+    // Reutiliza os mesmos dados calculados no renderOV
+    const fatMsg   = state.fin.fatMsg;
+    const vMsg     = state.fin.vMsg;
+    const fatTray  = state.fin.fatTray;
+    const vTray    = state.fin.vTray;
+    const gFat     = state.fin.gFat;
+    const gV       = state.fin.gV;
+    const metaTrayFat = fatTray - gFat;
+    const metaTrayV   = vTray   - gV;
+    const tktMsg   = state.fin.ticketMsg;
+    const tktTray  = state.fin.ticketTray;
+    const msgCamp  = mG.filter(d=>d.type==='msg');
+    const spMsg    = msgCamp.length ? msgCamp.reduce((a,x)=>a+x.sp,0) : 0;
+    const spTray   = mSp - spMsg;
+    const roasMsg  = spMsg>0&&fatMsg>0       ? fatMsg/spMsg        : 0;
+    const roasTray = spTray>0&&metaTrayFat>0 ? metaTrayFat/spTray  : 0;
+    const cpaMsg   = vMsg>0       ? spMsg/vMsg      : 0;
+    const cpaTray  = metaTrayV>0  ? spTray/metaTrayV: 0;
+
+    // Bloco WPP: Inv | Receita | ROAS | Ticket | CPA
+    document.getElementById('meta-bsc-wpp').innerHTML=[
+      m4('📱','Inv. Mensagens',spMsg>0?fr(spMsg):'—',`${msgCamp.length} campanhas`,'','red','Gasto Meta em campanhas de WhatsApp.'),
+      m4('💬','Receita WPP',fatMsg>0?fr(fatMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'Planilha',deltaHtml(vMsg,p.wpp),'grn','Receita via WhatsApp. Fonte: planilha.'),
+      m4('📈','ROAS WPP',roasMsg>0?roasMsg.toFixed(2)+'x':'—',`Inv: ${fr(spMsg)}`,'','pur','Receita WPP ÷ Gasto MSG.'),
+      m4('🎫','Ticket WPP',tktMsg>0?fr(tktMsg):'—',vMsg>0?`${fn(vMsg)} vendas`:'','','amb','Ticket médio por venda WPP.'),
+      m4('🎯','CPA WPP',cpaMsg>0?fr(cpaMsg):'—',`${fn(vMsg)} vendas`,'','blu','Custo por venda WPP.'),
+    ].join('');
+
+    // Bloco Tray: Inv | Receita | ROAS | Ticket | CPA
+    document.getElementById('meta-bsc-tray').innerHTML=[
+      m4('🛒','Inv. Vendas Diretas',spTray>0?fr(spTray):'—',`Meta → Site`,'','red','Gasto Meta em campanhas de tráfego para o site Tray.'),
+      m4('💰','Receita Meta Tray',metaTrayFat>0?fr(metaTrayFat):'—',metaTrayV>0?`${fn(metaTrayV)} vendas`:'Planilha',deltaHtml(metaTrayV,p.v),'grn','Receita Meta na Tray. Fonte: planilha.'),
+      m4('📈','ROAS Vendas Diretas',roasTray>0?roasTray.toFixed(2)+'x':'—',`Inv: ${fr(spTray)}`,'','pur','Receita Tray ÷ Gasto campanhas de site.'),
+      m4('🎫','Ticket Tray',tktTray>0?fr(tktTray):'—',vTray>0?`${fn(vTray)} total Tray`:'','','amb','Ticket médio vendas diretas Tray.'),
+      m4('🎯','CPA Tray',cpaTray>0?fr(cpaTray):'—',`${fn(metaTrayV)} vendas`,'','blu','Custo por venda Meta → Tray.'),
+    ].join('');
+  } else {
+    document.getElementById('meta-bsc-blocks').style.display='none';
+    document.getElementById('meta-m4').style.display='';
+    document.getElementById('meta-m4').innerHTML=build4(mG,gG,'meta');
+  }
   // Gráfico horizontal
   const h=Math.max(200,mG.length*44+60);
   document.getElementById('meta-cwrap').style.height=h+'px';
@@ -1055,14 +1230,23 @@ function renderGoogle(){
   const bestCpa   = isBsc&&gVSheet>0 ? gCpa : (gG.filter(d=>d.cpa>0).length?Math.min(...gG.filter(d=>d.cpa>0).map(d=>d.cpa)):0);
 
   if(isBsc){
-    // BSC Google: 4 boxes com dados da planilha
-    document.getElementById('google-m4').innerHTML=[
-      m4('💻','Investimento Google',frr(gSp),gG.length+' campanhas',deltaHtml(gSp,p.gSp),'red','Gasto total no Google Ads no período.'),
-      m4('🛒','Vendas Google (Tray)',gVSheet>0?fn(gVSheet):'—',gFatSheet>0?`Receita: ${fr(gFatSheet)}`:'Aguardando planilha',deltaHtml(gVSheet,0),'grn','Vendas Google na Tray. Fonte: coluna "Vendas site tray" da planilha.'),
-      m4('🎯','CPA Google',gCpa>0?fr(gCpa):'—',gVSheet>0?`${fn(gVSheet)} vendas`:'','','blu','Custo por venda Google: Gasto ÷ Vendas da planilha.'),
-      m4('📈','ROAS Google',gRoas>0?gRoas.toFixed(2)+'x':'—',gTicket>0?`Ticket: ${fr(gTicket)}`:'Planilha necessária','','amb','Receita Google Tray ÷ Gasto Google Ads.'),
+    document.getElementById('google-bsc-blocks').style.display='block';
+    document.getElementById('google-m4').style.display='none';
+    const gFatS = state.fin.gFat;
+    const gVS   = state.fin.gV;
+    const tktGS = state.fin.gTicket;
+    const roasGS= gSp>0&&gFatS>0 ? gFatS/gSp : 0;
+    const cpaGS = gVS>0           ? gSp/gVS    : 0;
+    document.getElementById('google-bsc-kpi').innerHTML=[
+      m4('🌐','Inv. Google',frr(gSp),`${gG.length} campanhas`,deltaHtml(gSp,p.gSp),'red','Gasto total no Google Ads.'),
+      m4('💰','Receita Google',gFatS>0?fr(gFatS):'—',gVS>0?`${fn(gVS)} vendas`:'Aguardando planilha','','grn','Receita Google na Tray. Fonte: coluna "Vendas site tray" da planilha BSC.'),
+      m4('📈','ROAS Google',roasGS>0?roasGS.toFixed(2)+'x':'—',`Inv: ${frr(gSp)}`,'','pur','Receita Google ÷ Gasto Google Ads.'),
+      m4('🎫','Ticket Google',tktGS>0?fr(tktGS):'—',gVS>0?`${fn(gVS)} vendas`:'','','amb','Valor médio por venda Google Ads.'),
+      m4('🎯','CPA Google',cpaGS>0?fr(cpaGS):'—',gVS>0?`${fn(gVS)} vendas`:'','','blu','Custo por venda Google: Gasto ÷ Vendas planilha.'),
     ].join('');
   } else {
+    document.getElementById('google-bsc-blocks').style.display='none';
+    document.getElementById('google-m4').style.display='';
     const bestCpaG=gG.filter(d=>d.cpa>0).length?Math.min(...gG.filter(d=>d.cpa>0).map(d=>d.cpa)):0;
     document.getElementById('google-m4').innerHTML=[
       m4('💻','Investimento Google',frr(gSp),gG.length+' campanhas',deltaHtml(gSp,p.gSp),'red','Gasto total nas campanhas do Google Ads no período selecionado.'),
