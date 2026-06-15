@@ -421,16 +421,16 @@ async function loadClientList(){
   CLIENTS={};
   let allAccounts=[];
   try{
-    const url=`https://onboard.windsor.ai/api/team/co-user-linked-accounts/?api_key=${AK}`;
+    const url='/api/accounts';
     const res=await fetch(url);
     if(res.ok){
       const j=await res.json();
       allAccounts=extractLinkedAccounts(j);
-      console.log('[Windsor] '+allAccounts.length+' contas conectadas');
+      console.log('[Proxy] '+allAccounts.length+' contas conectadas');
     } else {
-      console.warn('[Windsor] HTTP',res.status);
+      console.warn('[Proxy] HTTP',res.status);
     }
-  }catch(e){console.warn('[Windsor] Erro:',e);}
+  }catch(e){console.warn('[Proxy] Erro:',e);}
 
   const metaAccounts=allAccounts.filter(a=>/face|meta/i.test(a.datasource||''));
   const googleAccounts=allAccounts.filter(a=>/google.?ads/i.test(a.datasource||''));
