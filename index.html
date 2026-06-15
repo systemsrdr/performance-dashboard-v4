@@ -192,15 +192,33 @@ async function loadClients(force){
   }
   CLIENTS={};
 
-  let metaAccounts=[], googleAccounts=[];
+  // Endpoint oficial: retorna todas as contas conectadas (Meta + Google + ...)
+  // Doc: https://windsor.ai/api-documentation/
+  let allAccounts=[];
+  let fetchOk=false;
   try{
-    const [mRes,gRes]=await Promise.all([
-      fetch(`https://onboard.windsor.ai/api/ds/accounts/facebook?api_key=${AK}`).catch(()=>null),
-      fetch(`https://onboard.windsor.ai/api/ds/accounts/google_ads?api_key=${AK}`).catch(()=>null),
-    ]);
-    if(mRes&&mRes.ok){const j=await mRes.json().catch(()=>null);metaAccounts=extractAccounts(j);console.log('[Windsor] Meta:',metaAccounts);}
-    if(gRes&&gRes.ok){const j=await gRes.json().catch(()=>null);googleAccounts=extractAccounts(j);console.log('[Windsor] Google:',googleAccounts);}
-  }catch(e){console.warn('[Windsor] Erro:',e);}
+    const url=`https://onboard.windsor.ai/api/team/co-user-linked-accounts/?api_key=${AK}`;
+    console.log('[Windsor] Buscando:',url);
+    const res=await fetch(url);
+    console.log('[Windsor] Status:',res.status);
+    if(res.ok){
+      const j=await res.json();
+      console.log('[Windsor] Resposta bruta:',j);
+      allAccounts=extractLinkedAccounts(j);
+      console.log('[Windsor] Contas extraídas:',allAccounts.length,allAccounts);
+      fetchOk=allAccounts.length>0;
+    } else {
+      const txt=await res.text().catch(()=>'');
+      console.warn('[Windsor] Erro HTTP',res.status,txt.substring(0,200));
+    }
+  }catch(e){
+    console.error('[Windsor] Erro de fetch (provavelmente CORS):',e);
+  }
+
+  // Separa por datasource
+  const metaAccounts=allAccounts.filter(a=>/face|meta/i.test(a.datasource||''));
+  const googleAccounts=allAccounts.filter(a=>/google.?ads/i.test(a.datasource||''));
+  console.log('[Windsor] Meta:',metaAccounts.length,'· Google:',googleAccounts.length);
 
   // Mescla por nome (fuzzy)
   const byKey={};
@@ -257,6 +275,30 @@ async function loadClients(force){
 
   console.log('[CLIENTS]',CLIENTS);
   renderClients();
+}
+
+// Parsa resposta do endpoint /api/team/co-user-linked-accounts/
+// Formato esperado: [{datasource, account_name, account_id, status}, ...]
+// Mas pode vir em diferentes envelopes (data:[...], accounts:[...], etc)
+function extractLinkedAccounts(json){
+  if(!json)return [];
+  let arr=null;
+  if(Array.isArray(json)) arr=json;
+  else if(Array.isArray(json.data)) arr=json.data;
+  else if(Array.isArray(json.accounts)) arr=json.accounts;
+  else if(Array.isArray(json.linked_accounts)) arr=json.linked_accounts;
+  else if(Array.isArray(json.results)) arr=json.results;
+  if(!arr) return [];
+  return arr.map(a=>{
+    if(!a)return null;
+    const id=a.account_id||a.id||a.value;
+    const name=a.account_name||a.name||a.label||String(id||'');
+    const datasource=a.datasource||a.data_source||a.source||a.connector||'';
+    const status=a.status||'active';
+    if(!id||!name)return null;
+    if(status&&!/active/i.test(status))return null; // ignora inativas
+    return {id:String(id),name:String(name),datasource:String(datasource).toLowerCase()};
+  }).filter(Boolean);
 }
 
 function extractAccounts(json){
