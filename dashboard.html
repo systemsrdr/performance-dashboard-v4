@@ -517,10 +517,10 @@ async function fetchAll(){
     const pfStr=iso(pf),ptStr=iso(pt);
 
     const [mRes,mPRes,gRes,gPRes]=await Promise.all([
-      fetch(`https://connectors.windsor.ai/all?api_key=${AK}&date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,impressions,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,objective`).catch(()=>null),
-      fetch(`https://connectors.windsor.ai/all?api_key=${AK}&date_from=${pfStr}&date_to=${ptStr}&fields=source,account_id,spend,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,conversions`).catch(()=>null),
-      fetch(`https://connectors.windsor.ai/all?api_key=${AK}&date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,impressions,clicks,ctr,cpc,conversions,cost_per_conversion`).catch(()=>null),
-      fetch(`https://connectors.windsor.ai/all?api_key=${AK}&date_from=${pfStr}&date_to=${ptStr}&fields=source,account_id,spend,conversions`).catch(()=>null)
+      fetch(`/api/data?date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,impressions,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,objective`).catch(()=>null),
+      fetch(`/api/data?date_from=${pfStr}&date_to=${ptStr}&fields=source,account_id,spend,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,conversions`).catch(()=>null),
+      fetch(`/api/data?date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,impressions,clicks,ctr,cpc,conversions,cost_per_conversion`).catch(()=>null),
+      fetch(`/api/data?date_from=${pfStr}&date_to=${ptStr}&fields=source,account_id,spend,conversions`).catch(()=>null)
     ]);
     const mJ=mRes?await mRes.json().catch(()=>({data:[]})):{data:[]};
     const mPJ=mPRes?await mPRes.json().catch(()=>({data:[]})):{data:[]};
@@ -595,7 +595,7 @@ async function fetchAds(){
   document.getElementById('ad-box').innerHTML='';
   const f=document.getElementById('d-from').value,t=document.getElementById('d-to').value;
   try{
-    const url=`https://connectors.windsor.ai/all?api_key=${AK}&date_from=${f}&date_to=${t}&fields=account_id,ad_name,picture,thumbnail_url,spend,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,effective_status`;
+    const url=`/api/data?date_from=${f}&date_to=${t}&fields=account_id,ad_name,picture,thumbnail_url,spend,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,effective_status`;
     const res=await fetch(url);const j=await res.json();
     state.ads=(j.data||[]).filter(r=>C.metaIds.includes(String(r.account_id))).map(r=>({
       n:r.ad_name||'Sem nome',img:r.picture||r.thumbnail_url||null,
