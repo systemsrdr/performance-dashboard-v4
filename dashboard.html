@@ -419,15 +419,21 @@ window.onload=async()=>{
 // ── LISTA CLIENTES ───────────────────────────────────
 async function loadClientList(){
   CLIENTS={};
-  let metaAccounts=[],googleAccounts=[];
+  let allAccounts=[];
   try{
-    const [mRes,gRes]=await Promise.all([
-      fetch(`https://onboard.windsor.ai/api/ds/accounts/facebook?api_key=${AK}`).catch(()=>null),
-      fetch(`https://onboard.windsor.ai/api/ds/accounts/google_ads?api_key=${AK}`).catch(()=>null),
-    ]);
-    if(mRes&&mRes.ok){const j=await mRes.json().catch(()=>null);metaAccounts=extractAccounts(j);}
-    if(gRes&&gRes.ok){const j=await gRes.json().catch(()=>null);googleAccounts=extractAccounts(j);}
+    const url=`https://onboard.windsor.ai/api/team/co-user-linked-accounts/?api_key=${AK}`;
+    const res=await fetch(url);
+    if(res.ok){
+      const j=await res.json();
+      allAccounts=extractLinkedAccounts(j);
+      console.log('[Windsor] '+allAccounts.length+' contas conectadas');
+    } else {
+      console.warn('[Windsor] HTTP',res.status);
+    }
   }catch(e){console.warn('[Windsor] Erro:',e);}
+
+  const metaAccounts=allAccounts.filter(a=>/face|meta/i.test(a.datasource||''));
+  const googleAccounts=allAccounts.filter(a=>/google.?ads/i.test(a.datasource||''));
 
   const byKey={};
   metaAccounts.forEach(a=>{const k=nameKey(a.name)||('meta-'+a.id);if(!byKey[k])byKey[k]={nome:a.name,metaIds:[],googleIds:[]};byKey[k].metaIds.push(String(a.id));});
@@ -450,6 +456,27 @@ async function loadClientList(){
   Object.entries(legacy).forEach(([slug,L])=>{
     if(!CLIENTS[slug]){const ov=OVERRIDES[slug]||{};CLIENTS[slug]={nome:L.nome,seg:ov.seg||'',tipo:ov.tipo||'ec',metaIds:L.metaIds,googleIds:L.googleIds,sheet:ov.sheet||null};}
   });
+}
+
+function extractLinkedAccounts(json){
+  if(!json)return [];
+  let arr=null;
+  if(Array.isArray(json)) arr=json;
+  else if(Array.isArray(json.data)) arr=json.data;
+  else if(Array.isArray(json.accounts)) arr=json.accounts;
+  else if(Array.isArray(json.linked_accounts)) arr=json.linked_accounts;
+  else if(Array.isArray(json.results)) arr=json.results;
+  if(!arr) return [];
+  return arr.map(a=>{
+    if(!a)return null;
+    const id=a.account_id||a.id||a.value;
+    const name=a.account_name||a.name||a.label||String(id||'');
+    const datasource=a.datasource||a.data_source||a.source||a.connector||'';
+    const status=a.status||'active';
+    if(!id||!name)return null;
+    if(status&&!/active/i.test(status))return null;
+    return {id:String(id),name:String(name),datasource:String(datasource).toLowerCase()};
+  }).filter(Boolean);
 }
 
 function extractAccounts(json){
