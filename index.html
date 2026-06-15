@@ -197,22 +197,22 @@ async function loadClients(force){
   let allAccounts=[];
   let fetchOk=false;
   try{
-    const url=`https://onboard.windsor.ai/api/team/co-user-linked-accounts/?api_key=${AK}`;
-    console.log('[Windsor] Buscando:',url);
+    const url='/api/accounts';
+    console.log('[Proxy] Buscando:',url);
     const res=await fetch(url);
-    console.log('[Windsor] Status:',res.status);
+    console.log('[Proxy] Status:',res.status);
     if(res.ok){
       const j=await res.json();
-      console.log('[Windsor] Resposta bruta:',j);
+      console.log('[Proxy] Resposta bruta:',j);
       allAccounts=extractLinkedAccounts(j);
-      console.log('[Windsor] Contas extraídas:',allAccounts.length,allAccounts);
+      console.log('[Proxy] Contas extraídas:',allAccounts.length,allAccounts);
       fetchOk=allAccounts.length>0;
     } else {
       const txt=await res.text().catch(()=>'');
-      console.warn('[Windsor] Erro HTTP',res.status,txt.substring(0,200));
+      console.warn('[Proxy] Erro HTTP',res.status,txt.substring(0,200));
     }
   }catch(e){
-    console.error('[Windsor] Erro de fetch (provavelmente CORS):',e);
+    console.error('[Proxy] Erro de fetch:',e);
   }
 
   // Separa por datasource
