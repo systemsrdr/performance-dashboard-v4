@@ -108,7 +108,7 @@ footer strong{color:var(--tx2);font-weight:700}
   <div class="page-header">
     <div class="breadcrumb">Início › Clientes</div>
     <div class="page-title">Dashboards de <em>Performance</em></div>
-    <div class="page-sub">Selecione um cliente para acessar o painel de métricas em tempo real. Dados de Meta Ads e Google Ads sincronizados via Windsor.ai.</div>
+    <div class="page-sub">Selecione um cliente para acessar o painel de métricas em tempo real. Dados de Meta Ads e Google Ads sincronizados</div>
   </div>
 
   <div class="toolbar">
@@ -120,13 +120,13 @@ footer strong{color:var(--tx2);font-weight:700}
   <div id="content">
     <div class="loading">
       <div class="spinner"></div>
-      <div class="loading-text">Buscando contas conectadas no Windsor.ai…</div>
+      <div class="loading-text">Buscando contas conectadas no Sistema…</div>
     </div>
   </div>
 </main>
 
 <footer>
-  <strong>V4 Performance</strong> — Dashboards de Performance · Dados via Windsor.ai · Atualizado automaticamente
+  <strong>V4 Performance</strong> — Dashboards de Performance · Dados via Sistema · Atualizado automaticamente
 </footer>
 
 <script>
@@ -187,7 +187,7 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 async function loadClients(force){
   if(force){
     document.getElementById('content').innerHTML=
-      '<div class="loading"><div class="spinner"></div><div class="loading-text">Buscando contas conectadas no Windsor.ai…</div></div>';
+      '<div class="loading"><div class="spinner"></div><div class="loading-text">Buscando contas conectadas no Sistema…</div></div>';
     document.getElementById('count-chip').textContent='Carregando…';
   }
   CLIENTS={};
@@ -342,7 +342,7 @@ function renderClients(){
       <div class="empty">
         <div class="empty-icon">📭</div>
         <h3>Nenhum cliente encontrado</h3>
-        <p>Não foi possível listar contas conectadas no Windsor.ai. Verifique se há contas Meta Ads ou Google Ads conectadas em <code>onboard.windsor.ai</code> e se sua API key tem permissão.</p>
+        <p>Não foi possível listar contas conectadas. Verifique a configuração do sistema e tente novamente.</p>
         <button class="btn-reload" onclick="loadClients(true)">↻ Tentar novamente</button>
       </div>`;
     return;
