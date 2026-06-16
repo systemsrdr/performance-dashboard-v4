@@ -12,14 +12,23 @@ export default async function handler(req, res) {
   const debug = req.query && req.query.debug === '1';
   const diagnostics = [];
 
+  const today = new Date();
+  const dateTo = today.toISOString().split('T')[0];
+  const past = new Date(); past.setDate(past.getDate() - 60);
+  const dateFrom = past.toISOString().split('T')[0];
+
   const candidates = [
     { name: 'co_user_linked', url: `https://onboard.windsor.ai/api/team/co-user-linked-accounts/?api_key=${API_KEY}` },
     { name: 'get_connectors', url: `https://onboard.windsor.ai/api/get_connectors?api_key=${API_KEY}` },
     { name: 'connectors',     url: `https://onboard.windsor.ai/api/connectors?api_key=${API_KEY}` },
     { name: 'ds_accounts',    url: `https://onboard.windsor.ai/api/ds/accounts?api_key=${API_KEY}` },
     // Última cartada: deriva das próprias linhas de dados consumindo /all
-    { name: 'derive_from_data',
-      url: `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_preset=last_30d&fields=source,account_id,account_name`,
+    { name: 'derive_with_name',
+      url: `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${dateFrom}&date_to=${dateTo}&fields=source,account_id,account_name,spend`,
+      derive: true },
+    // Plano B do derive: sem account_name (alguns conectores não expõem)
+    { name: 'derive_no_name',
+      url: `https://connectors.windsor.ai/all?api_key=${API_KEY}&date_from=${dateFrom}&date_to=${dateTo}&fields=source,account_id,spend`,
       derive: true },
   ];
 
