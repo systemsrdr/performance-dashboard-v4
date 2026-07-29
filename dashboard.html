@@ -452,11 +452,16 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <div class="card" style="padding:0">
         <div class="ads-sort">
           <span class="ads-sort-l">Ordenar</span>
-          <button class="qb on" onclick="sortAds('top',this)">Destaque</button>
-          <button class="qb" onclick="sortAds('spend',this)">Gasto</button>
-          <button class="qb" onclick="sortAds('conv',this)">Conversões</button>
+          <button class="qb" onclick="sortAds('spend',this)">Maior Gasto</button>
+          <button class="qb on" onclick="sortAds('conv',this)">Mais Vendas</button>
+          <button class="qb" onclick="sortAds('rev',this)">Maior Receita</button>
           <button class="qb" onclick="sortAds('cpa',this)">Menor CPA</button>
           <button class="qb" onclick="sortAds('ctr',this)">CTR</button>
+          <span style="width:1px;height:20px;background:var(--brd);margin:0 4px"></span>
+          <span class="ads-sort-l">Status</span>
+          <button class="qb on" onclick="filterAds('all',this)">Todos</button>
+          <button class="qb" onclick="filterAds('active',this)">🟢 Ativos</button>
+          <button class="qb" onclick="filterAds('paused',this)">🔴 Pausados</button>
         </div>
         <div id="adloader" style="text-align:center;padding:48px;color:var(--tx3);font-size:13px;font-weight:600">Carregando anúncios...</div>
         <div class="ad-grid" id="ad-box"></div>
@@ -666,19 +671,37 @@ async function fetchAds(){
     const url=`/api/data?date_from=${f}&date_to=${t}&fields=account_id,ad_name,picture,thumbnail_url,spend,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,effective_status`;
     const res=await fetch(url);const j=await res.json();
     const normId=id=>String(id).replace(/-/g,'');
-    state.ads=(j.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id))).map(r=>({
-      n:r.ad_name||'Sem nome',img:r.picture||r.thumbnail_url||null,
-      sp:parseFloat(r.spend||0),pur:parseFloat(r.actions_omni_purchase||0),
-      rev:parseFloat(r.action_values_omni_purchase||0),
-      wpp:parseFloat(r.actions_onsite_conversion_messaging_conversation_started_7d||0),
-      leads:parseFloat(r.actions_lead||0),clk:parseInt(r.clicks||0),
-      ctr:parseFloat(r.ctr||0)*100,cpc:parseFloat(r.cpc||0),
-      active:(r.effective_status||'ACTIVE').toUpperCase()==='ACTIVE'
+    const rows=(j.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id)));
+    // Agrupa por nome do anúncio (a API fragmenta o mesmo anúncio por adset/campanha)
+    const grp={};
+    rows.forEach(r=>{
+      const n=r.ad_name||'Sem nome';
+      const st=(r.effective_status||'ACTIVE').toUpperCase();
+      const isActive=st==='ACTIVE';
+      if(!grp[n])grp[n]={n:n,img:null,sp:0,pur:0,rev:0,wpp:0,leads:0,clk:0,impClk:0,ctrSum:0,ctrN:0,anyActive:false};
+      const g=grp[n];
+      g.img=g.img||r.picture||r.thumbnail_url||null;
+      g.sp+=parseFloat(r.spend||0);
+      g.pur+=parseFloat(r.actions_omni_purchase||0);
+      g.rev+=parseFloat(r.action_values_omni_purchase||0);
+      g.wpp+=parseFloat(r.actions_onsite_conversion_messaging_conversation_started_7d||0);
+      g.leads+=parseFloat(r.actions_lead||0);
+      g.clk+=parseInt(r.clicks||0);
+      const ctr=parseFloat(r.ctr||0);if(ctr>0){g.ctrSum+=ctr;g.ctrN++;}
+      if(isActive)g.anyActive=true; // ativo se qualquer veiculação estiver ativa
+    });
+    state.ads=Object.values(grp).map(g=>({
+      n:g.n,img:g.img,sp:g.sp,pur:g.pur,rev:g.rev,wpp:g.wpp,leads:g.leads,clk:g.clk,
+      ctr:g.ctrN>0?(g.ctrSum/g.ctrN)*100:0,
+      cpc:g.clk>0?g.sp/g.clk:0,
+      cpa:g.pur>0?g.sp/g.pur:0,
+      roas:g.sp>0&&g.rev>0?g.rev/g.sp:0,
+      active:g.anyActive
     })).filter(a=>a.sp>0.5);
   }catch(e){state.ads=[];}
   document.getElementById('adloader').style.display='none';
   buildAdsKPI();
-  sortAds('top',document.querySelector('.ads-sort .qb.on'));
+  renderAdsGrid();
 }
 
 function showL(t){document.getElementById('loader').classList.add('show');setL(t);}
@@ -1279,14 +1302,16 @@ function renderGoogle(){
 // ── ADS ──────────────────────────────────────────────
 function buildAdsKPI(){
   const ads=state.ads;const tsp=ads.reduce((a,x)=>a+x.sp,0);
-  const trev=state.fin.fat||ads.reduce((a,x)=>a+(x.rev||0),0);
-  const tvend=state.fin.v||ads.reduce((a,x)=>a+(x.pur||0),0);
+  // Vendas e receita REAIS por anúncio (Meta API), não rateio de planilha
+  const trev=ads.reduce((a,x)=>a+(x.rev||0),0);
+  const tvend=ads.reduce((a,x)=>a+(x.pur||0),0);
+  const roasTot=tsp>0&&trev>0?trev/tsp:0;
   const isEc=C.tipo==='ec';
   const ativos=ads.filter(a=>a.active).length;
   document.getElementById('ads-m4').innerHTML=isEc?[
     m4('🎨','Anúncios',`${ativos} ativos`,`${ads.length-ativos} pausados`,'','blu'),
-    m4('💰','Receita Total',fr(trev),fn(tvend)+' vendas confirmadas','','grn'),
-    m4('🛒','Vendas Totais',fn(tvend),state.fin.fat>0?'Fonte: Planilha':'Fonte: Meta API','','amb'),
+    m4('💰','Receita (anúncios)',fr(trev),fn(tvend)+' vendas atribuídas','','grn','Soma da receita atribuída aos anúncios pela Meta API no período.'),
+    m4('📈','ROAS (anúncios)',roasTot>0?roasTot.toFixed(2)+'x':'—',`Receita ÷ Gasto`,'','pur'),
     m4('📊','Gasto Total',fr(tsp),'Meta Ads','','red'),
   ].join(''):[
     m4('🎨','Anúncios',`${ativos} ativos`,`${ads.length-ativos} pausados`,'','blu'),
@@ -1296,66 +1321,101 @@ function buildAdsKPI(){
   ].join('');
 }
 
-function sortAds(sk,btn){
-  document.querySelectorAll('.ads-sort .qb').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  let s=state.ads.slice();
-  const isEc=C.tipo==='ec';
-  const tsp=state.ads.reduce((a,x)=>a+x.sp,0);
-  if(sk==='top'){
-    if(isEc){
-      s.sort((a,b)=>{
-        const tsp_=tsp||1;
-        const aRev=state.fin.fat>0?(a.sp/tsp_)*state.fin.fat:a.rev||0;
-        const bRev=state.fin.fat>0?(b.sp/tsp_)*state.fin.fat:b.rev||0;
-        const aV=state.fin.v>0?Math.round((a.sp/tsp_)*state.fin.v):a.pur||0;
-        const bV=state.fin.v>0?Math.round((b.sp/tsp_)*state.fin.v):b.pur||0;
-        if(aV===0&&bV>0)return 1;
-        if(bV===0&&aV>0)return -1;
-        if(aRev!==bRev)return bRev-aRev;
-        const aRoas=a.sp>0?aRev/a.sp:0;
-        const bRoas=b.sp>0?bRev/b.sp:0;
-        return bRoas-aRoas;
-      });
-    } else {
-      s.sort((a,b)=>((b.leads||0)*100+(b.wpp||0)*50)-((a.leads||0)*100+(a.wpp||0)*50));
-    }
-  }
-  else if(sk==='spend')s.sort((a,b)=>b.sp-a.sp);
-  else if(sk==='conv'){if(isEc)s.sort((a,b)=>(b.pur||0)-(a.pur||0));else s.sort((a,b)=>((b.wpp||0)+(b.leads||0))-((a.wpp||0)+(a.leads||0)));}
-  else if(sk==='cpa')s.sort((a,b)=>{const fa=a.pur?a.sp/a.pur:(a.wpp?a.sp/a.wpp:(a.leads?a.sp/a.leads:999999));const fb=b.pur?b.sp/b.pur:(b.wpp?b.sp/b.wpp:(b.leads?b.sp/b.leads:999999));return fa-fb;});
-  else if(sk==='ctr')s.sort((a,b)=>b.ctr-a.ctr);
+let adSort='conv', adFilter='all';
 
-  const box=document.getElementById('ad-box');box.innerHTML='';
-  s.forEach((ad,i)=>{
-    const cpaW=ad.wpp?ad.sp/ad.wpp:0;
-    const adRev=state.fin.fat>0&&tsp>0?(ad.sp/tsp)*state.fin.fat:ad.rev;
-    const adV=state.fin.v>0&&tsp>0?Math.round((ad.sp/tsp)*state.fin.v):ad.pur;
-    const adCpa=adV>0?ad.sp/adV:0;
-    const div=document.createElement('div');
-    div.className='adc'+(i===0?' top1':'');
-    div.onclick=()=>openLB(ad,i+1,adRev,adV,adCpa);
-    div.innerHTML=`${ad.img?`<div class="adwrap"><img class="adimg" src="${ad.img}" loading="lazy" alt="${ad.n}" onerror="this.style.display='none'"><div class="adbadge ${i===0?'gold':'rank'}">${i===0?'👑 #1':'#'+(i+1)}</div><div class="adstatus ${ad.active?'on':'off'}">${ad.active?'● Ativo':'● Pausado'}</div></div>`:`<div class="adnopic" style="position:relative">${i===0?'👑 ':''} #${i+1}<div class="adstatus ${ad.active?'on':'off'}" style="position:absolute;top:8px;right:8px">${ad.active?'● Ativo':'● Pausado'}</div></div>`}<div class="adbody"><div class="adname" title="${ad.n}">${ad.n}</div><div class="adstats">
-      <div class="as"><div class="asl">Gasto</div><div class="asv">${fr(ad.sp)}</div></div>
-      ${isEc?`<div class="as"><div class="asl">Receita</div><div class="asv grn">${fr(adRev)}</div></div><div class="as"><div class="asl">Vendas</div><div class="asv">${fn(adV)}</div></div><div class="as"><div class="asl">CPA</div><div class="asv ${adCpa?'red':''}">${adCpa?fr(adCpa):'—'}</div></div><div class="as"><div class="asl">CTR</div><div class="asv">${fp(ad.ctr)}</div></div><div class="as"><div class="asl">Msgs</div><div class="asv">${fn(ad.wpp||0)}</div></div>`:`<div class="as"><div class="asl">WhatsApp</div><div class="asv ${ad.wpp?'red':''}">${fn(ad.wpp||0)}</div></div><div class="as"><div class="asl">Leads</div><div class="asv ${ad.leads?'grn':''}">${fn(ad.leads||0)}</div></div><div class="as"><div class="asl">C/WPP</div><div class="asv">${cpaW?fr(cpaW):'—'}</div></div><div class="as"><div class="asl">CTR</div><div class="asv">${fp(ad.ctr)}</div></div><div class="as"><div class="asl">Cliques</div><div class="asv">${fn(ad.clk)}</div></div>`}
-    </div></div>`;
-    box.appendChild(div);
-  });
+function filterAds(fk,btn){
+  adFilter=fk;
+  document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(/Todos|Ativos|Pausados/.test(b.textContent))b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderAdsGrid();
+}
+function sortAds(sk,btn){
+  adSort=sk;
+  document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(/Gasto|Vendas|Receita|CPA|CTR/.test(b.textContent))b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderAdsGrid();
 }
 
-function openLB(ad,rank,adRev,adV,adCpa){
+function sortAdList(list){
+  const isEc=C.tipo==='ec';
+  let s=list.slice();
+  if(adSort==='spend')s.sort((a,b)=>b.sp-a.sp);
+  else if(adSort==='conv'){if(isEc)s.sort((a,b)=>(b.pur||0)-(a.pur||0)||b.rev-a.rev);else s.sort((a,b)=>((b.wpp||0)+(b.leads||0))-((a.wpp||0)+(a.leads||0)));}
+  else if(adSort==='rev')s.sort((a,b)=>(b.rev||0)-(a.rev||0));
+  else if(adSort==='cpa')s.sort((a,b)=>{const fa=a.pur?a.sp/a.pur:(a.wpp?a.sp/a.wpp:(a.leads?a.sp/a.leads:9e9));const fb=b.pur?b.sp/b.pur:(b.wpp?b.sp/b.wpp:(b.leads?b.sp/b.leads:9e9));return fa-fb;});
+  else if(adSort==='ctr')s.sort((a,b)=>b.ctr-a.ctr);
+  return s;
+}
+
+function adCardHTML(ad,rankLabel,highlight){
+  const isEc=C.tipo==='ec';
+  const cpaW=ad.wpp?ad.sp/ad.wpp:0;
+  // dados REAIS do anúncio
+  const adRev=ad.rev||0, adV=ad.pur||0, adCpa=adV>0?ad.sp/adV:0;
+  const badge=highlight?`<div class="adbadge gold">👑 ${rankLabel}</div>`:`<div class="adbadge rank">${rankLabel}</div>`;
+  const img=ad.img
+    ?`<div class="adwrap"><img class="adimg" src="${ad.img}" loading="lazy" alt="${ad.n}" onerror="this.style.display='none'">${badge}<div class="adstatus ${ad.active?'on':'off'}">${ad.active?'● Ativo':'● Pausado'}</div></div>`
+    :`<div class="adnopic" style="position:relative">${highlight?'👑 ':''}${rankLabel}<div class="adstatus ${ad.active?'on':'off'}" style="position:absolute;top:8px;right:8px">${ad.active?'● Ativo':'● Pausado'}</div></div>`;
+  const stats=isEc
+    ?`<div class="as"><div class="asl">Gasto</div><div class="asv">${fr(ad.sp)}</div></div><div class="as"><div class="asl">Receita</div><div class="asv grn">${fr(adRev)}</div></div><div class="as"><div class="asl">Vendas</div><div class="asv">${fn(adV)}</div></div><div class="as"><div class="asl">CPA</div><div class="asv ${adCpa?'red':''}">${adCpa?fr(adCpa):'—'}</div></div><div class="as"><div class="asl">ROAS</div><div class="asv ${ad.roas?'grn':''}">${ad.roas?ad.roas.toFixed(2)+'x':'—'}</div></div><div class="as"><div class="asl">CTR</div><div class="asv">${fp(ad.ctr)}</div></div>`
+    :`<div class="as"><div class="asl">Gasto</div><div class="asv">${fr(ad.sp)}</div></div><div class="as"><div class="asl">WhatsApp</div><div class="asv ${ad.wpp?'red':''}">${fn(ad.wpp||0)}</div></div><div class="as"><div class="asl">Leads</div><div class="asv ${ad.leads?'grn':''}">${fn(ad.leads||0)}</div></div><div class="as"><div class="asl">C/WPP</div><div class="asv">${cpaW?fr(cpaW):'—'}</div></div><div class="as"><div class="asl">CTR</div><div class="asv">${fp(ad.ctr)}</div></div><div class="as"><div class="asl">Cliques</div><div class="asv">${fn(ad.clk)}</div></div>`;
+  return {img,stats,adRev,adV,adCpa};
+}
+
+function makeAdCard(ad,rankLabel,highlight){
+  const {img,stats,adRev,adV,adCpa}=adCardHTML(ad,rankLabel,highlight);
+  const div=document.createElement('div');
+  div.className='adc'+(highlight?' top1':'');
+  div.onclick=()=>openLB(ad,rankLabel,adRev,adV,adCpa);
+  div.innerHTML=`${img}<div class="adbody"><div class="adname" title="${ad.n}">${ad.n}</div><div class="adstats">${stats}</div></div>`;
+  return div;
+}
+
+function renderAdsGrid(){
+  const box=document.getElementById('ad-box');box.innerHTML='';
+  const actives=sortAdList(state.ads.filter(a=>a.active));
+  const paused=sortAdList(state.ads.filter(a=>!a.active));
+
+  const sectionHeader=(txt,count,color)=>{
+    const h=document.createElement('div');
+    h.style.cssText='grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:6px 0 2px;padding:6px 2px';
+    h.innerHTML=`<span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:${color}">${txt}</span><span style="font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg-soft);border:1px solid var(--brd);padding:2px 9px;border-radius:12px">${count}</span><span style="flex:1;height:1px;background:var(--brd)"></span>`;
+    return h;
+  };
+
+  if(adFilter==='active'){
+    if(!actives.length){box.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--tx3);font-weight:600">Nenhum anúncio ativo no período.</div>';return;}
+    actives.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),i===0)));
+  } else if(adFilter==='paused'){
+    if(!paused.length){box.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--tx3);font-weight:600">Nenhum anúncio pausado no período.</div>';return;}
+    paused.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),false)));
+  } else {
+    // Todos: separa em duas seções
+    if(actives.length){
+      box.appendChild(sectionHeader('🟢 Ativos',actives.length,'var(--grn)'));
+      actives.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),i===0)));
+    }
+    if(paused.length){
+      box.appendChild(sectionHeader('🔴 Pausados',paused.length,'var(--red)'));
+      paused.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),false)));
+    }
+  }
+}
+
+function openLB(ad,rank){
   const isEc=C.tipo==='ec';const cpaW=ad.wpp?ad.sp/ad.wpp:0,cpaL=ad.leads?ad.sp/ad.leads:0;
+  const adRev=ad.rev||0, adV=ad.pur||0, adCpa=adV>0?ad.sp/adV:0;
   document.getElementById('lb-img-wrap').innerHTML=ad.img?`<img class="lb-img" src="${ad.img}" alt="${ad.n}" onerror="this.parentElement.innerHTML='<div class=\\'lb-nopic\\'>Sem imagem</div>'">`:`<div class="lb-nopic">Sem imagem</div>`;
   document.getElementById('lb-title').textContent=ad.n;
-  document.getElementById('lb-camp').textContent='Anúncio #'+rank;
+  document.getElementById('lb-camp').textContent='Anúncio '+rank;
   const stEl=document.getElementById('lb-status');
   stEl.textContent=ad.active?'● Ativo agora':'● Pausado';stEl.className='lb-status '+(ad.active?'on':'off');
   document.getElementById('lb-stats').innerHTML=isEc?[
     `<div class="lb-stat"><div class="lb-stat-l">Gasto</div><div class="lb-stat-v">${frr(ad.sp)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">Receita</div><div class="lb-stat-v">${fr(adRev||ad.rev||0)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">Vendas</div><div class="lb-stat-v">${fn(adV||ad.pur||0)}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">CPA</div><div class="lb-stat-v">${(adCpa||0)?fr(adCpa):'—'}</div></div>`,
-    `<div class="lb-stat"><div class="lb-stat-l">Mensagens</div><div class="lb-stat-v">${fn(ad.wpp||0)}</div></div>`,
+    `<div class="lb-stat"><div class="lb-stat-l">Receita</div><div class="lb-stat-v">${fr(adRev)}</div></div>`,
+    `<div class="lb-stat"><div class="lb-stat-l">Vendas</div><div class="lb-stat-v">${fn(adV)}</div></div>`,
+    `<div class="lb-stat"><div class="lb-stat-l">CPA</div><div class="lb-stat-v">${adCpa?fr(adCpa):'—'}</div></div>`,
+    `<div class="lb-stat"><div class="lb-stat-l">ROAS</div><div class="lb-stat-v">${ad.roas?ad.roas.toFixed(2)+'x':'—'}</div></div>`,
     `<div class="lb-stat"><div class="lb-stat-l">CTR</div><div class="lb-stat-v">${fp(ad.ctr)}</div></div>`,
   ].join(''):[
     `<div class="lb-stat"><div class="lb-stat-l">Gasto</div><div class="lb-stat-v">${frr(ad.sp)}</div></div>`,
