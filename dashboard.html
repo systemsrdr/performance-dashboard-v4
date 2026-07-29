@@ -194,6 +194,27 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .adstatus.on{background:rgba(16,185,129,.95);color:#fff}
 .adstatus.off{background:rgba(232,0,13,.9);color:#fff}
 .adnopic{aspect-ratio:1;background:var(--bg-soft2);display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:12px;font-weight:600}
+/* ─── Seções de campanha ─── */
+.camp-group{border-bottom:1px solid var(--brd)}
+.camp-group:last-child{border-bottom:none}
+.camp-group-hd{display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;transition:background .14s;background:var(--bg-soft);user-select:none}
+.camp-group-hd:hover{background:var(--bg-soft2)}
+.camp-group-chev{font-size:11px;color:var(--tx3);transition:transform .18s;flex-shrink:0}
+.camp-group.collapsed .camp-group-chev{transform:rotate(-90deg)}
+.camp-group-icon{font-size:16px;flex-shrink:0}
+.camp-group-info{flex:1;min-width:0}
+.camp-group-name{font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.camp-group-meta{font-size:10px;color:var(--tx3);font-weight:600;margin-top:2px}
+.camp-group-kpis{display:flex;gap:16px;flex-shrink:0;flex-wrap:wrap}
+.cgk{text-align:right}
+.cgk-l{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3)}
+.cgk-v{font-size:13px;font-weight:800;color:var(--tx);line-height:1.2}
+.cgk-v.grn{color:var(--grn)}.cgk-v.red{color:var(--red)}.cgk-v.pur{color:var(--pur)}
+.camp-group-tag{font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;flex-shrink:0}
+.camp-group-body{padding:16px 20px}
+.camp-group.collapsed .camp-group-body{display:none}
+.ad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+@media(max-width:700px){.camp-group-kpis{display:none}}
 .adbody{padding:11px 13px}
 .adname{font-size:11px;font-weight:700;color:var(--tx);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .adstats{display:grid;grid-template-columns:1fr 1fr;gap:4px}
@@ -451,12 +472,25 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <div class="m4grid" id="ads-m4"></div>
       <div class="card" style="padding:0">
         <div class="ads-sort">
+          <span class="ads-sort-l">Ver por</span>
+          <button class="qb on" onclick="setGroup('campaign',this)">📁 Campanha</button>
+          <button class="qb" onclick="setGroup('type',this)">🏷️ Tipo</button>
+          <button class="qb" onclick="setGroup('none',this)">☰ Lista</button>
+          <span style="width:1px;height:20px;background:var(--brd);margin:0 4px"></span>
           <span class="ads-sort-l">Ordenar</span>
           <button class="qb" onclick="sortAds('spend',this)">Maior Gasto</button>
           <button class="qb on" onclick="sortAds('conv',this)">Mais Vendas</button>
           <button class="qb" onclick="sortAds('rev',this)">Maior Receita</button>
           <button class="qb" onclick="sortAds('cpa',this)">Menor CPA</button>
           <button class="qb" onclick="sortAds('ctr',this)">CTR</button>
+        </div>
+        <div class="ads-sort" style="border-top:none">
+          <span class="ads-sort-l">Tipo</span>
+          <button class="qb on" onclick="filterType('all',this)">Todos</button>
+          <button class="qb" onclick="filterType('compra',this)">🛒 Compras</button>
+          <button class="qb" onclick="filterType('msg',this)">💬 Mensagens</button>
+          <button class="qb" onclick="filterType('lead',this)">📋 Leads</button>
+          <button class="qb" onclick="filterType('trafego',this)">🖱️ Tráfego</button>
           <span style="width:1px;height:20px;background:var(--brd);margin:0 4px"></span>
           <span class="ads-sort-l">Status</span>
           <button class="qb on" onclick="filterAds('all',this)">Todos</button>
@@ -464,7 +498,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
           <button class="qb" onclick="filterAds('paused',this)">🔴 Pausados</button>
         </div>
         <div id="adloader" style="text-align:center;padding:48px;color:var(--tx3);font-size:13px;font-weight:600">Carregando anúncios...</div>
-        <div class="ad-grid" id="ad-box"></div>
+        <div id="ad-box"></div>
       </div>
     </div>
 
@@ -663,23 +697,48 @@ async function fetchAll(){
   }catch(e){hideL();console.error(e);renderAll();}
 }
 
+// Limpa nome de campanha (remove emojis, tags [V4RDR&Co], numeração)
+function cleanCamp(s){
+  return String(s||'').replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/gi,'').replace(/\[V4&Co\]/gi,'')
+    .replace(/^\s*\d+#\s*/,'').replace(/\s{2,}/g,' ').trim()||'Sem campanha';
+}
+// Classifica o tipo do anúncio/campanha
+function adType(g){
+  const obj=String(g.obj||'').toUpperCase();
+  const nm=(g.camp+' '+g.n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(obj.includes('LEAD')||nm.includes('lead')||nm.includes('formulario')||g.leads>0)return'lead';
+  if(obj.includes('MESSAGE')||obj.includes('ENGAGEMENT')||nm.includes('mensagem')||nm.includes('whatsapp')||nm.includes('wpp')||(g.wpp>0&&g.pur===0))return'msg';
+  if(obj.includes('TRAFFIC')||obj.includes('LINK_CLICKS')||nm.includes('trafego'))return'trafego';
+  if(obj.includes('SALES')||obj.includes('CONVERSION')||g.pur>0)return'compra';
+  return'outro';
+}
+const AD_TYPES={
+  compra:{icon:'🛒',label:'Compras / Vendas',cor:'var(--grn)'},
+  msg:{icon:'💬',label:'Mensagens / WhatsApp',cor:'var(--blu)'},
+  lead:{icon:'📋',label:'Leads / Formulário',cor:'var(--amb)'},
+  trafego:{icon:'🖱️',label:'Tráfego / Cliques',cor:'var(--pur)'},
+  outro:{icon:'📊',label:'Outras',cor:'var(--tx3)'}
+};
+
 async function fetchAds(){
   document.getElementById('adloader').style.display='block';
   document.getElementById('ad-box').innerHTML='';
   const f=document.getElementById('d-from').value,t=document.getElementById('d-to').value;
   try{
-    const url=`/api/data?date_from=${f}&date_to=${t}&fields=account_id,ad_name,picture,thumbnail_url,spend,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,effective_status`;
+    const url=`/api/data?date_from=${f}&date_to=${t}&fields=account_id,ad_name,campaign,objective,picture,thumbnail_url,spend,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,effective_status`;
     const res=await fetch(url);const j=await res.json();
     const normId=id=>String(id).replace(/-/g,'');
     const rows=(j.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id)));
-    // Agrupa por nome do anúncio (a API fragmenta o mesmo anúncio por adset/campanha)
+    // Agrupa por anúncio + campanha (a API fragmenta o mesmo anúncio por adset)
     const grp={};
     rows.forEach(r=>{
+      const camp=cleanCamp(r.campaign||'Sem campanha');
       const n=r.ad_name||'Sem nome';
+      const key=camp+'|||'+n;
       const st=(r.effective_status||'ACTIVE').toUpperCase();
       const isActive=st==='ACTIVE';
-      if(!grp[n])grp[n]={n:n,img:null,sp:0,pur:0,rev:0,wpp:0,leads:0,clk:0,impClk:0,ctrSum:0,ctrN:0,anyActive:false};
-      const g=grp[n];
+      if(!grp[key])grp[key]={n:n,camp:camp,obj:r.objective||'',img:null,sp:0,pur:0,rev:0,wpp:0,leads:0,clk:0,ctrSum:0,ctrN:0,anyActive:false};
+      const g=grp[key];
       g.img=g.img||r.picture||r.thumbnail_url||null;
       g.sp+=parseFloat(r.spend||0);
       g.pur+=parseFloat(r.actions_omni_purchase||0);
@@ -688,14 +747,15 @@ async function fetchAds(){
       g.leads+=parseFloat(r.actions_lead||0);
       g.clk+=parseInt(r.clicks||0);
       const ctr=parseFloat(r.ctr||0);if(ctr>0){g.ctrSum+=ctr;g.ctrN++;}
-      if(isActive)g.anyActive=true; // ativo se qualquer veiculação estiver ativa
+      if(isActive)g.anyActive=true;
     });
     state.ads=Object.values(grp).map(g=>({
-      n:g.n,img:g.img,sp:g.sp,pur:g.pur,rev:g.rev,wpp:g.wpp,leads:g.leads,clk:g.clk,
+      n:g.n,camp:g.camp,obj:g.obj,img:g.img,sp:g.sp,pur:g.pur,rev:g.rev,wpp:g.wpp,leads:g.leads,clk:g.clk,
       ctr:g.ctrN>0?(g.ctrSum/g.ctrN)*100:0,
       cpc:g.clk>0?g.sp/g.clk:0,
       cpa:g.pur>0?g.sp/g.pur:0,
       roas:g.sp>0&&g.rev>0?g.rev/g.sp:0,
+      tipo:adType(g),
       active:g.anyActive
     })).filter(a=>a.sp>0.5);
   }catch(e){state.ads=[];}
@@ -1321,36 +1381,40 @@ function buildAdsKPI(){
   ].join('');
 }
 
-let adSort='conv', adFilter='all';
+let adSort='conv', adFilter='all', adGroup='campaign', adTypeFilter='all';
 
-function filterAds(fk,btn){
-  adFilter=fk;
-  document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(/Todos|Ativos|Pausados/.test(b.textContent))b.classList.remove('on');});
+function filterAds(fk,btn){adFilter=fk;btnGroupToggle(btn,/Todos|Ativos|Pausados/,'status');renderAdsGrid();}
+function filterType(tk,btn){adTypeFilter=tk;btnGroupToggle(btn,/Todos|Compras|Mensagens|Leads|Tr[áa]fego/,'type');renderAdsGrid();}
+function sortAds(sk,btn){adSort=sk;btnGroupToggle(btn,/Gasto|Vendas|Receita|CPA|CTR/,'sort');renderAdsGrid();}
+function setGroup(gk,btn){adGroup=gk;btnGroupToggle(btn,/Campanha|Tipo|Lista/,'group');renderAdsGrid();}
+// desmarca só os botões do mesmo grupo (pelo texto) e marca o clicado
+function btnGroupToggle(btn,re,tag){
+  document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(re.test(b.textContent))b.classList.remove('on');});
   if(btn)btn.classList.add('on');
-  renderAdsGrid();
-}
-function sortAds(sk,btn){
-  adSort=sk;
-  document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(/Gasto|Vendas|Receita|CPA|CTR/.test(b.textContent))b.classList.remove('on');});
-  if(btn)btn.classList.add('on');
-  renderAdsGrid();
 }
 
 function sortAdList(list){
-  const isEc=C.tipo==='ec';
   let s=list.slice();
   if(adSort==='spend')s.sort((a,b)=>b.sp-a.sp);
-  else if(adSort==='conv'){if(isEc)s.sort((a,b)=>(b.pur||0)-(a.pur||0)||b.rev-a.rev);else s.sort((a,b)=>((b.wpp||0)+(b.leads||0))-((a.wpp||0)+(a.leads||0)));}
+  else if(adSort==='conv')s.sort((a,b)=>(b.pur||0)-(a.pur||0)||(b.wpp+b.leads)-(a.wpp+a.leads)||b.rev-a.rev);
   else if(adSort==='rev')s.sort((a,b)=>(b.rev||0)-(a.rev||0));
-  else if(adSort==='cpa')s.sort((a,b)=>{const fa=a.pur?a.sp/a.pur:(a.wpp?a.sp/a.wpp:(a.leads?a.sp/a.leads:9e9));const fb=b.pur?b.sp/b.pur:(b.wpp?b.sp/b.wpp:(b.leads?b.sp/b.leads:9e9));return fa-fb;});
+  else if(adSort==='cpa')s.sort((a,b)=>{const fa=a.pur?a.sp/a.pur:9e9;const fb=b.pur?b.sp/b.pur:9e9;return fa-fb;});
   else if(adSort==='ctr')s.sort((a,b)=>b.ctr-a.ctr);
   return s;
+}
+// aplica filtros de status + tipo
+function applyFilters(list){
+  return list.filter(a=>{
+    if(adFilter==='active'&&!a.active)return false;
+    if(adFilter==='paused'&&a.active)return false;
+    if(adTypeFilter!=='all'&&a.tipo!==adTypeFilter)return false;
+    return true;
+  });
 }
 
 function adCardHTML(ad,rankLabel,highlight){
   const isEc=C.tipo==='ec';
   const cpaW=ad.wpp?ad.sp/ad.wpp:0;
-  // dados REAIS do anúncio
   const adRev=ad.rev||0, adV=ad.pur||0, adCpa=adV>0?ad.sp/adV:0;
   const badge=highlight?`<div class="adbadge gold">👑 ${rankLabel}</div>`:`<div class="adbadge rank">${rankLabel}</div>`;
   const img=ad.img
@@ -1359,47 +1423,95 @@ function adCardHTML(ad,rankLabel,highlight){
   const stats=isEc
     ?`<div class="as"><div class="asl">Gasto</div><div class="asv">${fr(ad.sp)}</div></div><div class="as"><div class="asl">Receita</div><div class="asv grn">${fr(adRev)}</div></div><div class="as"><div class="asl">Vendas</div><div class="asv">${fn(adV)}</div></div><div class="as"><div class="asl">CPA</div><div class="asv ${adCpa?'red':''}">${adCpa?fr(adCpa):'—'}</div></div><div class="as"><div class="asl">ROAS</div><div class="asv ${ad.roas?'grn':''}">${ad.roas?ad.roas.toFixed(2)+'x':'—'}</div></div><div class="as"><div class="asl">CTR</div><div class="asv">${fp(ad.ctr)}</div></div>`
     :`<div class="as"><div class="asl">Gasto</div><div class="asv">${fr(ad.sp)}</div></div><div class="as"><div class="asl">WhatsApp</div><div class="asv ${ad.wpp?'red':''}">${fn(ad.wpp||0)}</div></div><div class="as"><div class="asl">Leads</div><div class="asv ${ad.leads?'grn':''}">${fn(ad.leads||0)}</div></div><div class="as"><div class="asl">C/WPP</div><div class="asv">${cpaW?fr(cpaW):'—'}</div></div><div class="as"><div class="asl">CTR</div><div class="asv">${fp(ad.ctr)}</div></div><div class="as"><div class="asl">Cliques</div><div class="asv">${fn(ad.clk)}</div></div>`;
-  return {img,stats,adRev,adV,adCpa};
+  return {img,stats};
 }
-
 function makeAdCard(ad,rankLabel,highlight){
-  const {img,stats,adRev,adV,adCpa}=adCardHTML(ad,rankLabel,highlight);
+  const {img,stats}=adCardHTML(ad,rankLabel,highlight);
+  const tipoInfo=AD_TYPES[ad.tipo]||AD_TYPES.outro;
   const div=document.createElement('div');
   div.className='adc'+(highlight?' top1':'');
-  div.onclick=()=>openLB(ad,rankLabel,adRev,adV,adCpa);
+  div.onclick=()=>openLB(ad,rankLabel);
   div.innerHTML=`${img}<div class="adbody"><div class="adname" title="${ad.n}">${ad.n}</div><div class="adstats">${stats}</div></div>`;
   return div;
 }
 
+// monta uma seção agrupada (campanha ou tipo) recolhível, com KPIs de resumo
+function makeGroupSection(titulo,icone,cor,ads,tagHtml){
+  const sp=ads.reduce((a,x)=>a+x.sp,0);
+  const rev=ads.reduce((a,x)=>a+x.rev,0);
+  const pur=ads.reduce((a,x)=>a+x.pur,0);
+  const wpp=ads.reduce((a,x)=>a+x.wpp,0);
+  const leads=ads.reduce((a,x)=>a+x.leads,0);
+  const roas=sp>0&&rev>0?rev/sp:0;
+  const cpa=pur>0?sp/pur:0;
+  const ativos=ads.filter(a=>a.active).length;
+  const isEc=C.tipo==='ec';
+
+  const kpis=isEc?`
+    <div class="cgk"><div class="cgk-l">Gasto</div><div class="cgk-v red">${fr(sp)}</div></div>
+    <div class="cgk"><div class="cgk-l">Receita</div><div class="cgk-v grn">${fr(rev)}</div></div>
+    <div class="cgk"><div class="cgk-l">Vendas</div><div class="cgk-v">${fn(pur)}</div></div>
+    <div class="cgk"><div class="cgk-l">ROAS</div><div class="cgk-v pur">${roas?roas.toFixed(2)+'x':'—'}</div></div>`
+   :`
+    <div class="cgk"><div class="cgk-l">Gasto</div><div class="cgk-v red">${fr(sp)}</div></div>
+    <div class="cgk"><div class="cgk-l">WhatsApp</div><div class="cgk-v">${fn(wpp)}</div></div>
+    <div class="cgk"><div class="cgk-l">Leads</div><div class="cgk-v grn">${fn(leads)}</div></div>`;
+
+  const wrap=document.createElement('div');
+  wrap.className='camp-group';
+  const grid=document.createElement('div');grid.className='ad-grid';
+  sortAdList(ads).forEach((ad,i)=>grid.appendChild(makeAdCard(ad,'#'+(i+1),i===0)));
+  const body=document.createElement('div');body.className='camp-group-body';body.appendChild(grid);
+
+  const hd=document.createElement('div');hd.className='camp-group-hd';
+  hd.innerHTML=`<span class="camp-group-chev">▼</span><span class="camp-group-icon">${icone}</span>
+    <div class="camp-group-info"><div class="camp-group-name">${titulo}</div><div class="camp-group-meta">${ads.length} criativo${ads.length!==1?'s':''} · ${ativos} ativo${ativos!==1?'s':''}</div></div>
+    ${tagHtml||''}
+    <div class="camp-group-kpis">${kpis}</div>`;
+  hd.onclick=()=>wrap.classList.toggle('collapsed');
+  wrap.appendChild(hd);wrap.appendChild(body);
+  return {wrap,sp,rev,pur};
+}
+
 function renderAdsGrid(){
   const box=document.getElementById('ad-box');box.innerHTML='';
-  const actives=sortAdList(state.ads.filter(a=>a.active));
-  const paused=sortAdList(state.ads.filter(a=>!a.active));
+  const ads=applyFilters(state.ads);
+  if(!ads.length){box.innerHTML='<div style="text-align:center;padding:48px;color:var(--tx3);font-weight:600">Nenhum anúncio para este filtro.</div>';return;}
 
-  const sectionHeader=(txt,count,color)=>{
-    const h=document.createElement('div');
-    h.style.cssText='grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:6px 0 2px;padding:6px 2px';
-    h.innerHTML=`<span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:${color}">${txt}</span><span style="font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg-soft);border:1px solid var(--brd);padding:2px 9px;border-radius:12px">${count}</span><span style="flex:1;height:1px;background:var(--brd)"></span>`;
-    return h;
-  };
-
-  if(adFilter==='active'){
-    if(!actives.length){box.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--tx3);font-weight:600">Nenhum anúncio ativo no período.</div>';return;}
-    actives.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),i===0)));
-  } else if(adFilter==='paused'){
-    if(!paused.length){box.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--tx3);font-weight:600">Nenhum anúncio pausado no período.</div>';return;}
-    paused.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),false)));
-  } else {
-    // Todos: separa em duas seções
-    if(actives.length){
-      box.appendChild(sectionHeader('🟢 Ativos',actives.length,'var(--grn)'));
-      actives.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),i===0)));
-    }
-    if(paused.length){
-      box.appendChild(sectionHeader('🔴 Pausados',paused.length,'var(--red)'));
-      paused.forEach((ad,i)=>box.appendChild(makeAdCard(ad,'#'+(i+1),false)));
-    }
+  if(adGroup==='none'){
+    // Lista simples: ativos e pausados separados
+    const wrap=document.createElement('div');wrap.style.padding='18px';
+    const grid=document.createElement('div');grid.className='ad-grid';
+    sortAdList(ads).forEach((ad,i)=>grid.appendChild(makeAdCard(ad,'#'+(i+1),i===0)));
+    wrap.appendChild(grid);box.appendChild(wrap);
+    return;
   }
+
+  // Agrupa
+  const groups={};
+  ads.forEach(a=>{
+    const key=adGroup==='type'?a.tipo:a.camp;
+    if(!groups[key])groups[key]=[];
+    groups[key].push(a);
+  });
+  // Ordena grupos por gasto total desc
+  const entries=Object.entries(groups).map(([k,arr])=>({k,arr,sp:arr.reduce((a,x)=>a+x.sp,0)})).sort((a,b)=>b.sp-a.sp);
+
+  entries.forEach(({k,arr})=>{
+    let titulo,icone,cor,tag='';
+    if(adGroup==='type'){
+      const ti=AD_TYPES[k]||AD_TYPES.outro;
+      titulo=ti.label;icone=ti.icon;cor=ti.cor;
+    } else {
+      titulo=k;
+      // ícone pelo tipo predominante da campanha
+      const ti=AD_TYPES[arr[0].tipo]||AD_TYPES.outro;
+      icone='📁';cor='var(--tx2)';
+      tag=`<span class="camp-group-tag" style="background:var(--bg-soft2);color:${ti.cor}">${ti.icon} ${ti.label}</span>`;
+    }
+    const {wrap}=makeGroupSection(titulo,icone,cor,arr,tag);
+    box.appendChild(wrap);
+  });
 }
 
 function openLB(ad,rank){
@@ -1407,7 +1519,8 @@ function openLB(ad,rank){
   const adRev=ad.rev||0, adV=ad.pur||0, adCpa=adV>0?ad.sp/adV:0;
   document.getElementById('lb-img-wrap').innerHTML=ad.img?`<img class="lb-img" src="${ad.img}" alt="${ad.n}" onerror="this.parentElement.innerHTML='<div class=\\'lb-nopic\\'>Sem imagem</div>'">`:`<div class="lb-nopic">Sem imagem</div>`;
   document.getElementById('lb-title').textContent=ad.n;
-  document.getElementById('lb-camp').textContent='Anúncio '+rank;
+  const tipoInfo=AD_TYPES[ad.tipo]||AD_TYPES.outro;
+  document.getElementById('lb-camp').textContent=(ad.camp?('📁 '+ad.camp):('Anúncio '+rank))+' · '+tipoInfo.icon+' '+tipoInfo.label;
   const stEl=document.getElementById('lb-status');
   stEl.textContent=ad.active?'● Ativo agora':'● Pausado';stEl.className='lb-status '+(ad.active?'on':'off');
   document.getElementById('lb-stats').innerHTML=isEc?[
