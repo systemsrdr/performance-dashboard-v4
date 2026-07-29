@@ -42,6 +42,8 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .abtn:hover{opacity:.88}
 .nstatus{font-size:11px;font-weight:600;color:var(--grn);display:flex;align-items:center;gap:5px}
 .nstatus::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--grn);animation:pulse 2s infinite}
+.logout-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--brd);background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:var(--tx2);transition:all .14s;font-family:inherit}
+.logout-btn:hover{background:var(--red2);color:var(--red);border-color:var(--red3)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* ─── SIDEBAR ─────────────────────────────────────── */
@@ -64,7 +66,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .pgsub{font-size:13px;color:var(--tx2)}
 .bc{font-size:11px;color:var(--tx3);margin-bottom:6px;font-weight:500}
 
-/* ─── HERO BIG NUMBERS (estilo HubSpot Ref 6) ─────── */
+/* ─── HERO BIG NUMBERS ─── */
 .hero{background:linear-gradient(135deg,#1A1A2E 0%,#2D1B4E 100%);border-radius:16px;padding:28px 32px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:-40%;right:-10%;width:60%;height:180%;background:radial-gradient(circle,rgba(232,0,13,.18) 0%,transparent 70%);pointer-events:none}
 .hero-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:22px;position:relative;z-index:1}
@@ -82,11 +84,10 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .hk-d.up{background:rgba(16,185,129,.22);color:#6EE7B7}
 .hk-d.dn{background:rgba(232,0,13,.22);color:#FCA5A5}
 .hk-s{font-size:10px;color:rgba(255,255,255,.5);margin-top:4px}
-.hero-gauge{position:relative;width:120px;height:65px;margin:8px auto 0}
 @media(max-width:1100px){.hero-grid{grid-template-columns:1.4fr 1fr 1fr;row-gap:22px}.hk:nth-child(n+4){border-left:none;padding-left:0;border-top:1px solid rgba(255,255,255,.12);padding-top:22px}}
 @media(max-width:700px){.hero-grid{grid-template-columns:1fr 1fr}.hk{border-left:none;padding-left:0}.hero-main{grid-column:1/-1}.hero-main .hv{font-size:38px}}
 
-/* ─── VS COMPARISON (estilo Supermetrics Ref 3) ───── */
+/* ─── VS COMPARISON ─── */
 .vs-card{background:#fff;border:1px solid var(--brd);border-radius:var(--r);padding:0;margin-bottom:16px;overflow:hidden}
 .vs-hd{padding:16px 20px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
 .vs-hd-l{font-size:14px;font-weight:700;color:var(--tx);letter-spacing:-.2px}
@@ -106,7 +107,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .vs-mini-bar-m{background:var(--blu);height:100%}
 .vs-mini-bar-g{background:#EA4335;height:100%}
 
-/* ─── DEMOGRAPHICS (estilo Meta Ref 4) ─────────────── */
+/* ─── DEMOGRAPHICS ─── */
 .demo-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:16px}
 .demo-bar-card,.demo-donut-card{background:#fff;border:1px solid var(--brd);border-radius:var(--r);padding:18px 20px}
 .demo-bar-list{display:flex;flex-direction:column;gap:12px;margin-top:14px}
@@ -122,15 +123,14 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .demo-empty{text-align:center;padding:30px 20px;color:var(--tx3);font-size:12px;font-weight:500}
 .demo-empty-icon{font-size:30px;margin-bottom:8px;opacity:.5}
 
-/* ─── PERIOD BANNER ───────────────────────────────── */
+/* ─── PERIOD BANNER ─── */
 .period-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,var(--bg-soft),#fff);border:1px solid var(--brd);border-left:3px solid var(--red);border-radius:8px;margin-bottom:16px;font-size:12px;color:var(--tx2)}
 .period-banner b{color:var(--tx);font-weight:700}
 .period-banner .pb-vs{color:var(--tx3);font-size:11px;margin-left:auto}
 
-/* ─── HERO BSC layout (4 colunas em vez de 5) ────── */
 .hero-grid.bsc{grid-template-columns:1fr 1fr 1fr 1fr}
 
-/* ─── KPI BOXES ───────────────────────────────────── */
+/* ─── KPI BOXES ─── */
 .m4grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
 .m4grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:0}
 .m4{background:#fff;border:1px solid var(--brd);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all .15s}
@@ -147,24 +147,12 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .m4grid-5 .m4 .m4-label{font-size:9px}
 @media(max-width:1200px){.m4grid-5{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
-/* tooltip */
 .info-icon{width:14px;height:14px;border-radius:50%;background:var(--bg-soft2);border:1px solid var(--brd);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--tx3);cursor:help;position:relative;flex-shrink:0;font-weight:700}
 .info-icon:hover .tooltip{display:block}
 .tooltip{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 6px);background:var(--tx);color:#fff;border-radius:8px;padding:8px 11px;font-size:11px;z-index:99;box-shadow:var(--shadow-lg);font-weight:400;letter-spacing:0;text-transform:none;min-width:180px;max-width:260px;white-space:normal;line-height:1.5}
 .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--tx)}
 
-/* ─── GAUGES ──────────────────────────────────────── */
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
-.gcard{background:#fff;border:1px solid var(--brd);border-radius:var(--r);padding:20px 18px 16px;display:flex;flex-direction:column;align-items:center;position:relative}
-.gtitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:12px;text-align:center;display:flex;align-items:center;gap:5px;justify-content:center}
-.gwrap{position:relative;width:180px;height:100px;margin-bottom:4px}
-.gcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px}
-.gval{font-size:22px;font-weight:800;color:var(--tx);letter-spacing:-.4px;line-height:1}
-.gunit{font-size:10px;color:var(--tx3);margin-top:2px;font-weight:500}
-.grange{display:flex;justify-content:space-between;width:180px;font-size:9px;color:var(--tx3);margin-top:4px;font-weight:600}
-.gdelta{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-top:6px}
-
-/* ─── CARDS / TABLE ───────────────────────────────── */
+/* ─── CARDS / TABLE ─── */
 .card{background:#fff;border:1px solid var(--brd);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
 .chd{padding:16px 20px 12px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .ctitle{font-size:14px;font-weight:700;color:var(--tx);letter-spacing:-.2px}
@@ -189,7 +177,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .camp-type-hd{padding:12px 20px 6px;font-size:11px;font-weight:700;color:var(--tx2);display:flex;align-items:center;gap:7px;border-top:1px solid var(--brd);background:var(--bg-soft)}
 .camp-type-hd:first-of-type{border-top:none}
 
-/* ─── ADS ─────────────────────────────────────────── */
+/* ─── ADS ─── */
 .ads-sort{display:flex;align-items:center;gap:6px;padding:12px 18px;border-bottom:1px solid var(--brd);flex-wrap:wrap}
 .ads-sort-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3)}
 .ad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;padding:18px}
@@ -214,7 +202,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .asv{font-size:12px;font-weight:700;color:var(--tx)}
 .asv.red{color:var(--red)}.asv.grn{color:var(--grn)}.asv.amb{color:#92400E}
 
-/* ─── FUNIL ───────────────────────────────────────── */
+/* ─── FUNIL ─── */
 .funil-outer{padding:18px 20px 14px;overflow-x:auto}
 .funil-row{display:flex;align-items:flex-end;gap:5px;height:160px;min-width:480px}
 .fblock{flex:1;border-radius:10px 10px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:filter .14s;cursor:default}
@@ -228,7 +216,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .ffl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px;font-weight:600}
 .ftabs{display:flex;gap:5px}
 
-/* ─── LIGHTBOX ────────────────────────────────────── */
+/* ─── LIGHTBOX ─── */
 .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
 .lb.open{display:flex}
 .lb-box{background:#fff;border:1px solid var(--brd);border-radius:16px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
@@ -248,35 +236,62 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 .lb-close:hover{background:var(--red2);color:var(--red);border-color:var(--red3)}
 .lb-inner{position:relative}
 
-/* ─── LOADER ──────────────────────────────────────── */
+/* ─── LOADER ─── */
 .loader-ov{display:none;position:fixed;inset:0;background:rgba(244,245,247,.94);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:14px;backdrop-filter:blur(4px)}
 .loader-ov.show{display:flex}
 .lspinner{width:42px;height:42px;border:3px solid var(--brd);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ltxt{font-size:13px;font-weight:600;color:var(--tx2)}
 
-/* ─── SEC BLOCKS (BSC) ────────────────────────────── */
 .sec-block{margin-bottom:18px}
 .sec-block-hd{display:flex;align-items:center;gap:10px;padding:8px 0 8px;margin-bottom:8px}
 .sec-block-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx2);white-space:nowrap}
 .sec-block-line{flex:1;height:1px;background:var(--brd)}
 
-/* ─── 404 ─────────────────────────────────────────── */
+/* ─── LOGIN ─── */
+.login-ov{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#1A1A2E 0%,#2D1B4E 100%);z-index:400;align-items:center;justify-content:center;padding:20px}
+.login-ov.show{display:flex}
+.login-card{background:#fff;border-radius:18px;max-width:400px;width:100%;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login-input{width:100%;padding:13px 15px;border:1.5px solid var(--brd);border-radius:10px;font-size:15px;font-family:inherit;outline:none;margin-bottom:6px;transition:border-color .15s}
+.login-input:focus{border-color:var(--red)}
+.login-btn{width:100%;background:var(--red);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .15s}
+.login-btn:hover{opacity:.9}
+
+/* ─── 404 ─── */
 #nf{display:none;position:fixed;inset:0;background:var(--bg);z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:20px}
 .nf-code{font-size:72px;font-weight:800;color:var(--brd2);letter-spacing:-2px}
 .nf-msg{color:var(--tx2);font-size:14px;max-width:380px}
 .nf-link{color:var(--red);font-size:13px;font-weight:700;text-decoration:none;padding:10px 22px;background:#fff;border:1px solid var(--red3);border-radius:20px;margin-top:8px}
 .nf-link:hover{background:var(--red);color:#fff}
 
-@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.m4grid{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}.nav{padding:0 14px}.main{padding:16px}.lb-stats{grid-template-columns:repeat(2,1fr)}.m4grid-5{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.m4grid{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}.nav{padding:0 14px}.main{padding:16px}.lb-stats{grid-template-columns:repeat(2,1fr)}.m4grid-5{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
 <div id="nf">
   <div class="nf-code">404</div>
-  <div class="nf-msg">Cliente não encontrado. Verifique o link ou volte à lista de clientes.</div>
-  <a href="/" class="nf-link">← Voltar à Home</a>
+  <div class="nf-msg">Cliente não encontrado. Verifique o link de acesso enviado pelo seu gestor V4.</div>
+</div>
+
+<!-- LOGIN -->
+<div class="login-ov" id="login-ov">
+  <div class="login-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <div style="width:38px;height:38px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(232,0,13,.3)">
+        <svg width="22" height="17" viewBox="0 0 100 80" fill="none"><polygon points="15,18 50,65 85,18" fill="white"/></svg>
+      </div>
+      <div style="font-size:17px;font-weight:800;color:var(--tx);letter-spacing:-.3px">V4 Performance</div>
+    </div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:24px">Área do cliente · acesso restrito</div>
+    <div id="login-client-name" style="font-size:15px;font-weight:700;color:var(--tx);margin-bottom:14px;padding:10px 14px;background:var(--bg-soft);border:1px solid var(--brd);border-radius:10px;display:none"></div>
+    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);display:block;margin-bottom:6px">Senha de acesso</label>
+    <input type="password" id="login-pass" class="login-input" placeholder="Digite sua senha" autocomplete="off"
+      onkeydown="if(event.key==='Enter')doLogin()" oninput="document.getElementById('login-err').style.display='none'">
+    <div id="login-err" style="display:none;font-size:12px;color:var(--red);font-weight:600;margin-bottom:10px">✕ Senha incorreta. Tente novamente.</div>
+    <button class="login-btn" onclick="doLogin()">Entrar →</button>
+    <div style="font-size:11px;color:var(--tx3);text-align:center;margin-top:16px;line-height:1.5">Acesso exclusivo aos seus dados de campanha.<br>Em caso de dúvida, contate seu gestor V4.</div>
+  </div>
 </div>
 
 <!-- LOADER -->
@@ -290,7 +305,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 <div id="app" style="display:none">
 
   <nav class="nav">
-    <a class="nav-logo" href="/">
+    <a class="nav-logo" href="#">
       <div class="nav-logo-icon">
         <svg width="18" height="14" viewBox="0 0 100 80" fill="none"><polygon points="15,18 50,65 85,18" fill="white"/></svg>
       </div>
@@ -308,6 +323,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <button class="qb" onclick="setQ('7d',this)">7 dias</button>
       <button class="abtn" onclick="fetchAll()">Aplicar →</button>
       <span class="nstatus" id="nstatus" style="display:none">Ao vivo</span>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </nav>
 
@@ -329,9 +345,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 011-1h10a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V2zm2 0v8l2.5-2 2 2.5 2-3 2 2.5V2H4z"/></svg>
       Anúncios
     </button>
-    <div class="ssec">Navegação</div>
-    <a class="sb" href="/"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l7 6h-2v7H10v-4H6v4H3V7H1l7-6z"/></svg>← Todos os clientes</a>
-    <div class="sfooter" style="margin-top:8px">
+    <div class="sfooter">
       <div class="sfooter-l">Período ativo</div>
       <div class="sfooter-v" id="sbperiod">—</div>
     </div>
@@ -344,27 +358,23 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <div class="pghd">
         <div class="bc">Métricas › Visão Geral</div>
         <div class="pgtitle">Visão Geral</div>
-        <div class="pgsub">Consolidado · Meta Ads + Google Ads</div>
+        <div class="pgsub" id="ov-sub">Consolidado · Meta Ads + Google Ads</div>
       </div>
 
-      <!-- Banner do período comparativo -->
       <div class="period-banner" id="period-banner" style="display:none">
         <span>📅</span>
         <span>Período: <b id="pb-curr">—</b></span>
         <span class="pb-vs">vs. <b id="pb-prev">—</b></span>
       </div>
 
-      <!-- HERO BIG NUMBERS -->
       <div class="hero" id="hero-section"></div>
 
-      <!-- BSC: blocos separados (mantém comportamento existente) -->
       <div id="ov-bsc-blocks" style="display:none">
         <div class="sec-block"><div class="sec-block-hd"><span class="sec-block-title">💬 Meta — Mensagens (WhatsApp)</span><div class="sec-block-line"></div></div><div class="m4grid-5" id="ov-bsc-wpp"></div></div>
         <div class="sec-block"><div class="sec-block-hd"><span class="sec-block-title">🛒 Meta — Vendas Diretas (Tray)</span><div class="sec-block-line"></div></div><div class="m4grid-5" id="ov-bsc-tray"></div></div>
         <div class="sec-block"><div class="sec-block-hd"><span class="sec-block-title">🌐 Google Ads (Tray)</span><div class="sec-block-line"></div></div><div class="m4grid-5" id="ov-bsc-google"></div></div>
       </div>
 
-      <!-- COMPARAÇÃO META vs GOOGLE -->
       <div class="vs-card" id="vs-section">
         <div class="vs-hd">
           <div class="vs-hd-l">Meta Ads <span style="color:var(--tx3);font-weight:500">vs</span> Google Ads</div>
@@ -373,7 +383,6 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
         <div id="vs-rows"></div>
       </div>
 
-      <!-- FUNIL -->
       <div class="card">
         <div class="chd">
           <div><div class="ctitle">Funil de Performance</div><div class="csub">Jornada do usuário</div></div>
@@ -386,7 +395,6 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
         <div id="funil-body"></div>
       </div>
 
-      <!-- DEMOGRÁFICOS (só EC) -->
       <div id="demo-section" style="display:none">
         <div class="demo-grid">
           <div class="demo-bar-card">
@@ -403,7 +411,6 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
         </div>
       </div>
 
-      <!-- GRÁFICOS LADO A LADO -->
       <div class="g2">
         <div class="card"><div class="chd"><div><div class="ctitle" id="ov-c1t">ROAS por Canal</div><div class="csub" id="ov-c1s">Retorno por plataforma</div></div></div><div class="cbody"><div class="cwrap" style="height:200px"><canvas id="ov-c1"></canvas></div></div></div>
         <div class="card"><div class="chd"><div><div class="ctitle" id="ov-c2t">Receita vs Gasto</div><div class="csub" id="ov-c2s">Por canal</div></div></div><div class="cbody"><div class="cwrap" style="height:200px"><canvas id="ov-c2"></canvas></div></div></div>
@@ -477,136 +484,79 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 
 <script>
 // ══════════════════════════════════════════════════════
-// CONFIG — mantenha em sincronia com home.html
+// BASE DE CLIENTES (Windsor.ai) — cada cliente com senha
+// Gerado a partir das contas conectadas no Windsor.ai.
+// Cada cliente acessa via: ?cliente=<slug> e digita a senha.
 // ══════════════════════════════════════════════════════
-const AK="2d4d1d577551f238260e5e6e150a4d7b4f24";
-
-// Overrides: clientes especiais (planilha, segmentação)
-const OVERRIDES={
-  aliancas:{seg:"Joalheria · E-commerce",tipo:"ec",
-    sheet:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTsMuSXIpzP3kg-v1c_8peav-AaSKPWQ7irMj3padTTA8J8OR24do9Y0_RRfeKa5Tr6W0WjYCRwTQNi/pub?output=csv"},
-  starman:{seg:"Provedora de Internet · Inside Sales",tipo:"is"},
-  bsc:{seg:"Logística · E-commerce B2B",tipo:"ec",
-    sheet:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTIqsXutKII_DYsFBQMEeo1I5SJq9b8I-RZxWoX3Ur8StELc9nYnntV_Dgnt20PLlD9nUeExeMjjihp/pub?output=csv"},
+const CLIENTS_DB = {
+  "aliancas": { nome:"CS Alianças", seg:"Joalheria · E-commerce", tipo:"ec", metaIds:["2429115943910453"], googleIds:["670-426-5990"], tiktokIds:["7535219818488905746"], pass:"Lira3705", sheet:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTsMuSXIpzP3kg-v1c_8peav-AaSKPWQ7irMj3padTTA8J8OR24do9Y0_RRfeKa5Tr6W0WjYCRwTQNi/pub?output=csv" },
+  "bsc": { nome:"BSC Pickup Solutions", seg:"Logística · E-commerce B2B", tipo:"ec", metaIds:["1707098029742717","2114458526044587"], googleIds:["483-772-6517"], tiktokIds:[], pass:"Elo7198", sheet:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTIqsXutKII_DYsFBQMEeo1I5SJq9b8I-RZxWoX3Ur8StELc9nYnntV_Dgnt20PLlD9nUeExeMjjihp/pub?output=csv" },
+  "fanes-joias": { nome:"Fane's Joias", seg:"Joalheria", tipo:"ec", metaIds:["2296171467380179","474991624866547"], googleIds:[], tiktokIds:[], pass:"Sol7293", sheet:null },
+  "magus": { nome:"Magus Industria", seg:"Indústria", tipo:"ec", metaIds:["1333183713911053"], googleIds:["855-603-9301"], tiktokIds:[], pass:"Gama4955", sheet:null },
+  "bluefit-farol": { nome:"Bluefit Maceió Farol", seg:"Academia", tipo:"is", metaIds:["941582737278806"], googleIds:[], tiktokIds:[], pass:"Atlas4375", sheet:null },
+  "bluefit-ponta-verde": { nome:"Bluefit Maceió Ponta Verde", seg:"Academia", tipo:"is", metaIds:["1176617220163908"], googleIds:[], tiktokIds:[], pass:"Atlas2532", sheet:null },
+  "flor-da-moda": { nome:"Boutique Flor da Moda", seg:"Moda · E-commerce", tipo:"ec", metaIds:["1178022936335581","652884500240603"], googleIds:[], tiktokIds:[], pass:"Iris7162", sheet:null },
+  "vestpe": { nome:"Vestpé Calçados", seg:"Calçados · E-commerce", tipo:"ec", metaIds:["972829204592018","548624654529285"], googleIds:[], tiktokIds:[], pass:"Alfa2366", sheet:null },
+  "toalha-bandeja": { nome:"Toalha de Bandeja", seg:"E-commerce", tipo:"ec", metaIds:["710165240805852"], googleIds:[], tiktokIds:[], pass:"Sol4772", sheet:null },
+  "mcw": { nome:"MCW Oficina Mecânica", seg:"Automotivo · Serviços", tipo:"is", metaIds:["1434398517793607"], googleIds:[], tiktokIds:[], pass:"Hera1223", sheet:null },
+  "gma-construtora": { nome:"GMA Construtora", seg:"Construção", tipo:"is", metaIds:["768661894629116"], googleIds:[], tiktokIds:[], pass:"Hera1895", sheet:null },
+  "fernando-miranda": { nome:"Fernando Miranda Advogados", seg:"Advocacia · Serviços", tipo:"is", metaIds:["1141811877992643"], googleIds:[], tiktokIds:[], pass:"Faro3713", sheet:null },
+  "newgo": { nome:"NewGo", seg:"Serviços", tipo:"is", metaIds:["1866208866909956"], googleIds:[], tiktokIds:[], pass:"Vega3591", sheet:null },
+  "proconph": { nome:"Proconph Sistemas", seg:"Software", tipo:"is", metaIds:[], googleIds:["905-299-0911"], tiktokIds:[], pass:"Hera4621", sheet:null }
 };
-const SLUG_HINTS=[
-  {match:/alian|aliancas|aliança|cs joalh/i, slug:'aliancas'},
-  {match:/star.?man|starman|star man/i,      slug:'starman'},
-  {match:/bsc|pickup/i,                       slug:'bsc'},
-];
 
-let CLIENTS={};
 const cid=(new URLSearchParams(location.search).get('cliente')||'').toLowerCase();
 let C=null;
 let state={meta:[],google:[],ads:[],fin:{fat:0,v:0,ticket:0},prev:{mSp:0,gSp:0,rev:0,v:0,wpp:0,leads:0,conv:0},loaded:false};
 const charts={};
 
-// ── HELPERS NOME/SLUG ────────────────────────────────
-function normSlug(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').substring(0,40);}
-function findOverrideSlug(name){for(const h of SLUG_HINTS){if(h.match.test(name))return h.slug;}return null;}
-function initials(name){return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';}
-function nameKey(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\b(ltda|me|eireli|s\.?a|comercio|com\.|empresa|company|inc|ads|account|conta|google|meta|facebook)\b/g,'').replace(/[^a-z0-9]+/g,'').substring(0,30);}
+// ── SESSÃO / LOGIN ───────────────────────────────────
+const SESSION_KEY='v4_auth_';
+function isAuthed(slug){try{return sessionStorage.getItem(SESSION_KEY+slug)==='1';}catch(e){return window.__authed===slug;}}
+function setAuthed(slug){try{sessionStorage.setItem(SESSION_KEY+slug,'1');}catch(e){window.__authed=slug;}}
+function clearAuthed(slug){try{sessionStorage.removeItem(SESSION_KEY+slug);}catch(e){window.__authed=null;}}
+
+function showLogin(){
+  const el=document.getElementById('login-client-name');
+  if(C){el.textContent='🏢 '+C.nome;el.style.display='block';}
+  document.getElementById('login-ov').classList.add('show');
+  setTimeout(()=>document.getElementById('login-pass').focus(),100);
+}
+function doLogin(){
+  const val=document.getElementById('login-pass').value.trim();
+  if(C && val===C.pass){
+    setAuthed(cid);
+    document.getElementById('login-ov').classList.remove('show');
+    startApp();
+  } else {
+    document.getElementById('login-err').style.display='block';
+    document.getElementById('login-pass').value='';
+    document.getElementById('login-pass').focus();
+  }
+}
+function doLogout(){
+  clearAuthed(cid);
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-pass').value='';
+  showLogin();
+}
 
 // ── INIT ─────────────────────────────────────────────
 window.onload=async()=>{
-  if(!cid){location.href='/';return;}
-  showL('Identificando cliente...');
-  await loadClientList();
-  C=CLIENTS[cid];
-  if(!C){hideL();document.getElementById('nf').style.display='flex';return;}
-  document.getElementById('app').style.display='block';
-  document.getElementById('nav-client').textContent=C.nome;
+  if(!cid){document.getElementById('nf').style.display='flex';return;}
+  C=CLIENTS_DB[cid];
+  if(!C){document.getElementById('nf').style.display='flex';return;}
   document.title='V4 Performance — '+C.nome;
-  setQ('30d',document.getElementById('qb30'));
-  fetchAll();
+  if(isAuthed(cid)){ startApp(); }
+  else { showLogin(); }
 };
 
-// ── LISTA CLIENTES ───────────────────────────────────
-async function loadClientList(){
-  CLIENTS={};
-  let allAccounts=[];
-  try{
-    const url='/api/accounts';
-    const res=await fetch(url);
-    if(res.ok){
-      const j=await res.json();
-      allAccounts=extractLinkedAccounts(j);
-      console.log('[Proxy] '+allAccounts.length+' contas conectadas');
-    } else {
-      console.warn('[Proxy] HTTP',res.status);
-    }
-  }catch(e){console.warn('[Proxy] Erro:',e);}
-
-  const metaAccounts=allAccounts.filter(a=>/face|meta/i.test(a.datasource||''));
-  const googleAccounts=allAccounts.filter(a=>/google.?ads/i.test(a.datasource||''));
-
-  const byKey={};
-  metaAccounts.forEach(a=>{const k=nameKey(a.name)||('meta-'+a.id);if(!byKey[k])byKey[k]={nome:a.name,metaIds:[],googleIds:[]};byKey[k].metaIds.push(String(a.id));});
-  googleAccounts.forEach(a=>{const k=nameKey(a.name)||('google-'+a.id);if(!byKey[k])byKey[k]={nome:a.name,metaIds:[],googleIds:[]};else if(a.name.length>byKey[k].nome.length)byKey[k].nome=a.name;byKey[k].googleIds.push(String(a.id));});
-
-  Object.values(byKey).forEach(c=>{
-    const overrideSlug=findOverrideSlug(c.nome);
-    const slug=overrideSlug||normSlug(c.nome);
-    if(!slug)return;
-    const ov=OVERRIDES[overrideSlug]||{};
-    CLIENTS[slug]={nome:c.nome,seg:ov.seg||'',tipo:ov.tipo||'ec',metaIds:c.metaIds,googleIds:c.googleIds,sheet:ov.sheet||null};
-  });
-
-  // Legacy garantido
-  const legacy={
-    aliancas:{nome:"Alianças CS",metaIds:["2429115943910453"],googleIds:["670-426-5990"]},
-    starman:{nome:"Star Man Net",metaIds:["465598168178564"],googleIds:["683-577-4127"]},
-    bsc:{nome:"BSC Pickup Solutions",metaIds:["1707098029742717"],googleIds:["483-772-6517"]},
-  };
-  Object.entries(legacy).forEach(([slug,L])=>{
-    if(!CLIENTS[slug]){const ov=OVERRIDES[slug]||{};CLIENTS[slug]={nome:L.nome,seg:ov.seg||'',tipo:ov.tipo||'ec',metaIds:L.metaIds,googleIds:L.googleIds,sheet:ov.sheet||null};}
-  });
+function startApp(){
+  document.getElementById('app').style.display='block';
+  document.getElementById('nav-client').textContent=C.nome;
+  setQ('30d',document.getElementById('qb30'));
+  fetchAll();
 }
-
-function extractLinkedAccounts(json){
-  if(!json)return [];
-  let arr=null;
-  if(Array.isArray(json)) arr=json;
-  else if(Array.isArray(json.data)) arr=json.data;
-  else if(Array.isArray(json.accounts)) arr=json.accounts;
-  else if(Array.isArray(json.connectors)) arr=json.connectors;
-  else if(Array.isArray(json.linked_accounts)) arr=json.linked_accounts;
-  else if(Array.isArray(json.results)) arr=json.results;
-  if(!arr) return [];
-  const out=[];
-  for(const item of arr){
-    if(!item)continue;
-    if(Array.isArray(item.accounts)){
-      const ds=String(item.datasource||item.connector_id||item.connector||item.id||'').toLowerCase();
-      for(const a of item.accounts){
-        const id=a.account_id||a.id||a.value;
-        const name=a.account_name||a.name||a.label||String(id||'');
-        if(!id||!name)continue;
-        out.push({id:String(id),name:String(name),datasource:ds});
-      }
-      continue;
-    }
-    const id=item.account_id||item.id||item.value;
-    const name=item.account_name||item.name||item.label||String(id||'');
-    const datasource=item.datasource||item.data_source||item.source||item.connector||item.connector_id||'';
-    const status=item.status||'active';
-    if(!id||!name)continue;
-    if(status&&!/active/i.test(status))continue;
-    out.push({id:String(id),name:String(name),datasource:String(datasource).toLowerCase()});
-  }
-  return out;
-}
-
-function extractAccounts(json){
-  if(!json)return [];
-  if(Array.isArray(json)) return json.map(normAcc).filter(Boolean);
-  if(Array.isArray(json.data)) return json.data.map(normAcc).filter(Boolean);
-  if(Array.isArray(json.accounts)) return json.accounts.map(normAcc).filter(Boolean);
-  if(json.fields){const f=json.fields.find(x=>x.key==='account_id'||x.key==='accounts');if(f&&Array.isArray(f.values))return f.values.map(normAcc).filter(Boolean);}
-  if(typeof json==='object'){return Object.entries(json).map(([id,v])=>{if(typeof v==='string')return {id,name:v};if(typeof v==='object'&&v)return {id:v.id||id,name:v.name||v.account_name||id};return null;}).filter(Boolean);}
-  return [];
-}
-function normAcc(a){if(!a)return null;const id=a.id||a.account_id||a.value;const name=a.name||a.account_name||a.label||a.title||(id?String(id):null);if(!id||!name)return null;return {id:String(id),name:String(name)};}
 
 // ── DATAS ────────────────────────────────────────────
 function iso(d){return d.toISOString().split('T')[0];}
@@ -715,7 +665,8 @@ async function fetchAds(){
   try{
     const url=`/api/data?date_from=${f}&date_to=${t}&fields=account_id,ad_name,picture,thumbnail_url,spend,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,effective_status`;
     const res=await fetch(url);const j=await res.json();
-    state.ads=(j.data||[]).filter(r=>C.metaIds.includes(String(r.account_id))).map(r=>({
+    const normId=id=>String(id).replace(/-/g,'');
+    state.ads=(j.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id))).map(r=>({
       n:r.ad_name||'Sem nome',img:r.picture||r.thumbnail_url||null,
       sp:parseFloat(r.spend||0),pur:parseFloat(r.actions_omni_purchase||0),
       rev:parseFloat(r.action_values_omni_purchase||0),
@@ -743,7 +694,6 @@ const sn=(s,l=999)=>String(s||'').replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/g
 const snC=(s,l=16)=>sn(s,l);
 function pctChg(a,b){if(!b||b===0)return null;return((a-b)/Math.abs(b)*100);}
 function deltaHtml(curr,prev,inv){if(inv===undefined)inv=false;const p=pctChg(curr,prev);if(p===null)return '';const up=inv?(p<0):(p>=0);return `<span class="m4-delta ${up?'dup':'ddn'}">${p>=0?'↑':'↓'} ${Math.abs(p).toFixed(1)}% vs anterior</span>`;}
-function gaugeDelta(curr,prev,inv){if(inv===undefined)inv=false;const p=pctChg(curr,prev);if(p===null)return '';const up=inv?(p<0):(p>=0);return `<span class="gdelta ${up?'dup':'ddn'}">${p>=0?'↑':'↓'} ${Math.abs(p).toFixed(1)}%</span>`;}
 function tipIcon(txt){return `<span class="info-icon">?<span class="tooltip">${txt}</span></span>`;}
 
 // ── CLASSIFICA CAMPANHA ──────────────────────────────
@@ -842,60 +792,7 @@ function build4(mG,gG){
   ].join('');
 }
 
-// ── VELOCÍMETRO ──────────────────────────────────────
-function gaugeRaw(id,value,min,max,color){
-  const el=document.getElementById(id);if(!el)return;
-  const ctx=el.getContext('2d');
-  const W=180,H=100;el.width=W;el.height=H;
-  const pct=Math.max(0,Math.min(1,(value-min)/(max-min||1)));
-  const sa=Math.PI,ea=2*Math.PI,va=sa+pct*(ea-sa);
-  ctx.clearRect(0,0,W,H);
-  ctx.beginPath();ctx.arc(W/2,H,W/2-14,sa,ea);
-  ctx.strokeStyle='#E8EAED';ctx.lineWidth=14;ctx.lineCap='round';ctx.stroke();
-  const zones=[[0,.33,'rgba(16,185,129,.15)'],[.33,.66,'rgba(245,158,11,.15)'],[.66,1,'rgba(232,0,13,.15)']];
-  zones.forEach(([s,e,cl])=>{ctx.beginPath();ctx.arc(W/2,H,W/2-14,sa+s*(ea-sa),sa+e*(ea-sa));ctx.strokeStyle=cl;ctx.lineWidth=14;ctx.lineCap='butt';ctx.stroke();});
-  const g=ctx.createLinearGradient(0,H,W,0);g.addColorStop(0,color+'B0');g.addColorStop(1,color);
-  ctx.beginPath();ctx.arc(W/2,H,W/2-14,sa,va);ctx.strokeStyle=g;ctx.lineWidth=14;ctx.lineCap='round';ctx.stroke();
-  const r=W/2-14,nx=W/2+r*Math.cos(va),ny=H+r*Math.sin(va-Math.PI);
-  ctx.beginPath();ctx.arc(nx,ny,6,0,2*Math.PI);
-  ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
-}
-
-function renderGauges(mG,gG){
-  const isEc=C.tipo==='ec';
-  const mSp=mG.reduce((a,x)=>a+x.sp,0),gSp=gG.reduce((a,x)=>a+x.sp,0);
-  const totalSp=mSp+gSp;
-  const p=state.prev;
-  const w=document.getElementById('gauge-wrap');
-  if(isEc){
-    const fatTotal=state.fin.fatTotal||state.fin.fat||mG.reduce((a,x)=>a+(x.rev||0),0);
-    const vTotal=state.fin.vTotal||state.fin.v||mG.reduce((a,x)=>a+(x.pur||0),0);
-    const roasTotal=totalSp>0&&fatTotal>0?fatTotal/totalSp:0;
-    const cpaTot=vTotal>0?totalSp/vTotal:0;
-    const mix=totalSp>0?mSp/totalSp*100:0;
-    const prevFat=p.rev||0,prevSp=(p.mSp||0)+(p.gSp||0);
-    const prevRoas=prevSp>0&&prevFat>0?prevFat/prevSp:0;
-    const prevV=p.v||0;
-    const prevCpa=prevV>0?prevSp/prevV:0;
-    w.innerHTML=`
-      <div class="gcard"><div class="gtitle">ROAS Total ${tipIcon('Receita ÷ Investimento. Maior = melhor.')}</div><div class="gwrap"><canvas id="g-roas"></canvas><div class="gcenter"><div class="gval">${roasTotal.toFixed(2)}x</div><div class="gunit">retorno/gasto</div></div></div>${gaugeDelta(roasTotal,prevRoas)}<div class="grange"><span>0x</span><span>15x</span></div></div>
-      <div class="gcard"><div class="gtitle">Mix de Investimento ${tipIcon('% Meta vs Google.')}</div><div class="gwrap"><canvas id="g-mix"></canvas><div class="gcenter"><div class="gval">${Math.round(mix)}%</div><div class="gunit">Meta</div></div></div><div style="display:flex;justify-content:space-between;width:180px;font-size:10px;margin-top:5px;font-weight:600"><span style="color:var(--blu)">Meta ${fr(mSp)}</span><span style="color:#EA4335">Google ${fr(gSp)}</span></div><div class="grange"><span>0%</span><span>100%</span></div></div>
-      <div class="gcard"><div class="gtitle">CPA Total ${tipIcon('Investimento ÷ Vendas. Menor = melhor.')}</div><div class="gwrap"><canvas id="g-cpa"></canvas><div class="gcenter"><div class="gval">${fr(cpaTot)}</div><div class="gunit">custo/venda</div></div></div>${gaugeDelta(cpaTot,prevCpa,true)}<div class="grange"><span>R$0</span><span>R$500</span></div></div>`;
-    setTimeout(()=>{gaugeRaw('g-roas',roasTotal,0,15,'#10B981');gaugeRaw('g-mix',mix,0,100,'#1877F2');gaugeRaw('g-cpa',cpaTot,0,500,'#E8000D');},60);
-  }else{
-    const wpp=mG.reduce((a,x)=>a+(x.wpp||0),0);
-    const leads=mG.reduce((a,x)=>a+(x.leads||0),0);
-    const gConv=gG.reduce((a,x)=>a+x.conv,0);
-    w.innerHTML=`
-      <div class="gcard"><div class="gtitle">WhatsApp ${tipIcon('Conversas iniciadas.')}</div><div class="gwrap"><canvas id="g-wpp"></canvas><div class="gcenter"><div class="gval">${fn(wpp)}</div><div class="gunit">conversas</div></div></div>${gaugeDelta(wpp,p.wpp)}<div class="grange"><span>0</span><span>200</span></div></div>
-      <div class="gcard"><div class="gtitle">Leads ${tipIcon('Formulário.')}</div><div class="gwrap"><canvas id="g-leads"></canvas><div class="gcenter"><div class="gval">${fn(leads)}</div><div class="gunit">leads</div></div></div>${gaugeDelta(leads,p.leads)}<div class="grange"><span>0</span><span>300</span></div></div>
-      <div class="gcard"><div class="gtitle">Conv. Google ${tipIcon('Google Ads.')}</div><div class="gwrap"><canvas id="g-gconv"></canvas><div class="gcenter"><div class="gval">${fn(Math.round(gConv))}</div><div class="gunit">conversões</div></div></div>${gaugeDelta(gConv,p.conv)}<div class="grange"><span>0</span><span>300</span></div></div>`;
-    setTimeout(()=>{gaugeRaw('g-wpp',wpp,0,200,'#E8000D');gaugeRaw('g-leads',leads,0,300,'#10B981');gaugeRaw('g-gconv',gConv,0,300,'#1877F2');},60);
-  }
-}
-
-// ── OVERVIEW ─────────────────────────────────────────
-// ─── HERO: big numbers + gauge integrado ──────────
+// ── OVERVIEW: HERO ───────────────────────────────────
 function hk(label,value,delta,sub,tip){
   const cls = delta && delta.up ? 'up' : (delta && delta.dn ? 'dn' : '');
   const deltaHtml = delta ? `<div class="hk-d ${cls}">${delta.arrow||''} ${delta.txt}</div>` : '';
@@ -926,14 +823,12 @@ function renderPeriodBanner(){
 
 function renderHero(mG,gG){
   const isEc=C.tipo==='ec';
-  const isBsc=cid==='bsc';
   const mSp=mG.reduce((a,x)=>a+x.sp,0),gSp=gG.reduce((a,x)=>a+x.sp,0);
   const totalSp=mSp+gSp;
   const p=state.prev;
   const el=document.getElementById('hero-section');
 
   if(isEc){
-    // Métricas EC
     const fatTotal=state.fin.fatTotal||state.fin.fat||mG.reduce((a,x)=>a+(x.rev||0),0);
     const vTotal=state.fin.vTotal||state.fin.v||mG.reduce((a,x)=>a+(x.pur||0),0);
     const roas=totalSp>0&&fatTotal>0?fatTotal/totalSp:0;
@@ -943,8 +838,6 @@ function renderHero(mG,gG){
     const prevRoas=prevSp>0&&p.rev>0?p.rev/prevSp:0;
     const prevCpa=p.v>0?prevSp/p.v:0;
     const prevTicket=p.v>0&&p.rev>0?p.rev/p.v:0;
-
-    // ROAS bar: meta de referência = 5x
     const roasTarget=5;
     const roasPct=Math.min(100,(roas/roasTarget)*100);
 
@@ -963,7 +856,6 @@ function renderHero(mG,gG){
         ${hk('🛒 Vendas',fn(vTotal),deltaObj(vTotal,p.v),'no período','Total de compras')}
       </div>`;
   } else {
-    // Métricas IS
     const wpp=mG.reduce((a,x)=>a+(x.wpp||0),0);
     const leads=mG.reduce((a,x)=>a+(x.leads||0),0);
     const gConv=gG.reduce((a,x)=>a+x.conv,0);
@@ -972,9 +864,8 @@ function renderHero(mG,gG){
     const prevSp=(p.mSp||0)+(p.gSp||0);
     const prevTotalLeads=(p.wpp||0)+(p.leads||0)+(p.conv||0);
     const prevCpl=prevTotalLeads>0?prevSp/prevTotalLeads:0;
-    // Meta de referência CPL = R$50
     const cplTarget=50;
-    const cplPct=cpl>0?Math.min(100,(cplTarget/cpl)*100):100; // melhor = bar maior
+    const cplPct=cpl>0?Math.min(100,(cplTarget/cpl)*100):100;
 
     el.innerHTML=`
       <div class="hero-grid">
@@ -993,7 +884,7 @@ function renderHero(mG,gG){
   }
 }
 
-// ─── VS COMPARISON: Meta vs Google ────────────────
+// ─── VS COMPARISON ────────────────────────────────
 function vsRow(label,metaVal,googleVal,format,inv){
   inv=inv||false;
   const fmt=format||(v=>fn(v));
@@ -1003,7 +894,6 @@ function vsRow(label,metaVal,googleVal,format,inv){
   let mWin='',gWin='';
   if(total>0){
     if(inv){
-      // menor é melhor
       if(mNum>0&&(gNum===0||mNum<gNum))mWin='vs-win meta';
       else if(gNum>0)gWin='vs-win google';
     } else {
@@ -1068,7 +958,7 @@ function renderVS(mG,gG){
   document.getElementById('vs-rows').innerHTML=rows.join('');
 }
 
-// ─── DEMOGRAPHICS (EC only) ────────────────────────
+// ─── DEMOGRAPHICS ──────────────────────────────────
 async function renderDemographics(){
   const section=document.getElementById('demo-section');
   if(C.tipo!=='ec'){section.style.display='none';return;}
@@ -1081,7 +971,8 @@ async function renderDemographics(){
     const res=await fetch(url);
     if(res.ok){
       const j=await res.json();
-      data=(j.data||[]).filter(r=>C.metaIds.includes(String(r.account_id))&&r.age&&r.gender);
+      const normId=id=>String(id).replace(/-/g,'');
+      data=(j.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id))&&r.age&&r.gender);
     }
   }catch(e){console.warn('[Demo] erro:',e);}
 
@@ -1092,7 +983,6 @@ async function renderDemographics(){
   }
   document.getElementById('demo-donut').style.display='';
 
-  // Agrupa por idade × gênero
   const ages={};
   const genders={male:0,female:0,unknown:0};
   data.forEach(r=>{
@@ -1107,7 +997,6 @@ async function renderDemographics(){
     else genders.unknown+=clicks;
   });
 
-  // Ordena idades
   const ageOrder=['13-17','18-24','25-34','35-44','45-54','55-64','65+'];
   const ageList=Object.keys(ages).sort((a,b)=>{
     const ai=ageOrder.indexOf(a),bi=ageOrder.indexOf(b);
@@ -1115,7 +1004,6 @@ async function renderDemographics(){
     return a.localeCompare(b);
   });
 
-  // Renderiza barras (escala proporcional)
   const maxTotal=Math.max(...Object.values(ages).map(a=>a.total));
   const barsHtml=ageList.map(age=>{
     const a=ages[age];
@@ -1132,7 +1020,6 @@ async function renderDemographics(){
   }).join('');
   document.getElementById('demo-bars').innerHTML=barsHtml;
 
-  // Donut de gênero
   setTimeout(()=>{
     dc('demo-donut',{type:'doughnut',data:{
       labels:['Masculino','Feminino','Outros'],
@@ -1145,6 +1032,8 @@ function renderOV(){
   const mG=groupMeta(),gG=groupGoogle();
   const mSp=mG.reduce((a,x)=>a+x.sp,0),gSp=gG.reduce((a,x)=>a+x.sp,0);
   const isBsc=cid==='bsc';
+
+  document.getElementById('ov-sub').textContent=C.seg?(C.seg+' · Meta Ads + Google Ads'):'Consolidado · Meta Ads + Google Ads';
 
   renderPeriodBanner();
   renderHero(mG,gG);
