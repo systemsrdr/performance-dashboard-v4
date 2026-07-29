@@ -362,6 +362,10 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 7.5H8.5v3h-1v-3h-3v-1h3v-3h1v3h3v1z"/></svg>
       Google Ads
     </button>
+    <button class="sb" id="sb-tiktok" onclick="showSec('tiktok',this)" style="display:none">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 1.5c.2 1.3 1 2.3 2.3 2.5v2c-.9 0-1.7-.3-2.4-.7v4.4a4 4 0 11-4-4c.2 0 .3 0 .5.1v2.1a2 2 0 101.4 1.9V1.5h2.2z"/></svg>
+      TikTok Ads
+    </button>
     <button class="sb" id="sb-ads" onclick="showSec('ads',this)">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 011-1h10a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V2zm2 0v8l2.5-2 2 2.5 2-3 2 2.5V2H4z"/></svg>
       Anúncios
@@ -466,31 +470,29 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <div class="card" style="padding:0"><div class="chd"><div class="ctitle">Detalhamento Google Ads</div></div><div class="tw"><table class="tbl"><thead><tr><th style="width:32%">Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Conversões</th><th>CPA</th></tr></thead><tbody id="google-tb"></tbody></table></div></div>
     </div>
 
+    <!-- TIKTOK -->
+    <div class="sec" id="sec-tiktok">
+      <div class="pghd"><div class="bc">Métricas › TikTok Ads</div><div class="pgtitle">TikTok Ads</div><div class="pgsub">Performance e conversões · TikTok</div></div>
+      <div class="m4grid" id="tiktok-m4"></div>
+      <div class="g2">
+        <div class="card"><div class="chd"><div><div class="ctitle">Investimento por campanha</div></div></div><div class="cbody"><div class="cwrap" style="height:200px"><canvas id="tt-c1"></canvas></div></div></div>
+        <div class="card"><div class="chd"><div><div class="ctitle">CPA por campanha</div><div class="csub">🟢 &lt;R$50 · 🟡 &lt;R$200 · 🔴 &gt;R$200</div></div></div><div class="cbody"><div class="cwrap" style="height:200px"><canvas id="tt-c2"></canvas></div></div></div>
+      </div>
+      <div class="card" style="padding:0"><div class="chd"><div class="ctitle">Detalhamento TikTok Ads</div></div><div class="tw"><table class="tbl"><thead><tr><th style="width:32%">Campanha</th><th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Conversões</th><th>CPA</th></tr></thead><tbody id="tiktok-tb"></tbody></table></div></div>
+    </div>
+
     <!-- ADS -->
     <div class="sec" id="sec-ads">
       <div class="pghd"><div class="bc">Métricas › Anúncios</div><div class="pgtitle">Anúncios Campeões</div><div class="pgsub">Performance individual · ativo/inativo · vendas e receita confirmadas</div></div>
       <div class="m4grid" id="ads-m4"></div>
       <div class="card" style="padding:0">
         <div class="ads-sort">
-          <span class="ads-sort-l">Ver por</span>
-          <button class="qb on" onclick="setGroup('campaign',this)">📁 Campanha</button>
-          <button class="qb" onclick="setGroup('type',this)">🏷️ Tipo</button>
-          <button class="qb" onclick="setGroup('none',this)">☰ Lista</button>
-          <span style="width:1px;height:20px;background:var(--brd);margin:0 4px"></span>
-          <span class="ads-sort-l">Ordenar</span>
+          <span class="ads-sort-l">Ordenar dentro de cada bloco</span>
           <button class="qb" onclick="sortAds('spend',this)">Maior Gasto</button>
           <button class="qb on" onclick="sortAds('conv',this)">Mais Vendas</button>
           <button class="qb" onclick="sortAds('rev',this)">Maior Receita</button>
           <button class="qb" onclick="sortAds('cpa',this)">Menor CPA</button>
           <button class="qb" onclick="sortAds('ctr',this)">CTR</button>
-        </div>
-        <div class="ads-sort" style="border-top:none">
-          <span class="ads-sort-l">Tipo</span>
-          <button class="qb on" onclick="filterType('all',this)">Todos</button>
-          <button class="qb" onclick="filterType('compra',this)">🛒 Compras</button>
-          <button class="qb" onclick="filterType('msg',this)">💬 Mensagens</button>
-          <button class="qb" onclick="filterType('lead',this)">📋 Leads</button>
-          <button class="qb" onclick="filterType('trafego',this)">🖱️ Tráfego</button>
           <span style="width:1px;height:20px;background:var(--brd);margin:0 4px"></span>
           <span class="ads-sort-l">Status</span>
           <button class="qb on" onclick="filterAds('all',this)">Todos</button>
@@ -546,7 +548,7 @@ const CLIENTS_DB = {
 
 const cid=(new URLSearchParams(location.search).get('cliente')||'').toLowerCase();
 let C=null;
-let state={meta:[],google:[],ads:[],fin:{fat:0,v:0,ticket:0},prev:{mSp:0,gSp:0,rev:0,v:0,wpp:0,leads:0,conv:0},loaded:false};
+let state={meta:[],google:[],tiktok:[],ads:[],fin:{fat:0,v:0,ticket:0},prev:{mSp:0,gSp:0,rev:0,v:0,wpp:0,leads:0,conv:0},loaded:false};
 const charts={};
 
 // ── SESSÃO / LOGIN ───────────────────────────────────
@@ -593,6 +595,8 @@ window.onload=async()=>{
 function startApp(){
   document.getElementById('app').style.display='block';
   document.getElementById('nav-client').textContent=C.nome;
+  // Mostra aba TikTok só se o cliente tiver conta TikTok conectada
+  if(C.tiktokIds&&C.tiktokIds.length){document.getElementById('sb-tiktok').style.display='';}
   setQ('30d',document.getElementById('qb30'));
   fetchAll();
 }
@@ -623,20 +627,23 @@ async function fetchAll(){
     const pt=new Date(f);pt.setDate(pt.getDate()-1);
     const pfStr=iso(pf),ptStr=iso(pt);
 
-    const [mRes,mPRes,gRes,gPRes]=await Promise.all([
+    const [mRes,mPRes,gRes,gPRes,ttRes]=await Promise.all([
       fetch(`/api/data?date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,impressions,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,objective`).catch(()=>null),
       fetch(`/api/data?date_from=${pfStr}&date_to=${ptStr}&fields=source,account_id,spend,actions_omni_purchase,action_values_omni_purchase,actions_onsite_conversion_messaging_conversation_started_7d,actions_lead,conversions`).catch(()=>null),
       fetch(`/api/data?date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,impressions,clicks,ctr,cpc,conversions,cost_per_conversion`).catch(()=>null),
-      fetch(`/api/data?date_from=${pfStr}&date_to=${ptStr}&fields=source,account_id,spend,conversions`).catch(()=>null)
+      fetch(`/api/data?date_from=${pfStr}&date_to=${ptStr}&fields=source,account_id,spend,conversions`).catch(()=>null),
+      (C.tiktokIds&&C.tiktokIds.length)?fetch(`/api/data?date_from=${f}&date_to=${t}&fields=source,account_id,campaign,spend,impressions,clicks,ctr,cpc,conversions`).catch(()=>null):Promise.resolve(null)
     ]);
     const mJ=mRes?await mRes.json().catch(()=>({data:[]})):{data:[]};
     const mPJ=mPRes?await mPRes.json().catch(()=>({data:[]})):{data:[]};
     const gJ=gRes?await gRes.json().catch(()=>({data:[]})):{data:[]};
     const gPJ=gPRes?await gPRes.json().catch(()=>({data:[]})):{data:[]};
+    const ttJ=ttRes?await ttRes.json().catch(()=>({data:[]})):{data:[]};
 
     const normId=id=>String(id).replace(/-/g,'');
     state.meta=(mJ.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id)));
     state.google=(gJ.data||[]).filter(r=>C.googleIds.map(normId).includes(normId(r.account_id)));
+    state.tiktok=(C.tiktokIds&&C.tiktokIds.length)?(ttJ.data||[]).filter(r=>C.tiktokIds.map(normId).includes(normId(r.account_id))):[];
 
     const mPrev=(mPJ.data||[]).filter(r=>C.metaIds.map(normId).includes(normId(r.account_id)));
     const gPrev=(gPJ.data||[]).filter(r=>C.googleIds.map(normId).includes(normId(r.account_id)));
@@ -702,23 +709,26 @@ function cleanCamp(s){
   return String(s||'').replace(/🟢\s*/g,'').replace(/\[V4RDR&Co\]/gi,'').replace(/\[V4&Co\]/gi,'')
     .replace(/^\s*\d+#\s*/,'').replace(/\s{2,}/g,' ').trim()||'Sem campanha';
 }
-// Classifica o tipo do anúncio/campanha
+// Classifica o anúncio em 3 blocos: vendas, mensagens, trafego
 function adType(g){
   const obj=String(g.obj||'').toUpperCase();
   const nm=(g.camp+' '+g.n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  if(obj.includes('LEAD')||nm.includes('lead')||nm.includes('formulario')||g.leads>0)return'lead';
-  if(obj.includes('MESSAGE')||obj.includes('ENGAGEMENT')||nm.includes('mensagem')||nm.includes('whatsapp')||nm.includes('wpp')||(g.wpp>0&&g.pur===0))return'msg';
+  // Tráfego: objetivo de cliques/tráfego tem prioridade (não vira mensagem por 1 wpp solto)
   if(obj.includes('TRAFFIC')||obj.includes('LINK_CLICKS')||nm.includes('trafego'))return'trafego';
+  // Mensagens: objetivo de mensagem/engajamento, ou campanha claramente de WhatsApp
+  if(obj.includes('MESSAGE')||obj.includes('ENGAGEMENT')||nm.includes('mensagem')||nm.includes('whatsapp')||nm.includes('wpp'))return'msg';
+  // Vendas / compras
   if(obj.includes('SALES')||obj.includes('CONVERSION')||g.pur>0)return'compra';
-  return'outro';
+  // sem objetivo claro: se teve conversa e nenhuma venda, é mensagem; senão tráfego
+  if(g.wpp>0&&g.pur===0)return'msg';
+  return'trafego';
 }
 const AD_TYPES={
-  compra:{icon:'🛒',label:'Compras / Vendas',cor:'var(--grn)'},
-  msg:{icon:'💬',label:'Mensagens / WhatsApp',cor:'var(--blu)'},
-  lead:{icon:'📋',label:'Leads / Formulário',cor:'var(--amb)'},
-  trafego:{icon:'🖱️',label:'Tráfego / Cliques',cor:'var(--pur)'},
-  outro:{icon:'📊',label:'Outras',cor:'var(--tx3)'}
+  compra:{icon:'🛒',label:'Vendas',cor:'var(--grn)'},
+  msg:{icon:'💬',label:'Mensagens',cor:'var(--blu)'},
+  trafego:{icon:'🖱️',label:'Tráfego',cor:'var(--pur)'}
 };
+const AD_TYPE_ORDER=['compra','msg','trafego'];
 
 async function fetchAds(){
   document.getElementById('adloader').style.display='block';
@@ -817,7 +827,7 @@ function dc(id,cfg){if(charts[id])charts[id].destroy();try{const el=document.get
 const CHART_TX='#4B5563',CHART_GRID='#E8EAED';
 const BO=()=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:CHART_TX,font:{size:11,family:'Inter'}},grid:{display:false},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:11,family:'Inter'}},grid:{color:CHART_GRID},border:{display:false}}},animation:{duration:600}});
 
-function renderAll(){renderOV();renderMeta();renderGoogle();fetchAds();switchFunil('all',document.querySelector('.ftabs .qb.on'));}
+function renderAll(){renderOV();renderMeta();renderGoogle();renderTikTok();fetchAds();switchFunil('all',document.querySelector('.ftabs .qb.on'));}
 function showSec(id,btn){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.sb').forEach(b=>b.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');if(btn)btn.classList.add('on');}
 
 // ── BOX BUILDER ──────────────────────────────────────
@@ -1359,6 +1369,44 @@ function renderGoogle(){
   });
 }
 
+// ── TIKTOK ───────────────────────────────────────────
+function groupTikTok(){
+  const g={};
+  state.tiktok.forEach(r=>{
+    const k=r.campaign||'Sem campanha';
+    if(!g[k])g[k]={c:k,sp:0,imp:0,clk:0,conv:0,n:0};
+    g[k].sp+=parseFloat(r.spend||0);g[k].imp+=parseFloat(r.impressions||0);g[k].clk+=parseFloat(r.clicks||0);g[k].conv+=parseFloat(r.conversions||0);g[k].n++;
+  });
+  return Object.values(g).filter(d=>d.sp>0).map(d=>{d.cpa=d.conv>0?d.sp/d.conv:0;d.ctr=d.imp>0?d.clk/d.imp*100:0;d.cpc=d.clk>0?d.sp/d.clk:0;return d;}).sort((a,b)=>b.sp-a.sp);
+}
+function renderTikTok(){
+  if(!(C.tiktokIds&&C.tiktokIds.length))return;
+  const tG=groupTikTok();
+  const sp=tG.reduce((a,x)=>a+x.sp,0);
+  const conv=tG.reduce((a,x)=>a+x.conv,0);
+  const clk=tG.reduce((a,x)=>a+x.clk,0);
+  const imp=tG.reduce((a,x)=>a+x.imp,0);
+  const bestCpa=tG.filter(d=>d.cpa>0).length?Math.min(...tG.filter(d=>d.cpa>0).map(d=>d.cpa)):0;
+  document.getElementById('tiktok-m4').innerHTML=[
+    m4('🎵','Investimento TikTok',frr(sp),tG.length+' campanhas','','red'),
+    m4('🎯','Conversões',fn(Math.round(conv)),'CPA: '+fr(conv?sp/conv:0),'','grn'),
+    m4('🖱️','Cliques',fn(clk),imp>0?`CTR ${(clk/imp*100).toFixed(2)}%`:'','','blu'),
+    m4('🏆','Melhor CPA',bestCpa?frr(bestCpa):'—','Menor custo/conv','','amb'),
+  ].join('');
+  setTimeout(()=>{
+    const bo=BO();
+    dc('tt-c1',{type:'doughnut',data:{labels:tG.map(d=>snC(d.c,18)),datasets:[{data:tG.map(d=>Math.round(d.sp)),backgroundColor:['#000000','rgba(37,244,238,.88)','rgba(254,44,85,.88)','rgba(147,51,234,.88)','rgba(245,158,11,.88)','rgba(16,185,129,.88)'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{color:CHART_TX,font:{size:11,family:'Inter'},boxWidth:10,padding:7}}}}});
+    dc('tt-c2',{type:'bar',data:{labels:tG.map(d=>snC(d.c,16)),datasets:[{data:tG.map(d=>Math.round(d.cpa)),backgroundColor:tG.map(d=>d.cpa===0?'rgba(0,0,0,.08)':(d.cpa<50?'rgba(16,185,129,.85)':(d.cpa<200?'rgba(245,158,11,.85)':'rgba(232,0,13,.85)'))),borderRadius:9,barThickness:38}]},options:Object.assign({},bo,{scales:{x:{ticks:{color:CHART_TX,font:{size:10},maxRotation:20},grid:{display:false},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:9},callback:v=>'R$'+v},grid:{color:CHART_GRID},border:{display:false}}}})});
+  },0);
+  const tb=document.getElementById('tiktok-tb');tb.innerHTML='';
+  tG.forEach(d=>{
+    const cls=d.cpa===0?'bb':(d.cpa<50?'bg':d.cpa<200?'ba':'br');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="hi" title="${d.c}">${sn(d.c,28)}</td><td>${frr(d.sp)}</td><td>${d.imp>=1e6?(d.imp/1e6).toFixed(1)+'M':fn(d.imp||0)}</td><td>${fn(d.clk)}</td><td>${fp(d.ctr)}</td><td>R$${(d.cpc||0).toFixed(2)}</td><td>${fn(Math.round(d.conv))}</td><td>${d.cpa?`<span class="badge ${cls}">${frr(d.cpa)}</span>`:'—'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
 // ── ADS ──────────────────────────────────────────────
 function buildAdsKPI(){
   const ads=state.ads;const tsp=ads.reduce((a,x)=>a+x.sp,0);
@@ -1381,33 +1429,30 @@ function buildAdsKPI(){
   ].join('');
 }
 
-let adSort='conv', adFilter='all', adGroup='campaign', adTypeFilter='all';
+let adSort='conv', adFilter='all';
 
-function filterAds(fk,btn){adFilter=fk;btnGroupToggle(btn,/Todos|Ativos|Pausados/,'status');renderAdsGrid();}
-function filterType(tk,btn){adTypeFilter=tk;btnGroupToggle(btn,/Todos|Compras|Mensagens|Leads|Tr[áa]fego/,'type');renderAdsGrid();}
-function sortAds(sk,btn){adSort=sk;btnGroupToggle(btn,/Gasto|Vendas|Receita|CPA|CTR/,'sort');renderAdsGrid();}
-function setGroup(gk,btn){adGroup=gk;btnGroupToggle(btn,/Campanha|Tipo|Lista/,'group');renderAdsGrid();}
-// desmarca só os botões do mesmo grupo (pelo texto) e marca o clicado
-function btnGroupToggle(btn,re,tag){
+function filterAds(fk,btn){adFilter=fk;btnGroupToggle(btn,/Todos|Ativos|Pausados/);renderAdsGrid();}
+function sortAds(sk,btn){adSort=sk;btnGroupToggle(btn,/Gasto|Vendas|Receita|CPA|CTR/);renderAdsGrid();}
+function btnGroupToggle(btn,re){
   document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(re.test(b.textContent))b.classList.remove('on');});
   if(btn)btn.classList.add('on');
 }
 
 function sortAdList(list){
   let s=list.slice();
-  if(adSort==='spend')s.sort((a,b)=>b.sp-a.sp);
-  else if(adSort==='conv')s.sort((a,b)=>(b.pur||0)-(a.pur||0)||(b.wpp+b.leads)-(a.wpp+a.leads)||b.rev-a.rev);
-  else if(adSort==='rev')s.sort((a,b)=>(b.rev||0)-(a.rev||0));
+  // Sempre: quem tem venda (ou conversão) vem antes de quem tem 0
+  const conv=a=>(a.pur||0)+(a.wpp||0)+(a.leads||0);
+  if(adSort==='spend')s.sort((a,b)=>(conv(b)>0)-(conv(a)>0)||b.sp-a.sp);
+  else if(adSort==='conv')s.sort((a,b)=>conv(b)-conv(a)||b.rev-a.rev||b.sp-a.sp);
+  else if(adSort==='rev')s.sort((a,b)=>(b.rev||0)-(a.rev||0)||conv(b)-conv(a));
   else if(adSort==='cpa')s.sort((a,b)=>{const fa=a.pur?a.sp/a.pur:9e9;const fb=b.pur?b.sp/b.pur:9e9;return fa-fb;});
   else if(adSort==='ctr')s.sort((a,b)=>b.ctr-a.ctr);
   return s;
 }
-// aplica filtros de status + tipo
-function applyFilters(list){
+function applyStatus(list){
   return list.filter(a=>{
     if(adFilter==='active'&&!a.active)return false;
     if(adFilter==='paused'&&a.active)return false;
-    if(adTypeFilter!=='all'&&a.tipo!==adTypeFilter)return false;
     return true;
   });
 }
@@ -1427,7 +1472,6 @@ function adCardHTML(ad,rankLabel,highlight){
 }
 function makeAdCard(ad,rankLabel,highlight){
   const {img,stats}=adCardHTML(ad,rankLabel,highlight);
-  const tipoInfo=AD_TYPES[ad.tipo]||AD_TYPES.outro;
   const div=document.createElement('div');
   div.className='adc'+(highlight?' top1':'');
   div.onclick=()=>openLB(ad,rankLabel);
@@ -1445,6 +1489,7 @@ function makeGroupSection(titulo,icone,cor,ads,tagHtml){
   const roas=sp>0&&rev>0?rev/sp:0;
   const cpa=pur>0?sp/pur:0;
   const ativos=ads.filter(a=>a.active).length;
+  const comVenda=ads.filter(a=>(a.pur||0)+(a.wpp||0)+(a.leads||0)>0).length;
   const isEc=C.tipo==='ec';
 
   const kpis=isEc?`
@@ -1465,7 +1510,7 @@ function makeGroupSection(titulo,icone,cor,ads,tagHtml){
 
   const hd=document.createElement('div');hd.className='camp-group-hd';
   hd.innerHTML=`<span class="camp-group-chev">▼</span><span class="camp-group-icon">${icone}</span>
-    <div class="camp-group-info"><div class="camp-group-name">${titulo}</div><div class="camp-group-meta">${ads.length} criativo${ads.length!==1?'s':''} · ${ativos} ativo${ativos!==1?'s':''}</div></div>
+    <div class="camp-group-info"><div class="camp-group-name">${titulo}</div><div class="camp-group-meta">${ads.length} criativo${ads.length!==1?'s':''} · ${ativos} ativo${ativos!==1?'s':''} · ${comVenda} com resultado</div></div>
     ${tagHtml||''}
     <div class="camp-group-kpis">${kpis}</div>`;
   hd.onclick=()=>wrap.classList.toggle('collapsed');
@@ -1475,43 +1520,24 @@ function makeGroupSection(titulo,icone,cor,ads,tagHtml){
 
 function renderAdsGrid(){
   const box=document.getElementById('ad-box');box.innerHTML='';
-  const ads=applyFilters(state.ads);
+  const ads=applyStatus(state.ads);
   if(!ads.length){box.innerHTML='<div style="text-align:center;padding:48px;color:var(--tx3);font-weight:600">Nenhum anúncio para este filtro.</div>';return;}
 
-  if(adGroup==='none'){
-    // Lista simples: ativos e pausados separados
-    const wrap=document.createElement('div');wrap.style.padding='18px';
-    const grid=document.createElement('div');grid.className='ad-grid';
-    sortAdList(ads).forEach((ad,i)=>grid.appendChild(makeAdCard(ad,'#'+(i+1),i===0)));
-    wrap.appendChild(grid);box.appendChild(wrap);
-    return;
-  }
-
-  // Agrupa
-  const groups={};
-  ads.forEach(a=>{
-    const key=adGroup==='type'?a.tipo:a.camp;
-    if(!groups[key])groups[key]=[];
-    groups[key].push(a);
-  });
-  // Ordena grupos por gasto total desc
-  const entries=Object.entries(groups).map(([k,arr])=>({k,arr,sp:arr.reduce((a,x)=>a+x.sp,0)})).sort((a,b)=>b.sp-a.sp);
-
-  entries.forEach(({k,arr})=>{
-    let titulo,icone,cor,tag='';
-    if(adGroup==='type'){
-      const ti=AD_TYPES[k]||AD_TYPES.outro;
-      titulo=ti.label;icone=ti.icon;cor=ti.cor;
-    } else {
-      titulo=k;
-      // ícone pelo tipo predominante da campanha
-      const ti=AD_TYPES[arr[0].tipo]||AD_TYPES.outro;
-      icone='📁';cor='var(--tx2)';
-      tag=`<span class="camp-group-tag" style="background:var(--bg-soft2);color:${ti.cor}">${ti.icon} ${ti.label}</span>`;
-    }
-    const {wrap}=makeGroupSection(titulo,icone,cor,arr,tag);
+  // 3 blocos fixos, nesta ordem
+  const blocos=[
+    {tipo:'compra', ...AD_TYPES.compra},
+    {tipo:'msg', ...AD_TYPES.msg},
+    {tipo:'trafego', ...AD_TYPES.trafego},
+  ];
+  let algum=false;
+  blocos.forEach(b=>{
+    const arr=ads.filter(a=>a.tipo===b.tipo);
+    if(!arr.length)return;
+    algum=true;
+    const {wrap}=makeGroupSection(b.label,b.icon,b.cor,arr,'');
     box.appendChild(wrap);
   });
+  if(!algum)box.innerHTML='<div style="text-align:center;padding:48px;color:var(--tx3);font-weight:600">Nenhum anúncio para este filtro.</div>';
 }
 
 function openLB(ad,rank){
@@ -1519,8 +1545,8 @@ function openLB(ad,rank){
   const adRev=ad.rev||0, adV=ad.pur||0, adCpa=adV>0?ad.sp/adV:0;
   document.getElementById('lb-img-wrap').innerHTML=ad.img?`<img class="lb-img" src="${ad.img}" alt="${ad.n}" onerror="this.parentElement.innerHTML='<div class=\\'lb-nopic\\'>Sem imagem</div>'">`:`<div class="lb-nopic">Sem imagem</div>`;
   document.getElementById('lb-title').textContent=ad.n;
-  const tipoInfo=AD_TYPES[ad.tipo]||AD_TYPES.outro;
-  document.getElementById('lb-camp').textContent=(ad.camp?('📁 '+ad.camp):('Anúncio '+rank))+' · '+tipoInfo.icon+' '+tipoInfo.label;
+  const tipoInfo=AD_TYPES[ad.tipo]||AD_TYPES.trafego;
+  document.getElementById('lb-camp').textContent=tipoInfo.icon+' '+tipoInfo.label+(ad.camp?(' · '+ad.camp):'');
   const stEl=document.getElementById('lb-status');
   stEl.textContent=ad.active?'● Ativo agora':'● Pausado';stEl.className='lb-status '+(ad.active?'on':'off');
   document.getElementById('lb-stats').innerHTML=isEc?[
