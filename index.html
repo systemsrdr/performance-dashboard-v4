@@ -7,406 +7,207 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F4F5F7;--card:#ffffff;--bg-soft:#F9FAFB;
-  --brd:#E8EAED;--brd2:#D1D5DB;
+  --bg:#F4F5F7;--card:#fff;--bg-soft:#F9FAFB;--brd:#E8EAED;--brd2:#D1D5DB;
   --tx:#1A1A2E;--tx2:#4B5563;--tx3:#9CA3AF;
-  --red:#E8000D;--red2:#FEE2E2;--red-soft:#FF4D4D;
-  --grn:#10B981;--grn2:#D1FAE5;
-  --blu:#1877F2;--blu2:#EBF4FF;
-  --r:14px;--rs:8px;
-  --shadow:0 8px 30px rgba(0,0,0,.08);
+  --red:#E8000D;--red2:#FEE2E2;--red3:#FECACA;
+  --grn:#10B981;--blu:#1877F2;--pur:#9333EA;--amb:#F59E0B;
+  --r:14px;--rs:10px;--shadow:0 4px 16px rgba(0,0,0,.06);--shadow-lg:0 20px 60px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;color:var(--tx);font-size:14px}
-body{display:flex;flex-direction:column;min-height:100vh}
+html,body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--tx);min-height:100vh}
 
-/* ─── NAV ─────────────────────────────────────────── */
-.nav{background:#fff;border-bottom:1px solid var(--brd);padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-icon{width:34px;height:34px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(232,0,13,.25)}
-.nav-logo-text{font-size:15px;font-weight:800;color:var(--tx);letter-spacing:-.3px;line-height:1}
-.nav-logo-sub{font-size:11px;color:var(--tx3);font-weight:500;margin-top:2px;letter-spacing:.02em}
-.nav-badge{background:var(--bg-soft);border:1px solid var(--brd);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:6px}
-.nav-badge::before{content:'';width:6px;height:6px;background:var(--grn);border-radius:50%;animation:pulse 2s infinite}
+.nav{height:62px;background:#fff;border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 26px;gap:12px;position:sticky;top:0;z-index:50}
+.nav-logo{display:flex;align-items:center;gap:11px;text-decoration:none}
+.nav-logo-icon{width:32px;height:32px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(232,0,13,.25)}
+.nav-logo-text{font-size:15px;font-weight:800;color:var(--tx);letter-spacing:-.2px}
+.nav-logo-sub{font-size:10px;color:var(--tx3);font-weight:600}
+.nstatus{margin-left:auto;font-size:11px;font-weight:600;color:var(--grn);display:flex;align-items:center;gap:6px}
+.nstatus::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--grn);animation:pulse 2s infinite}
+.logout-btn{margin-left:14px;padding:7px 14px;border-radius:20px;border:1px solid var(--brd);background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:var(--tx2);font-family:inherit;transition:all .14s}
+.logout-btn:hover{background:var(--red2);color:var(--red);border-color:var(--red3)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ─── MAIN ────────────────────────────────────────── */
-.main{flex:1;max-width:1200px;margin:0 auto;padding:48px 24px;width:100%}
-.page-header{margin-bottom:32px}
-.breadcrumb{font-size:12px;color:var(--tx3);margin-bottom:10px;font-weight:500}
-.page-title{font-size:30px;font-weight:800;color:var(--tx);margin-bottom:6px;letter-spacing:-.6px}
-.page-title em{color:var(--red);font-style:normal}
-.page-sub{font-size:14px;color:var(--tx2);max-width:580px}
+.wrap{max-width:1200px;margin:0 auto;padding:40px 26px 60px}
+.bc{font-size:11px;color:var(--tx3);font-weight:600;margin-bottom:10px}
+.h1{font-size:30px;font-weight:800;letter-spacing:-.6px;margin-bottom:6px}
+.h1 em{color:var(--red);font-style:normal}
+.sub{font-size:14px;color:var(--tx2);margin-bottom:8px}
+.toolbar{display:flex;align-items:center;gap:12px;margin:26px 0 20px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;position:relative}
+.search input{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--brd);border-radius:var(--rs);font-size:14px;font-family:inherit;outline:none;background:#fff;transition:border-color .15s}
+.search input:focus{border-color:var(--red)}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--tx3)}
+.count{font-size:12px;color:var(--tx3);font-weight:600;white-space:nowrap}
 
-/* ─── TOOLBAR ─────────────────────────────────────── */
-.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap}
-.count-chip{background:#fff;border:1px solid var(--brd);border-radius:20px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--tx2)}
-.count-chip strong{color:var(--tx);font-weight:800}
-.search{flex:1;max-width:320px;background:#fff;border:1px solid var(--brd);padding:8px 14px;border-radius:20px;font-size:13px;color:var(--tx);font-family:inherit;outline:none;transition:border-color .15s}
-.search:focus{border-color:var(--red)}
-.search::placeholder{color:var(--tx3)}
-.btn-reload{background:#fff;border:1px solid var(--brd);color:var(--tx2);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .14s}
-.btn-reload:hover{background:var(--bg-soft);color:var(--tx)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.ccard{background:#fff;border:1px solid var(--brd);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .16s;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.ccard:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--brd2)}
+.ccard-stripe{position:absolute;top:0;left:0;right:0;height:3px}
+.ccard-top{display:flex;align-items:center;gap:13px}
+.ccard-av{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;letter-spacing:-.5px}
+.ccard-info{min-width:0;flex:1}
+.ccard-name{font-size:15px;font-weight:700;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ccard-seg{font-size:11px;color:var(--tx3);font-weight:500;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ccard-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:700;padding:4px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:4px}
+.tag.meta{background:#EBF4FF;color:var(--blu)}
+.tag.google{background:#FEE2E2;color:#EA4335}
+.tag.tiktok{background:#F3F4F6;color:#1A1A2E}
+.tag.type{background:#F3E8FF;color:var(--pur)}
+.ccard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:4px}
+.ccard-slug{font-size:11px;color:var(--tx3);font-weight:600;font-family:ui-monospace,monospace}
+.ccard-arrow{font-size:12px;font-weight:700;color:var(--red)}
 
-/* ─── CARDS ───────────────────────────────────────── */
-.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:20px}
-.client-card{background:#fff;border:1px solid var(--brd);border-radius:var(--r);padding:24px;cursor:pointer;transition:all .2s;text-decoration:none;display:block;position:relative;overflow:hidden;color:inherit}
-.client-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--red-soft))}
-.client-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--brd2)}
-.client-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.client-avatar{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:.5px}
-.client-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--grn);background:var(--grn2);padding:4px 10px;border-radius:20px}
-.client-status::before{content:'';width:6px;height:6px;background:var(--grn);border-radius:50%}
-.client-name{font-size:17px;font-weight:700;color:var(--tx);margin-bottom:3px;letter-spacing:-.2px}
-.client-sub{font-size:12px;color:var(--tx3);margin-bottom:14px}
-.plat-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;min-height:22px}
-.plat{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em}
-.plat-meta{background:var(--blu2);color:var(--blu)}
-.plat-google{background:#FEF2F2;color:#EA4335}
-.client-cta{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--brd)}
-.client-cta-text{font-size:13px;font-weight:700;color:var(--red)}
-.client-cta-arrow{width:28px;height:28px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;transition:transform .2s}
-.client-card:hover .client-cta-arrow{transform:translateX(3px)}
+.footer{text-align:center;font-size:12px;color:var(--tx3);margin-top:44px;font-weight:500}
+.footer b{color:var(--tx2);font-weight:700}
 
-/* ─── STATES ──────────────────────────────────────── */
-.loading{text-align:center;padding:80px 20px}
-.spinner{width:38px;height:38px;border:3px solid var(--brd);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:13px;color:var(--tx2);font-weight:500}
-.empty{text-align:center;padding:60px 20px;background:#fff;border:1px solid var(--brd);border-radius:var(--r)}
-.empty-icon{font-size:42px;margin-bottom:14px;opacity:.5}
-.empty h3{color:var(--tx);font-size:17px;font-weight:700;margin-bottom:8px}
-.empty p{color:var(--tx2);font-size:13px;line-height:1.6;max-width:520px;margin:0 auto 14px}
-.empty code{background:var(--bg-soft);padding:3px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red);border:1px solid var(--brd)}
+/* LOGIN */
+.login-ov{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#1A1A2E 0%,#2D1B4E 100%);z-index:400;align-items:center;justify-content:center;padding:20px}
+.login-ov.show{display:flex}
+.login-card{background:#fff;border-radius:18px;max-width:400px;width:100%;padding:36px 32px;box-shadow:var(--shadow-lg)}
+.login-input{width:100%;padding:13px 15px;border:1.5px solid var(--brd);border-radius:10px;font-size:15px;font-family:inherit;outline:none;margin-bottom:6px;transition:border-color .15s}
+.login-input:focus{border-color:var(--red)}
+.login-btn{width:100%;background:var(--red);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .15s}
+.login-btn:hover{opacity:.9}
 
-/* ─── FOOTER ──────────────────────────────────────── */
-footer{text-align:center;padding:24px;font-size:11px;color:var(--tx3);border-top:1px solid var(--brd);background:#fff}
-footer strong{color:var(--tx2);font-weight:700}
-
-@media(max-width:600px){.main{padding:28px 16px}.clients-grid{grid-template-columns:1fr}.nav{padding:0 20px}.page-title{font-size:24px}}
+@media(max-width:640px){.wrap{padding:26px 16px 40px}.h1{font-size:24px}.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<nav class="nav">
-  <a class="nav-logo" href="/">
-    <div class="nav-logo-icon">
-      <svg width="20" height="16" viewBox="0 0 100 80" fill="none">
-        <polygon points="15,18 50,65 85,18" fill="white"/>
-        <text x="56" y="66" font-family="Inter,sans-serif" font-weight="800" font-size="24" fill="white">4</text>
-      </svg>
+<!-- LOGIN GESTOR -->
+<div class="login-ov" id="login-ov">
+  <div class="login-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <div style="width:38px;height:38px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(232,0,13,.3)">
+        <svg width="22" height="17" viewBox="0 0 100 80" fill="none"><polygon points="15,18 50,65 85,18" fill="white"/></svg>
+      </div>
+      <div style="font-size:17px;font-weight:800;color:var(--tx);letter-spacing:-.3px">V4 Performance</div>
     </div>
-    <div>
-      <div class="nav-logo-text">V4 Performance</div>
-      <div class="nav-logo-sub">Intelligence Dashboards</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:24px">Painel do gestor · acesso interno</div>
+    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);display:block;margin-bottom:6px">Senha do gestor</label>
+    <input type="password" id="login-pass" class="login-input" placeholder="Digite a senha" autocomplete="off"
+      onkeydown="if(event.key==='Enter')doLogin()" oninput="document.getElementById('login-err').style.display='none'">
+    <div id="login-err" style="display:none;font-size:12px;color:var(--red);font-weight:600;margin-bottom:10px">✕ Senha incorreta. Tente novamente.</div>
+    <button class="login-btn" onclick="doLogin()">Entrar →</button>
+    <div style="font-size:11px;color:var(--tx3);text-align:center;margin-top:16px;line-height:1.5">Esta é a visão geral de todos os clientes.<br>Cada cliente acessa apenas o próprio painel.</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <nav class="nav">
+    <a class="nav-logo" href="./">
+      <div class="nav-logo-icon"><svg width="19" height="15" viewBox="0 0 100 80" fill="none"><polygon points="15,18 50,65 85,18" fill="white"/></svg></div>
+      <div><div class="nav-logo-text">V4 Performance</div><div class="nav-logo-sub">Intelligence Dashboards</div></div>
+    </a>
+    <span class="nstatus">Dashboards ao vivo</span>
+    <button class="logout-btn" onclick="doLogout()">Sair</button>
+  </nav>
+
+  <div class="wrap">
+    <div class="bc">Início › Clientes</div>
+    <div class="h1">Dashboards de <em>Performance</em></div>
+    <div class="sub">Selecione um cliente para acessar o painel de métricas. Dados de Meta Ads e Google Ads sincronizados via Windsor.ai.</div>
+
+    <div class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input type="text" id="search" placeholder="Buscar cliente..." oninput="renderCards()">
+      </div>
+      <span class="count" id="count"></span>
     </div>
-  </a>
-  <div class="nav-badge">Dashboards ao vivo</div>
-</nav>
 
-<main class="main">
-  <div class="page-header">
-    <div class="breadcrumb">Início › Clientes</div>
-    <div class="page-title">Dashboards de <em>Performance</em></div>
-    <div class="page-sub">Selecione um cliente para acessar o painel de métricas em tempo real. Dados de Meta Ads e Google Ads sincronizados</div>
+    <div class="grid" id="grid"></div>
+
+    <div class="footer"><b>V4 Performance</b> — Dashboards de Performance · Dados via Windsor.ai · Atualizado automaticamente</div>
   </div>
-
-  <div class="toolbar">
-    <span class="count-chip" id="count-chip">Carregando…</span>
-    <input class="search" id="search" type="search" placeholder="Buscar cliente por nome..." oninput="filterClients(this.value)">
-    <button class="btn-reload" onclick="loadClients(true)">↻ Recarregar</button>
-  </div>
-
-  <div id="content">
-    <div class="loading">
-      <div class="spinner"></div>
-      <div class="loading-text">Buscando contas conectadas no Sistema…</div>
-    </div>
-  </div>
-</main>
-
-<footer>
-  <strong>V4 Performance</strong> — Dashboards de Performance · Dados via Sistema · Atualizado automaticamente
-</footer>
+</div>
 
 <script>
 // ══════════════════════════════════════════════════════
-// CONFIG — mantenha em sincronia com index.html
+// BASE DE CLIENTES — deve ser idêntica à do dashboard.html
 // ══════════════════════════════════════════════════════
-const AK="2d4d1d577551f238260e5e6e150a4d7b4f24";
-
-// Overrides: clientes com configuração especial (planilha, segmentação)
-const OVERRIDES={
-  aliancas:{seg:"Joalheria · E-commerce",avatarColor:"#7c3aed"},
-  starman: {seg:"Provedora de Internet · Inside Sales",avatarColor:"#3B82F6"},
-  bsc:     {seg:"Logística · E-commerce B2B",avatarColor:"#10B981"},
+const CLIENTS_DB = {
+  "aliancas": { nome:"CS Alianças", seg:"Joalheria · E-commerce", tipo:"ec", metaIds:["2429115943910453"], googleIds:["670-426-5990"], tiktokIds:["7535219818488905746"] },
+  "bsc": { nome:"BSC Pickup Solutions", seg:"Logística · E-commerce B2B", tipo:"ec", metaIds:["1707098029742717","2114458526044587"], googleIds:["483-772-6517"], tiktokIds:[] },
+  "fanes-joias": { nome:"Fane's Joias", seg:"Joalheria", tipo:"ec", metaIds:["2296171467380179","474991624866547"], googleIds:[], tiktokIds:[] },
+  "magus": { nome:"Magus Industria", seg:"Indústria", tipo:"ec", metaIds:["1333183713911053"], googleIds:["855-603-9301"], tiktokIds:[] },
+  "bluefit-farol": { nome:"Bluefit Maceió Farol", seg:"Academia", tipo:"is", metaIds:["941582737278806"], googleIds:[], tiktokIds:[] },
+  "bluefit-ponta-verde": { nome:"Bluefit Maceió Ponta Verde", seg:"Academia", tipo:"is", metaIds:["1176617220163908"], googleIds:[], tiktokIds:[] },
+  "flor-da-moda": { nome:"Boutique Flor da Moda", seg:"Moda · E-commerce", tipo:"ec", metaIds:["1178022936335581","652884500240603"], googleIds:[], tiktokIds:[] },
+  "vestpe": { nome:"Vestpé Calçados", seg:"Calçados · E-commerce", tipo:"ec", metaIds:["972829204592018","548624654529285"], googleIds:[], tiktokIds:[] },
+  "toalha-bandeja": { nome:"Toalha de Bandeja", seg:"E-commerce", tipo:"ec", metaIds:["710165240805852"], googleIds:[], tiktokIds:[] },
+  "mcw": { nome:"MCW Oficina Mecânica", seg:"Automotivo · Serviços", tipo:"is", metaIds:["1434398517793607"], googleIds:[], tiktokIds:[] },
+  "gma-construtora": { nome:"GMA Construtora", seg:"Construção", tipo:"is", metaIds:["768661894629116"], googleIds:[], tiktokIds:[] },
+  "fernando-miranda": { nome:"Fernando Miranda Advogados", seg:"Advocacia · Serviços", tipo:"is", metaIds:["1141811877992643"], googleIds:[], tiktokIds:[] },
+  "newgo": { nome:"NewGo", seg:"Serviços", tipo:"is", metaIds:["1866208866909956"], googleIds:[], tiktokIds:[] },
+  "proconph": { nome:"Proconph Sistemas", seg:"Software", tipo:"is", metaIds:[], googleIds:["905-299-0911"], tiktokIds:[] }
 };
 
-// Sinônimos para casar nomes do Windsor com slugs legacy
-const SLUG_HINTS=[
-  {match:/alian|aliancas|aliança|cs joalh/i, slug:'aliancas'},
-  {match:/star.?man|starman|star man/i,      slug:'starman'},
-  {match:/bsc|pickup/i,                       slug:'bsc'},
-];
+// Senha do gestor (apenas para a home). Troque à vontade.
+const GESTOR_PASS = "Painel7184";
+const SESSION_KEY = "v4_gestor_auth";
 
-// Paleta para avatares (atribuída por hash do nome)
-const AV_COLORS=['#7c3aed','#3B82F6','#10B981','#dc2626','#ea580c','#d97706','#65a30d','#0891b2','#7c2d12','#be185d','#0284c7','#9333ea','#C084FC','#F59E0B','#14B8A6'];
-
-let CLIENTS={};
-
-// ══════════════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════════════
-function normSlug(s){
-  return String(s||'').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').substring(0,40);
+// ── LOGIN GESTOR ─────────────────────────────────────
+function isAuthed(){try{return sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){return window.__authed===true;}}
+function setAuthed(){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){window.__authed=true;}}
+function clearAuthed(){try{sessionStorage.removeItem(SESSION_KEY);}catch(e){window.__authed=false;}}
+function showLogin(){document.getElementById('login-ov').classList.add('show');setTimeout(()=>document.getElementById('login-pass').focus(),100);}
+function doLogin(){
+  const v=document.getElementById('login-pass').value.trim();
+  if(v===GESTOR_PASS){setAuthed();document.getElementById('login-ov').classList.remove('show');startApp();}
+  else{document.getElementById('login-err').style.display='block';document.getElementById('login-pass').value='';document.getElementById('login-pass').focus();}
 }
-function findOverrideSlug(name){
-  for(const h of SLUG_HINTS){ if(h.match.test(name)) return h.slug; }
-  return null;
-}
-function avatarFor(name){
-  let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;
-  return AV_COLORS[h%AV_COLORS.length];
-}
-function initials(name){
-  return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
-}
-function nameKey(s){
-  return String(s||'').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/\b(ltda|me|eireli|s\.?a|comercio|com\.|empresa|company|inc|ads|account|conta|google|meta|facebook)\b/g,'')
-    .replace(/[^a-z0-9]+/g,'').substring(0,30);
-}
-function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function doLogout(){clearAuthed();document.getElementById('app').style.display='none';document.getElementById('login-pass').value='';showLogin();}
 
-// ══════════════════════════════════════════════════════
-// FETCH WINDSOR
-// ══════════════════════════════════════════════════════
-async function loadClients(force){
-  if(force){
-    document.getElementById('content').innerHTML=
-      '<div class="loading"><div class="spinner"></div><div class="loading-text">Buscando contas conectadas no Sistema…</div></div>';
-    document.getElementById('count-chip').textContent='Carregando…';
-  }
-  CLIENTS={};
+// ── AVATAR / CORES ───────────────────────────────────
+const AV_COLORS=['#E8000D','#1877F2','#10B981','#9333EA','#F59E0B','#EA4335','#0EA5E9','#EC4899'];
+function initials(name){return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';}
+function colorFor(slug){let h=0;for(let i=0;i<slug.length;i++)h=(h*31+slug.charCodeAt(i))>>>0;return AV_COLORS[h%AV_COLORS.length];}
 
-  // Endpoint oficial: retorna todas as contas conectadas (Meta + Google + ...)
-  // Doc: https://windsor.ai/api-documentation/
-  let allAccounts=[];
-  let fetchOk=false;
-  try{
-    const url='/api/accounts';
-    console.log('[Proxy] Buscando:',url);
-    const res=await fetch(url);
-    console.log('[Proxy] Status:',res.status);
-    if(res.ok){
-      const j=await res.json();
-      console.log('[Proxy] Resposta bruta:',j);
-      allAccounts=extractLinkedAccounts(j);
-      console.log('[Proxy] Contas extraídas:',allAccounts.length,allAccounts);
-      fetchOk=allAccounts.length>0;
-    } else {
-      const txt=await res.text().catch(()=>'');
-      console.warn('[Proxy] Erro HTTP',res.status,txt.substring(0,200));
-    }
-  }catch(e){
-    console.error('[Proxy] Erro de fetch:',e);
-  }
+// ── RENDER ───────────────────────────────────────────
+function renderCards(){
+  const q=(document.getElementById('search').value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const grid=document.getElementById('grid');
+  const entries=Object.entries(CLIENTS_DB).filter(([slug,c])=>{
+    if(!q)return true;
+    const hay=(c.nome+' '+(c.seg||'')+' '+slug).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return hay.includes(q);
+  }).sort((a,b)=>a[1].nome.localeCompare(b[1].nome));
 
-  // Separa por datasource
-  const metaAccounts=allAccounts.filter(a=>/face|meta/i.test(a.datasource||''));
-  const googleAccounts=allAccounts.filter(a=>/google.?ads/i.test(a.datasource||''));
-  console.log('[Windsor] Meta:',metaAccounts.length,'· Google:',googleAccounts.length);
+  document.getElementById('count').textContent=entries.length+' de '+Object.keys(CLIENTS_DB).length+' clientes';
 
-  // Mescla por nome (fuzzy)
-  const byKey={};
-  metaAccounts.forEach(a=>{
-    const k=nameKey(a.name)||('meta-'+a.id);
-    if(!byKey[k])byKey[k]={nome:a.name,metaIds:[],googleIds:[]};
-    byKey[k].metaIds.push(String(a.id));
-  });
-  googleAccounts.forEach(a=>{
-    const k=nameKey(a.name)||('google-'+a.id);
-    if(!byKey[k])byKey[k]={nome:a.name,metaIds:[],googleIds:[]};
-    else if(a.name.length>byKey[k].nome.length){byKey[k].nome=a.name;}
-    byKey[k].googleIds.push(String(a.id));
-  });
-
-  Object.values(byKey).forEach(c=>{
-    const overrideSlug=findOverrideSlug(c.nome);
-    const slug=overrideSlug||normSlug(c.nome);
-    if(!slug)return;
-    const ov=OVERRIDES[overrideSlug]||{};
-    CLIENTS[slug]={
-      nome:c.nome,
-      seg:ov.seg||(c.metaIds.length&&c.googleIds.length?'Meta Ads + Google Ads':(c.metaIds.length?'Meta Ads':'Google Ads')),
-      avatar:initials(c.nome),
-      avatarColor:ov.avatarColor||avatarFor(c.nome),
-      metaIds:c.metaIds,
-      googleIds:c.googleIds,
-      isLegacy:!!overrideSlug,
-    };
-  });
-
-  // Fallback se Windsor falhou
-  if(Object.keys(CLIENTS).length===0){
-    console.warn('[Windsor] Lista vazia — usando fallback estático');
-    CLIENTS={
-      aliancas:{nome:"Alianças CS",seg:OVERRIDES.aliancas.seg,avatar:"AC",avatarColor:OVERRIDES.aliancas.avatarColor,metaIds:["2429115943910453"],googleIds:["670-426-5990"],isLegacy:true},
-      starman: {nome:"Star Man Net",seg:OVERRIDES.starman.seg, avatar:"SM",avatarColor:OVERRIDES.starman.avatarColor, metaIds:["465598168178564"], googleIds:["683-577-4127"],isLegacy:true},
-      bsc:     {nome:"BSC Pickup Solutions",seg:OVERRIDES.bsc.seg,avatar:"BS",avatarColor:OVERRIDES.bsc.avatarColor,metaIds:["1707098029742717"],googleIds:["483-772-6517"],isLegacy:true},
-    };
-  } else {
-    // Garante que legacy estão presentes
-    const legacy={
-      aliancas:{nome:"Alianças CS",metaIds:["2429115943910453"],googleIds:["670-426-5990"]},
-      starman: {nome:"Star Man Net",metaIds:["465598168178564"],googleIds:["683-577-4127"]},
-      bsc:     {nome:"BSC Pickup Solutions",metaIds:["1707098029742717"],googleIds:["483-772-6517"]},
-    };
-    Object.entries(legacy).forEach(([slug,L])=>{
-      if(!CLIENTS[slug]){
-        const ov=OVERRIDES[slug]||{};
-        CLIENTS[slug]={nome:L.nome,seg:ov.seg||'',avatar:initials(L.nome),avatarColor:ov.avatarColor||avatarFor(L.nome),metaIds:L.metaIds,googleIds:L.googleIds,isLegacy:true};
-      }
-    });
-  }
-
-  console.log('[CLIENTS]',CLIENTS);
-  renderClients();
-}
-
-// Parsa resposta do endpoint /api/team/co-user-linked-accounts/
-// Formato esperado: [{datasource, account_name, account_id, status}, ...]
-// Mas pode vir em diferentes envelopes (data:[...], accounts:[...], etc)
-function extractLinkedAccounts(json){
-  if(!json)return [];
-  let arr=null;
-  if(Array.isArray(json)) arr=json;
-  else if(Array.isArray(json.data)) arr=json.data;
-  else if(Array.isArray(json.accounts)) arr=json.accounts;
-  else if(Array.isArray(json.connectors)) arr=json.connectors;
-  else if(Array.isArray(json.linked_accounts)) arr=json.linked_accounts;
-  else if(Array.isArray(json.results)) arr=json.results;
-  if(!arr) return [];
-
-  // Caso 1: array de contas direto [{datasource, account_id, account_name}]
-  // Caso 2: array de conectores [{connector_id/datasource, accounts:[{id,name}]}]
-  const out=[];
-  for(const item of arr){
-    if(!item)continue;
-    // Sub-array de contas dentro de um conector
-    if(Array.isArray(item.accounts)){
-      const ds=String(item.datasource||item.connector_id||item.connector||item.id||'').toLowerCase();
-      for(const a of item.accounts){
-        const id=a.account_id||a.id||a.value;
-        const name=a.account_name||a.name||a.label||String(id||'');
-        if(!id||!name)continue;
-        out.push({id:String(id),name:String(name),datasource:ds});
-      }
-      continue;
-    }
-    // Conta avulsa
-    const id=item.account_id||item.id||item.value;
-    const name=item.account_name||item.name||item.label||String(id||'');
-    const datasource=item.datasource||item.data_source||item.source||item.connector||item.connector_id||'';
-    const status=item.status||'active';
-    if(!id||!name)continue;
-    if(status&&!/active/i.test(status))continue;
-    out.push({id:String(id),name:String(name),datasource:String(datasource).toLowerCase()});
-  }
-  return out;
-}
-
-function extractAccounts(json){
-  if(!json)return [];
-  if(Array.isArray(json)) return json.map(normAcc).filter(Boolean);
-  if(Array.isArray(json.data)) return json.data.map(normAcc).filter(Boolean);
-  if(Array.isArray(json.accounts)) return json.accounts.map(normAcc).filter(Boolean);
-  if(json.fields){
-    const f=json.fields.find(x=>x.key==='account_id'||x.key==='accounts');
-    if(f && Array.isArray(f.values)) return f.values.map(normAcc).filter(Boolean);
-  }
-  if(typeof json==='object'){
-    return Object.entries(json).map(([id,v])=>{
-      if(typeof v==='string') return {id,name:v};
-      if(typeof v==='object'&&v) return {id:v.id||id, name:v.name||v.account_name||id};
-      return null;
-    }).filter(Boolean);
-  }
-  return [];
-}
-function normAcc(a){
-  if(!a)return null;
-  const id=a.id||a.account_id||a.value;
-  const name=a.name||a.account_name||a.label||a.title||(id?String(id):null);
-  if(!id||!name)return null;
-  return {id:String(id),name:String(name)};
-}
-
-// ══════════════════════════════════════════════════════
-// RENDER
-// ══════════════════════════════════════════════════════
-function renderClients(){
-  const list=Object.entries(CLIENTS);
-  const content=document.getElementById('content');
-  const chip=document.getElementById('count-chip');
-
-  chip.innerHTML=`<strong>${list.length}</strong> cliente${list.length!==1?'s':''} conectado${list.length!==1?'s':''}`;
-
-  if(list.length===0){
-    content.innerHTML=`
-      <div class="empty">
-        <div class="empty-icon">📭</div>
-        <h3>Nenhum cliente encontrado</h3>
-        <p>Não foi possível listar contas conectadas. Verifique a configuração do sistema e tente novamente.</p>
-        <button class="btn-reload" onclick="loadClients(true)">↻ Tentar novamente</button>
-      </div>`;
-    return;
-  }
-
-  // Ordena: legacy primeiro, depois alfabético
-  list.sort((a,b)=>{
-    if(a[1].isLegacy&&!b[1].isLegacy)return -1;
-    if(b[1].isLegacy&&!a[1].isLegacy)return 1;
-    return a[1].nome.localeCompare(b[1].nome);
-  });
-
-  const html=list.map(([slug,cl])=>{
-    const plats=[];
-    if(cl.metaIds&&cl.metaIds.length)plats.push('<span class="plat plat-meta">Meta Ads</span>');
-    if(cl.googleIds&&cl.googleIds.length)plats.push('<span class="plat plat-google">Google Ads</span>');
-    return `<a class="client-card" href="/dashboard.html?cliente=${encodeURIComponent(slug)}" data-name="${escapeHtml(cl.nome.toLowerCase())}">
-      <div class="client-card-header">
-        <div class="client-avatar" style="background:${cl.avatarColor}">${escapeHtml(cl.avatar)}</div>
-        <span class="client-status">Ativo</span>
+  grid.innerHTML=entries.map(([slug,c])=>{
+    const col=colorFor(slug);
+    const tags=[];
+    if(c.metaIds&&c.metaIds.length)tags.push(`<span class="tag meta">Meta ${c.metaIds.length>1?'×'+c.metaIds.length:''}</span>`);
+    if(c.googleIds&&c.googleIds.length)tags.push(`<span class="tag google">Google</span>`);
+    if(c.tiktokIds&&c.tiktokIds.length)tags.push(`<span class="tag tiktok">TikTok</span>`);
+    tags.push(`<span class="tag type">${c.tipo==='ec'?'E-commerce':'Inside Sales'}</span>`);
+    return `<a class="ccard" href="dashboard.html?cliente=${slug}">
+      <div class="ccard-stripe" style="background:${col}"></div>
+      <div class="ccard-top">
+        <div class="ccard-av" style="background:${col}">${initials(c.nome)}</div>
+        <div class="ccard-info">
+          <div class="ccard-name">${c.nome}</div>
+          <div class="ccard-seg">${c.seg||'—'}</div>
+        </div>
       </div>
-      <div class="client-name">${escapeHtml(cl.nome)}</div>
-      <div class="client-sub">${escapeHtml(cl.seg||'\u00a0')}</div>
-      <div class="plat-row">${plats.join('')}</div>
-      <div class="client-cta">
-        <span class="client-cta-text">Abrir dashboard</span>
-        <div class="client-cta-arrow">→</div>
+      <div class="ccard-tags">${tags.join('')}</div>
+      <div class="ccard-foot">
+        <span class="ccard-slug">?cliente=${slug}</span>
+        <span class="ccard-arrow">Abrir →</span>
       </div>
     </a>`;
   }).join('');
-
-  content.innerHTML=`<div class="clients-grid">${html}</div>`;
 }
 
-function filterClients(q){
-  q=(q||'').toLowerCase().trim();
-  document.querySelectorAll('.client-card').forEach(el=>{
-    const n=el.getAttribute('data-name')||'';
-    el.style.display=(!q||n.includes(q))?'':'none';
-  });
-}
+function startApp(){document.getElementById('app').style.display='block';renderCards();}
 
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
-window.onload=()=>loadClients(false);
+window.onload=()=>{
+  if(isAuthed())startApp();
+  else showLogin();
+};
 </script>
 </body>
 </html>
