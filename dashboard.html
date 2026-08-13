@@ -266,12 +266,17 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 
 /* ─── FUNIL ─── */
 .funil-outer{padding:18px 20px 14px;overflow-x:auto}
-.funil-row{display:flex;align-items:flex-end;gap:5px;height:160px;min-width:480px}
-.fblock{flex:1;border-radius:10px 10px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:filter .14s;cursor:default}
+.funil-row{display:flex;align-items:flex-end;gap:5px;height:190px;min-width:480px}
+.fcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.fabove{min-height:20px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px}
+.fnum-out{font-size:15px;font-weight:800;color:var(--tx);letter-spacing:-.3px;line-height:1}
+.fblock{border-radius:10px 10px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:filter .14s;cursor:default;overflow:hidden}
+.fblock-mini{justify-content:flex-start;padding-top:3px}
 .fblock:hover{filter:brightness(1.08)}
 .fnum{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.3px;line-height:1;margin-bottom:3px}
 .flbl{font-size:9px;font-weight:600;color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.05em;text-align:center;padding:0 4px}
 .frate{font-size:9px;font-weight:700;background:rgba(0,0,0,.22);color:rgba(255,255,255,.95);border-radius:8px;padding:2px 7px;margin-top:4px}
+.frate-dark{background:rgba(0,0,0,.35)}
 .funil-footer{display:flex;gap:5px;min-width:480px;margin-top:5px}
 .ffoot{flex:1;text-align:center;background:var(--bg-soft);border-radius:0 0 8px 8px;padding:7px 4px;border:1px solid var(--brd);border-top:none}
 .ffv{font-size:11px;font-weight:700;color:var(--tx)}
@@ -554,9 +559,14 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
       <div class="m4grid" id="ads-m4"></div>
       <div class="card" style="padding:0">
         <div class="ads-sort">
-          <span class="ads-sort-l">Ordenar dentro de cada bloco</span>
+          <span class="ads-sort-l">Campanha</span>
+          <select id="ads-camp-select" class="di" style="min-width:200px;max-width:340px" onchange="filterCamp(this.value)">
+            <option value="__all__">Todas as campanhas</option>
+          </select>
+          <span style="width:1px;height:20px;background:var(--brd);margin:0 4px"></span>
+          <span class="ads-sort-l">Ordenar</span>
           <button class="qb" onclick="sortAds('spend',this)">Maior Gasto</button>
-          <button class="qb on" onclick="sortAds('conv',this)">Mais Vendas</button>
+          <button class="qb on" onclick="sortAds('conv',this)">Mais Result.</button>
           <button class="qb" onclick="sortAds('rev',this)">Maior Receita</button>
           <button class="qb" onclick="sortAds('cpa',this)">Menor CPA</button>
           <button class="qb" onclick="sortAds('ctr',this)">CTR</button>
@@ -1001,7 +1011,16 @@ function dc(id,cfg){if(charts[id])charts[id].destroy();try{const el=document.get
 const CHART_TX='#4B5563',CHART_GRID='#E8EAED';
 const BO=()=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:CHART_TX,font:{size:11,family:'Inter'}},grid:{display:false},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:11,family:'Inter'}},grid:{color:CHART_GRID},border:{display:false}}},animation:{duration:600}});
 
-function renderAll(){renderOV();renderMeta();renderGoogle();renderTikTok();fetchAds();switchFunil('all',document.querySelector('.ftabs .qb.on'));}
+function renderAll(){
+  // 1) Render imediato do que já temos em memória (rápido, sem rede)
+  renderOV();renderMeta();renderGoogle();renderTikTok();
+  switchFunil('all',document.querySelector('.ftabs .qb.on'));
+  // 2) Anúncios são uma chamada de rede extra e pesada — dispara depois,
+  //    sem travar a tela. O usuário já vê os KPIs enquanto isso carrega.
+  const loader=document.getElementById('adloader');
+  if(loader)loader.style.display='block';
+  setTimeout(()=>{fetchAds();},50);
+}
 function showSec(id,btn){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.sb').forEach(b=>b.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');if(btn)btn.classList.add('on');if(id==='overview'&&geoMap){setTimeout(()=>geoMap.invalidateSize(),100);}}
 
 // ── BOX BUILDER ──────────────────────────────────────
@@ -1349,12 +1368,21 @@ function switchFunil(plat,btn){
   const COLS=['#1F2937','#374151','#1E3A8A','#E8000D','#10B981'];
   const mV=steps[0]&&steps[0].v||1;
   const fN=v=>v>=1e6?(v/1e6).toFixed(1)+'M':(v>=1000?(v/1000).toFixed(1)+'k':fn(v));
-  const bH=v=>v===0?12:Math.round(12+Math.log(v+1)/Math.log(mV+1)*88);
+  const bH=v=>v===0?10:Math.round(10+Math.log(v+1)/Math.log(mV+1)*90);
   let row='<div class="funil-row">',foot='<div class="funil-footer">';
   steps.forEach((s,i)=>{
     const h=bH(s.v),r=i>0&&steps[i-1].v>0?(s.v/steps[i-1].v*100):100;
     const cStr=s.sp&&s.v>0?' · CPA '+fr(s.sp/s.v):'';
-    row+=`<div class="fblock" style="height:${h}%;background:${COLS[Math.min(i,COLS.length-1)]}"><div class="fnum">${fN(s.v)}</div><div class="flbl">${s.l}</div>${i>0?`<div class="frate">${r.toFixed(2)}%</div>`:''}</div>`;
+    // Se a barra for baixa demais para caber o texto dentro, joga o número/label PARA CIMA da barra.
+    const curto = h < 34;
+    const inner = curto
+      ? `<div class="fnum">${fN(s.v)}</div>${i>0?`<div class="frate frate-dark">${r.toFixed(2)}%</div>`:''}`
+      : `<div class="fnum">${fN(s.v)}</div><div class="flbl">${s.l}</div>${i>0?`<div class="frate">${r.toFixed(2)}%</div>`:''}`;
+    row+=`<div class="fcol">`
+      + (curto?`<div class="fabove"><div class="fnum-out">${fN(s.v)}</div></div>`:`<div class="fabove"></div>`)
+      + `<div class="fblock${curto?' fblock-mini':''}" style="height:${h}%;background:${COLS[Math.min(i,COLS.length-1)]}">`
+      + (curto?`${i>0?`<div class="frate frate-dark">${r.toFixed(2)}%</div>`:''}`:inner)
+      + `</div></div>`;
     foot+=`<div class="ffoot"><div class="ffv">${fn(s.v)}</div><div class="ffl">${s.l}${cStr}</div></div>`;
   });
   document.getElementById('funil-body').innerHTML=`<div class="funil-outer">${row}</div>${foot}</div>`;
@@ -1564,7 +1592,7 @@ async function fetchAds(){
   try{
     const LEADF='actions_lead,actions_leadgen_grouped,actions_onsite_conversion_lead_grouped,actions_offsite_conversion_fb_pixel_lead,actions_complete_registration';
     const MSGF='actions_onsite_conversion_messaging_conversation_started_7d,actions_onsite_conversion_total_messaging_connection';
-    const url=`/api/data?date_from=${f}&date_to=${t}&fields=source,account_id,campaign,ad_name,ad_id,ad_status,thumbnail_url,creative_url,spend,impressions,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,${MSGF},${LEADF}`;
+    const url=`/api/data?date_from=${f}&date_to=${t}&fields=source,account_id,campaign,ad_name,ad_id,ad_status,ad_effective_status,thumbnail_url,creative_url,spend,impressions,clicks,ctr,cpc,actions_omni_purchase,action_values_omni_purchase,${MSGF},${LEADF}`;
     const res=await fetch(url).catch(()=>null);
     const j=res?await res.json().catch(()=>({data:[]})):{data:[]};
     const normId=id=>String(id).replace(/-/g,'');
@@ -1572,6 +1600,7 @@ async function fetchAds(){
   }catch(e){console.error('[Ads]',e);adsRaw=[];}
   if(loader)loader.style.display='none';
   buildAdsKPI();
+  fillCampSelect();
   renderAdsGrid();
 }
 function adKey(r){return (r.ad_id||r.ad_name||'')+'|'+(r.campaign||'');}
@@ -1579,7 +1608,7 @@ function groupAds(){
   const m={};
   adsRaw.forEach(r=>{
     const k=adKey(r);
-    if(!m[k])m[k]={id:r.ad_id||'',name:r.ad_name||'Sem nome',camp:r.campaign||'',status:(r.ad_status||'').toUpperCase(),thumb:r.thumbnail_url||r.creative_url||'',sp:0,imp:0,clk:0,pur:0,rev:0,wpp:0,leads:0};
+    if(!m[k])m[k]={id:r.ad_id||'',name:r.ad_name||'Sem nome',camp:r.campaign||'',status:(r.ad_effective_status||r.ad_status||'').toString().toUpperCase(),thumb:r.thumbnail_url||r.creative_url||'',sp:0,imp:0,clk:0,pur:0,rev:0,wpp:0,leads:0};
     const a=m[k];
     a.sp+=parseFloat(r.spend||0);a.imp+=parseFloat(r.impressions||0);a.clk+=parseFloat(r.clicks||0);
     a.pur+=parseFloat(r.actions_omni_purchase||0);a.rev+=parseFloat(r.action_values_omni_purchase||0);
@@ -1590,7 +1619,11 @@ function groupAds(){
     a.ctr=a.imp>0?a.clk/a.imp*100:0;a.cpc=a.clk>0?a.sp/a.clk:0;
     a.conv=a.pur+a.wpp+a.leads;
     a.cpa=a.conv>0?a.sp/a.conv:0;
-    a.active=a.status==='ACTIVE'||a.status==='ativo'.toUpperCase();
+    // "Ativo" = entregando agora (effective_status ACTIVE) OU teve gasto no período (rodou de fato).
+    // Só é "pausado" se o status diz pausado/arquivado E não gastou nada no período.
+    const st=a.status;
+    const naoAtivo=/PAUSED|ARCHIVED|DELETED|DISABLED|ADSET_PAUSED|CAMPAIGN_PAUSED|WITH_ISSUES|PENDING/.test(st);
+    a.active = st==='ACTIVE' || (a.sp>0 && !naoAtivo) || (!st && a.sp>0);
     a.type=a.pur>0?'compra':(a.wpp>=a.leads&&a.wpp>0?'msg':(a.leads>0?'lead':'trafego'));
     return a;
   });
@@ -1612,32 +1645,41 @@ function buildAdsKPI(){
 }
 function sortAds(k,btn){adsSort=k;document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(b.textContent.match(/Gasto|Vendas|Receita|CPA|CTR/))b.classList.remove('on');});if(btn)btn.classList.add('on');renderAdsGrid();}
 function filterAds(k,btn){adsFilter=k;document.querySelectorAll('.ads-sort .qb').forEach(b=>{if(b.textContent.match(/Todos|Ativos|Pausados/))b.classList.remove('on');});if(btn)btn.classList.add('on');renderAdsGrid();}
+let adsCamp='__all__';
+function filterCamp(v){adsCamp=v;renderAdsGrid();}
+function fillCampSelect(){
+  const sel=document.getElementById('ads-camp-select');
+  if(!sel)return;
+  const ads=groupAds();
+  // campanhas únicas ordenadas por gasto
+  const byCamp={};
+  ads.forEach(a=>{const c=a.camp||'Sem campanha';if(!byCamp[c])byCamp[c]={c:c,sp:0,n:0};byCamp[c].sp+=a.sp;byCamp[c].n++;});
+  const camps=Object.values(byCamp).sort((a,b)=>b.sp-a.sp);
+  const cur=sel.value||'__all__';
+  let opts=`<option value="__all__">Todas as campanhas (${ads.length} anúncios)</option>`;
+  camps.forEach(c=>{opts+=`<option value="${c.c.replace(/"/g,'&quot;')}">${sn(c.c,44)} (${c.n})</option>`;});
+  sel.innerHTML=opts;
+  // preserva seleção se ainda existir
+  if(cur!=='__all__'&&camps.some(c=>c.c===cur))sel.value=cur; else {sel.value='__all__';adsCamp='__all__';}
+}
 function renderAdsGrid(){
   let ads=groupAds();
   if(adsFilter==='active')ads=ads.filter(a=>a.active);
   else if(adsFilter==='paused')ads=ads.filter(a=>!a.active);
+  if(adsCamp&&adsCamp!=='__all__')ads=ads.filter(a=>(a.camp||'Sem campanha')===adsCamp);
   const sorters={spend:(a,b)=>b.sp-a.sp,conv:(a,b)=>b.conv-a.conv,rev:(a,b)=>b.rev-a.rev,cpa:(a,b)=>(a.cpa||9e9)-(b.cpa||9e9),ctr:(a,b)=>b.ctr-a.ctr};
-  const types={compra:{icon:'🛒',label:'Vendas / Compras'},msg:{icon:'💬',label:'Mensagens / WhatsApp'},lead:{icon:'📋',label:'Leads / Formulário'},trafego:{icon:'🖱️',label:'Tráfego / Outros'}};
-  const grouped={};
-  ads.forEach(a=>{if(!grouped[a.type])grouped[a.type]=[];grouped[a.type].push(a);});
-  const order=['compra','msg','lead','trafego'];
+  ads.sort(sorters[adsSort]||sorters.conv);
   const box=document.getElementById('ad-box');
-  let html='';
-  order.forEach(type=>{
-    const list=grouped[type];
-    if(!list||!list.length)return;
-    list.sort(sorters[adsSort]||sorters.conv);
-    const info=types[type];
-    const gsp=list.reduce((a,x)=>a+x.sp,0),gconv=list.reduce((a,x)=>a+x.conv,0),grev=list.reduce((a,x)=>a+x.rev,0);
-    html+=`<div class="camp-group"><div class="camp-group-hd" onclick="this.parentNode.classList.toggle('collapsed')">
-      <span class="camp-group-chev">▼</span><span class="camp-group-icon">${info.icon}</span>
-      <div class="camp-group-info"><div class="camp-group-name">${info.label}</div><div class="camp-group-meta">${list.length} anúncios · ${fr(gsp)} investido</div></div>
-      <div class="camp-group-kpis"><div class="cgk"><div class="cgk-l">Result.</div><div class="cgk-v grn">${fn(gconv)}</div></div>${grev>0?`<div class="cgk"><div class="cgk-l">Receita</div><div class="cgk-v">${fr(grev)}</div></div>`:''}</div>
-    </div><div class="camp-group-body"><div class="ad-grid">`;
-    list.forEach((a,i)=>{html+=makeAdCard(a,i);});
-    html+=`</div></div></div>`;
-  });
-  box.innerHTML=html||'<div style="text-align:center;padding:48px;color:var(--tx3);font-size:13px;font-weight:600">Nenhum anúncio encontrado para o período.</div>';
+  if(!ads.length){box.innerHTML='<div style="text-align:center;padding:48px;color:var(--tx3);font-size:13px;font-weight:600">Nenhum anúncio encontrado para o filtro selecionado.</div>';return;}
+  const gsp=ads.reduce((a,x)=>a+x.sp,0),gconv=ads.reduce((a,x)=>a+x.conv,0),grev=ads.reduce((a,x)=>a+x.rev,0),gact=ads.filter(a=>a.active).length;
+  let html=`<div class="camp-group-hd" style="cursor:default">
+    <span class="camp-group-icon">🎬</span>
+    <div class="camp-group-info"><div class="camp-group-name">${adsCamp==='__all__'?'Todos os anúncios':sn(adsCamp,50)}</div><div class="camp-group-meta">${ads.length} anúncios · ${gact} ativos · ${fr(gsp)} investido</div></div>
+    <div class="camp-group-kpis"><div class="cgk"><div class="cgk-l">Result.</div><div class="cgk-v grn">${fn(gconv)}</div></div>${grev>0?`<div class="cgk"><div class="cgk-l">Receita</div><div class="cgk-v">${fr(grev)}</div></div>`:''}</div>
+  </div><div style="padding:16px 20px"><div class="ad-grid">`;
+  ads.forEach((a,i)=>{html+=makeAdCard(a,i);});
+  html+=`</div></div>`;
+  box.innerHTML=html;
 }
 function makeAdCard(a,i){
   const isEc=C.tipo==='ec';
