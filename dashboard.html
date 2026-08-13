@@ -92,6 +92,23 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
 
 /* ─── VS COMPARISON ─── */
 .vs-card{background:#fff;border:1px solid var(--brd);border-radius:var(--r);padding:0;margin-bottom:16px;overflow:hidden}
+.bcmp{display:flex;flex-direction:column;gap:14px}
+.bcmp-row{display:grid;grid-template-columns:1fr 128px 1fr;align-items:center;gap:10px}
+.bcmp-metric{text-align:center;grid-column:2;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.bcmp-metric .bcmp-metric-sub{font-size:9px;font-weight:600;color:var(--tx3);text-transform:none;letter-spacing:0;margin-top:2px}
+.bcmp-side{display:flex;flex-direction:column;gap:4px}
+.bcmp-side.ours{align-items:flex-end}
+.bcmp-side.mkt{align-items:flex-start}
+.bcmp-val{font-size:17px;font-weight:800;letter-spacing:-.3px;line-height:1}
+.bcmp-val.ours{color:#1877F2}
+.bcmp-val.mkt{color:var(--tx3)}
+.bcmp-bar{height:9px;border-radius:6px;min-width:6px;transition:width .4s}
+.bcmp-bar.ours{background:linear-gradient(90deg,#1877F2,#4a9bff)}
+.bcmp-bar.mkt{background:#d1d5db}
+.bcmp-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:2px}
+.bcmp-tag.win{background:rgba(16,185,129,.14);color:#059669}
+.bcmp-tag.lose{background:rgba(232,0,13,.12);color:#dc2626}
+.bcmp-tag.mid{background:rgba(107,114,128,.14);color:#6b7280}
 .vs-hd{padding:16px 20px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
 .vs-hd-l{font-size:14px;font-weight:700;color:var(--tx);letter-spacing:-.2px}
 .vs-hd-r{font-size:11px;font-weight:600;color:var(--tx3)}
@@ -459,6 +476,15 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
           <div class="vs-hd-r" id="vs-period">—</div>
         </div>
         <div id="vs-rows"></div>
+      </div>
+
+      <div id="bench-section" style="display:none">
+        <div class="sec-block-hd"><span class="sec-block-title">📊 Nossos Resultados vs Mercado</span><div class="sec-block-line"></div></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="chd"><div><div class="ctitle">Comparativo com Benchmarks de Mercado</div><div class="csub" id="bench-sub">Meta Ads · o que fazemos hoje vs. a média do setor</div></div></div>
+          <div id="bench-body" style="padding:8px 20px 18px"></div>
+          <div style="padding:0 20px 16px;font-size:10px;color:var(--tx3);line-height:1.5">Referências de mercado são médias aproximadas do setor para campanhas de geração de leads/mensagens no Meta Ads, usadas como norte comparativo. Valores reais variam por nicho, região e período.</div>
+        </div>
       </div>
 
       <div class="card">
@@ -1228,6 +1254,55 @@ function renderVS(mG,gG){
   document.getElementById('vs-rows').innerHTML=rows.join('');
 }
 
+// Benchmarks aproximados de mercado (Meta Ads, geração de leads/mensagens).
+// Usados como referência comparativa — não são metas oficiais do cliente.
+const MKT_BENCH={ ctr:1.20, cpc:0.90, cpl:9.00, cpm:11.00 };
+function renderBenchmark(mG){
+  const mSp=mG.reduce((a,x)=>a+x.sp,0);
+  const mImp=mG.reduce((a,x)=>a+(x.imp||0),0);
+  const mClk=mG.reduce((a,x)=>a+(x.clk||0),0);
+  const mWpp=mG.reduce((a,x)=>a+(x.wpp||0),0);
+  const mLeads=mG.reduce((a,x)=>a+(x.leads||0),0);
+  const mRes=mWpp+mLeads;
+  const ours={
+    ctr: mImp>0?mClk/mImp*100:0,
+    cpc: mClk>0?mSp/mClk:0,
+    cpl: mRes>0?mSp/mRes:0,
+    cpm: mImp>0?mSp/mImp*1000:0
+  };
+  // Ajusta benchmark de CPL/CPC/CPM para a moeda do cliente (valores base em unidade da moeda local)
+  const bench={ctr:MKT_BENCH.ctr,cpc:MKT_BENCH.cpc,cpl:MKT_BENCH.cpl,cpm:MKT_BENCH.cpm};
+  // linhas: para CTR maior é melhor; para custos menor é melhor
+  const defs=[
+    {k:'ctr', label:'CTR', sub:'Taxa de cliques', hi:true,  fmt:v=>v.toFixed(2)+'%'},
+    {k:'cpc', label:'CPC', sub:'Custo por clique', hi:false, fmt:v=>_simb()+v.toFixed(2)},
+    {k:'cpm', label:'CPM', sub:'Custo por mil impr.', hi:false, fmt:v=>_simb()+v.toFixed(2)},
+    {k:'cpl', label:'Custo por Resultado', sub:'WhatsApp + Leads', hi:false, fmt:v=>_simb()+v.toFixed(2)},
+  ];
+  let html='<div class="bcmp">';
+  html+=`<div class="bcmp-row"><div class="bcmp-side ours" style="font-size:11px;font-weight:800;color:#1877F2">NÓS HOJE</div><div class="bcmp-metric" style="color:var(--tx3)">MÉTRICA</div><div class="bcmp-side mkt" style="font-size:11px;font-weight:800;color:var(--tx3)">MERCADO</div></div>`;
+  defs.forEach(d=>{
+    const o=ours[d.k], b=bench[d.k];
+    // largura relativa das barras (normaliza pelo maior dos dois)
+    const mx=Math.max(o,b)||1;
+    const ow=Math.max(6,o/mx*100), bw=Math.max(6,b/mx*100);
+    // quem "ganha": para hi=true, maior é melhor; senão menor é melhor
+    let tag,tagCls;
+    if(o===0){tag='sem dados';tagCls='mid';}
+    else if(d.hi){ if(o>=b){tag='acima do mercado';tagCls='win';} else {tag='abaixo do mercado';tagCls='lose';} }
+    else { if(o<=b){tag='melhor que o mercado';tagCls='win';} else {tag='acima do mercado';tagCls='lose';} }
+    html+=`<div class="bcmp-row">
+      <div class="bcmp-side ours"><div class="bcmp-val ours">${d.fmt(o)}</div><div class="bcmp-bar ours" style="width:${ow}%"></div><div class="bcmp-tag ${tagCls}">${tag}</div></div>
+      <div class="bcmp-metric">${d.label}<div class="bcmp-metric-sub">${d.sub}</div></div>
+      <div class="bcmp-side mkt"><div class="bcmp-val mkt">${d.fmt(b)}</div><div class="bcmp-bar mkt" style="width:${bw}%"></div></div>
+    </div>`;
+  });
+  html+='</div>';
+  document.getElementById('bench-body').innerHTML=html;
+  const sub=document.getElementById('bench-sub');
+  if(sub)sub.textContent=`Meta Ads · ${mRes} resultado${mRes===1?'':'s'} no período · o que fazemos hoje vs. a média do setor`;
+}
+
 // ─── DEMOGRAPHICS ──────────────────────────────────
 async function renderDemographics(){
   const section=document.getElementById('demo-section');
@@ -1280,7 +1355,19 @@ function renderOV(){
   renderPeriodBanner();
   renderHero(mG,gG);
   renderObjetivos();
-  renderVS(mG,gG);
+  // Meta vs Google só faz sentido se o cliente roda os dois. Se não houver Google,
+  // mostramos o comparativo "Nós vs Mercado" (mais útil para contas só-Meta).
+  const temGoogle=(C.googleIds&&C.googleIds.length>0)&&gSp>0;
+  const vsEl=document.getElementById('vs-section'), benchEl=document.getElementById('bench-section');
+  if(temGoogle){
+    if(vsEl)vsEl.style.display='';
+    if(benchEl)benchEl.style.display='none';
+    renderVS(mG,gG);
+  } else {
+    if(vsEl)vsEl.style.display='none';
+    if(benchEl)benchEl.style.display='block';
+    renderBenchmark(mG);
+  }
   renderGeo();
   renderDemographics();
 
@@ -1619,11 +1706,14 @@ function groupAds(){
     a.ctr=a.imp>0?a.clk/a.imp*100:0;a.cpc=a.clk>0?a.sp/a.clk:0;
     a.conv=a.pur+a.wpp+a.leads;
     a.cpa=a.conv>0?a.sp/a.conv:0;
-    // "Ativo" = entregando agora (effective_status ACTIVE) OU teve gasto no período (rodou de fato).
-    // Só é "pausado" se o status diz pausado/arquivado E não gastou nada no período.
+    // Status vindo do Meta (effective_status preferido, senão ad_status).
+    // ACTIVE = ativo/entregando; qualquer outro valor conhecido = pausado.
+    // Se o campo vier vazio, usamos gasto como pista (gastou = estava ativo).
     const st=a.status;
-    const naoAtivo=/PAUSED|ARCHIVED|DELETED|DISABLED|ADSET_PAUSED|CAMPAIGN_PAUSED|WITH_ISSUES|PENDING/.test(st);
-    a.active = st==='ACTIVE' || (a.sp>0 && !naoAtivo) || (!st && a.sp>0);
+    if(st==='ACTIVE') a.active=true;
+    else if(/PAUSED|ARCHIVED|DELETED|DISABLED|ADSET_PAUSED|CAMPAIGN_PAUSED|WITH_ISSUES|PENDING|IN_PROCESS|CAMPAIGN_GROUP_PAUSED/.test(st)) a.active=false;
+    else a.active = a.sp>0; // status desconhecido: gastou => tratamos como ativo
+    a.statusLabel = a.active ? 'Ativo' : 'Pausado';
     a.type=a.pur>0?'compra':(a.wpp>=a.leads&&a.wpp>0?'msg':(a.leads>0?'lead':'trafego'));
     return a;
   });
@@ -1633,13 +1723,14 @@ function buildAdsKPI(){
   const isEc=C.tipo==='ec';
   const sp=ads.reduce((a,x)=>a+x.sp,0);
   const active=ads.filter(a=>a.active).length;
+  const paused=ads.length-active;
   const totalConv=ads.reduce((a,x)=>a+x.conv,0);
   const totalRev=ads.reduce((a,x)=>a+x.rev,0);
   const best=ads.filter(a=>a.conv>0).sort((a,b)=>b.conv-a.conv)[0];
   document.getElementById('ads-m4').innerHTML=[
-    m4('🎬','Anúncios',fn(ads.length),`${active} ativos · ${ads.length-active} pausados`,'','red'),
-    m4('💻','Investimento',fr(sp),`${ads.length} criativos`,'','blu'),
-    isEc?m4('🛒','Vendas',fn(totalConv),`Receita ${fr(totalRev)}`,'','grn'):m4('🎯','Resultados',fn(totalConv),'WPP + Leads','','grn'),
+    m4('🎬','Anúncios',fn(ads.length),`<span style="color:var(--grn);font-weight:700">🟢 ${active} ativos</span> · <span style="color:var(--red);font-weight:700">🔴 ${paused} pausados</span>`,'','red'),
+    m4('💻','Investimento',fr(sp),`${ads.length} criativos no período`,'','blu'),
+    isEc?m4('🛒','Vendas',fn(totalConv),`Receita ${fr(totalRev)}`,'','grn'):m4('🎯','Resultados',fn(totalConv),'WhatsApp + Leads','','grn'),
     m4('🏆','Top Criativo',best?snC(best.name,14):'—',best?`${fn(best.conv)} result.`:'','','amb'),
   ].join('');
 }
@@ -1670,7 +1761,12 @@ function renderAdsGrid(){
   const sorters={spend:(a,b)=>b.sp-a.sp,conv:(a,b)=>b.conv-a.conv,rev:(a,b)=>b.rev-a.rev,cpa:(a,b)=>(a.cpa||9e9)-(b.cpa||9e9),ctr:(a,b)=>b.ctr-a.ctr};
   ads.sort(sorters[adsSort]||sorters.conv);
   const box=document.getElementById('ad-box');
-  if(!ads.length){box.innerHTML='<div style="text-align:center;padding:48px;color:var(--tx3);font-size:13px;font-weight:600">Nenhum anúncio encontrado para o filtro selecionado.</div>';return;}
+  if(!ads.length){
+    let msg='Nenhum anúncio encontrado para o filtro selecionado.';
+    if(adsFilter==='paused')msg='Nenhum anúncio pausado com dados neste período. Anúncios pausados só aparecem se tiveram entrega (gasto/impressões) dentro do intervalo de datas selecionado — tente um período mais amplo.';
+    else if(adsFilter==='active')msg='Nenhum anúncio ativo com dados neste período.';
+    box.innerHTML=`<div style="text-align:center;padding:48px 32px;color:var(--tx3);font-size:13px;font-weight:600;line-height:1.6;max-width:560px;margin:0 auto">${msg}</div>`;return;
+  }
   const gsp=ads.reduce((a,x)=>a+x.sp,0),gconv=ads.reduce((a,x)=>a+x.conv,0),grev=ads.reduce((a,x)=>a+x.rev,0),gact=ads.filter(a=>a.active).length;
   let html=`<div class="camp-group-hd" style="cursor:default">
     <span class="camp-group-icon">🎬</span>
