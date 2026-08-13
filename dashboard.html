@@ -515,7 +515,10 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;c
         <div class="sec-block"><div class="sec-block-hd"><span class="sec-block-title">💬 WhatsApp (Mensagens)</span><div class="sec-block-line"></div></div><div class="m4grid-5" id="meta-bsc-wpp"></div></div>
       </div>
       <div class="m4grid" id="meta-m4"></div>
-      <div class="card"><div class="chd"><div><div class="ctitle">Gasto vs Conversão por campanha</div></div></div><div class="cbody"><div class="cwrap" id="meta-cwrap"><canvas id="meta-c"></canvas></div></div></div>
+      <div class="g2">
+        <div class="card" style="margin-bottom:0"><div class="chd"><div><div class="ctitle">Gasto vs Conversão por campanha</div><div class="csub" id="meta-c-sub">Top 8 campanhas por investimento</div></div></div><div class="cbody"><div class="cwrap" id="meta-cwrap"><canvas id="meta-c"></canvas></div></div></div>
+        <div class="card" style="margin-bottom:0"><div class="chd"><div><div class="ctitle" id="meta-c2t">Distribuição do Investimento</div><div class="csub">Participação de cada campanha no gasto</div></div></div><div class="cbody"><div class="cwrap" style="height:300px"><canvas id="meta-c2"></canvas></div></div></div>
+      </div>
       <div class="card" style="padding:0">
         <div class="chd"><div><div class="ctitle">Campanhas por tipo</div><div class="csub">Separadas para evitar confusão de métricas</div></div><div class="camp-tab-bar" id="camp-tabs"></div></div>
         <div id="camp-sections"></div>
@@ -1409,16 +1412,31 @@ function renderMeta(){
     document.getElementById('meta-m4').style.display='';
     document.getElementById('meta-m4').innerHTML=build4(mG,gG);
   }
-  const h=Math.max(220,mG.length*44+60);
+  // Top 8 campanhas por gasto para o gráfico principal (evita barra gigante)
+  const TOPN=8;
+  const topM=mG.slice(0,TOPN);
+  const restM=mG.slice(TOPN);
+  const subEl=document.getElementById('meta-c-sub');
+  if(subEl)subEl.textContent=mG.length>TOPN?`Top ${TOPN} de ${mG.length} campanhas por investimento`:`${mG.length} campanha${mG.length===1?'':'s'} · por investimento`;
+  const h=Math.max(220,topM.length*40+70);
   document.getElementById('meta-cwrap').style.height=h+'px';
   setTimeout(()=>{
     const bo=BO();
-    const lbl=mG.map(d=>snC(d.c,20));
+    const lbl=topM.map(d=>snC(d.c,20));
     if(isEc){
-      dc('meta-c',{type:'bar',data:{labels:lbl,datasets:[{label:'Receita',data:mG.map(d=>Math.round(d.rev||0)),backgroundColor:'rgba(16,185,129,.8)',borderRadius:5,barThickness:11},{label:'Gasto',data:mG.map(d=>Math.round(d.sp)),backgroundColor:'rgba(232,0,13,.65)',borderRadius:5,barThickness:11}]},options:Object.assign({},bo,{indexAxis:'y',plugins:{legend:{display:true,labels:{color:CHART_TX,font:{size:11},boxWidth:8,padding:8}}},scales:{x:{ticks:{color:CHART_TX,font:{size:9},callback:v=>_simb()+(v/1000).toFixed(0)+'k'},grid:{color:CHART_GRID},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:9}},grid:{display:false},border:{display:false}}}})});
+      dc('meta-c',{type:'bar',data:{labels:lbl,datasets:[{label:'Receita',data:topM.map(d=>Math.round(d.rev||0)),backgroundColor:'rgba(16,185,129,.8)',borderRadius:5,barThickness:12},{label:'Gasto',data:topM.map(d=>Math.round(d.sp)),backgroundColor:'rgba(232,0,13,.65)',borderRadius:5,barThickness:12}]},options:Object.assign({},bo,{indexAxis:'y',plugins:{legend:{display:true,labels:{color:CHART_TX,font:{size:11},boxWidth:8,padding:8}}},scales:{x:{ticks:{color:CHART_TX,font:{size:9},callback:v=>_simb()+(v/1000).toFixed(0)+'k'},grid:{color:CHART_GRID},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:10}},grid:{display:false},border:{display:false}}}})});
     }else{
-      dc('meta-c',{type:'bar',data:{labels:lbl,datasets:[{label:'WhatsApp',data:mG.map(d=>d.wpp||0),backgroundColor:'rgba(232,0,13,.8)',borderRadius:5,barThickness:13},{label:'Leads',data:mG.map(d=>d.leads||0),backgroundColor:'rgba(16,185,129,.8)',borderRadius:5,barThickness:13}]},options:Object.assign({},bo,{indexAxis:'y',plugins:{legend:{display:true,labels:{color:CHART_TX,font:{size:11},boxWidth:8,padding:8}}},scales:{x:{ticks:{color:CHART_TX,font:{size:9}},grid:{color:CHART_GRID},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:9}},grid:{display:false},border:{display:false}}}})});
+      dc('meta-c',{type:'bar',data:{labels:lbl,datasets:[{label:'WhatsApp',data:topM.map(d=>d.wpp||0),backgroundColor:'rgba(232,0,13,.8)',borderRadius:5,barThickness:14},{label:'Leads',data:topM.map(d=>d.leads||0),backgroundColor:'rgba(16,185,129,.8)',borderRadius:5,barThickness:14}]},options:Object.assign({},bo,{indexAxis:'y',plugins:{legend:{display:true,labels:{color:CHART_TX,font:{size:11},boxWidth:8,padding:8}}},scales:{x:{ticks:{color:CHART_TX,font:{size:9}},grid:{color:CHART_GRID},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:10}},grid:{display:false},border:{display:false}}}})});
     }
+    // Donut: distribuição do investimento (top 6 + "Outras")
+    const DN=6;
+    const dtop=mG.slice(0,DN);
+    const drest=mG.slice(DN);
+    const dLabels=dtop.map(d=>snC(d.c,18));
+    const dData=dtop.map(d=>Math.round(d.sp));
+    if(drest.length){dLabels.push('Outras ('+drest.length+')');dData.push(Math.round(drest.reduce((a,x)=>a+x.sp,0)));}
+    const donutCols=['rgba(232,0,13,.88)','rgba(24,119,242,.88)','rgba(16,185,129,.88)','rgba(245,158,11,.88)','rgba(147,51,234,.88)','rgba(236,72,153,.88)','rgba(156,163,175,.7)'];
+    dc('meta-c2',{type:'doughnut',data:{labels:dLabels,datasets:[{data:dData,backgroundColor:donutCols,borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:CHART_TX,font:{size:10,family:'Inter'},boxWidth:9,padding:7}},tooltip:{callbacks:{label:ctx=>ctx.label+': '+_simb()+ctx.parsed.toLocaleString(_loc())}}}}});
   },0);
   const types={compra:{icon:'🛒',label:'Campanhas de Compras / Vendas'},msg:{icon:'💬',label:'Campanhas de Mensagens / WhatsApp'},lead:{icon:'📋',label:'Campanhas de Leads / Formulário'},outro:{icon:'📊',label:'Outras Campanhas'}};
   const grouped={};
