@@ -688,9 +688,11 @@ function showLogin(){
   document.getElementById('login-ov').classList.add('show');
   setTimeout(()=>document.getElementById('login-pass').focus(),100);
 }
+// Senha-mestra de administrador: abre QUALQUER cliente sem precisar da senha individual.
+const ADMIN_PASS="AdminM";
 function doLogin(){
   const val=document.getElementById('login-pass').value.trim();
-  if(C && val===C.pass){
+  if(C && (val===C.pass || val===ADMIN_PASS)){
     setAuthed(cid);
     document.getElementById('login-ov').classList.remove('show');
     startApp();
@@ -1098,7 +1100,7 @@ function build4(mG,gG){
   return [
     m4('💻','Investimento Meta',fr(mSp),`Google: ${fr(gSp)} · Total: ${fr(totalSp)}`,deltaHtml(mSp,p.mSp),'red','Gasto total no Meta Ads.'),
     m4('💬','Mensagens WPP',fn(allWpp),'CPA: '+fr(allWpp>0?cpaMsg:0),deltaHtml(allWpp,p.wpp),'amb','Conversas WhatsApp.'),
-    m4('📋','Leads',fn(allLeads),'CPL: '+fr(allLeads>0?cpaLead:0),deltaHtml(allLeads,p.leads),'grn','Leads (formulário, pixel, CRM).'),
+    m4('📋','Leads (MQL)','CPA '+fr(allLeads>0?cpaLead:0),`${fn(allLeads)} leads · custo por lead`,deltaHtml(allLeads,p.leads),'grn','Custo por lead (CPA/MQL): Gasto ÷ Leads.'),
     m4('🎯','Conv. Google',fn(Math.round(gConv)),'CPA: '+fr(gConv>0?gSp/gConv:0),deltaHtml(gConv,p.conv),'blu','Conversões Google Ads.'),
   ].join('');
 }
@@ -1343,7 +1345,20 @@ async function renderDemographics(){
     return `<div class="demo-bar-row"><div class="demo-bar-age">${age}</div><div class="demo-bar-track"><div class="demo-bar-m" style="width:${mPct/2}%">${a.male>0?fn(a.male):''}</div><div class="demo-bar-f" style="width:${fPct/2}%">${a.female>0?fn(a.female):''}</div></div><div class="demo-bar-val">${fn(a.total)}</div></div>`;
   }).join('');
   setTimeout(()=>{
-    dc('demo-donut',{type:'doughnut',data:{labels:['Masculino','Feminino','Outros'],datasets:[{data:[genders.male,genders.female,genders.unknown],backgroundColor:['#1877F2','#EC4899','#9CA3AF'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:CHART_TX,font:{size:11,family:'Inter'},boxWidth:10,padding:8}}}}});
+    const gTotal=(genders.male||0)+(genders.female||0)+(genders.unknown||0);
+    const gLabelPlugin={id:'gLabels',afterDatasetsDraw(chart){
+      const{ctx}=chart;const meta=chart.getDatasetMeta(0);if(!meta||!meta.data)return;
+      meta.data.forEach((arc,i)=>{
+        const v=chart.data.datasets[0].data[i];if(!v||gTotal===0)return;
+        const pct=v/gTotal*100;if(pct<4)return;
+        const p=arc.tooltipPosition();
+        ctx.save();ctx.fillStyle='#fff';ctx.font='700 12px Inter';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(pct.toFixed(0)+'%',p.x,p.y-6);
+        ctx.font='600 10px Inter';ctx.fillText(fn(v),p.x,p.y+7);
+        ctx.restore();
+      });
+    }};
+    dc('demo-donut',{type:'doughnut',data:{labels:['Masculino','Feminino','Outros'],datasets:[{data:[genders.male,genders.female,genders.unknown],backgroundColor:['#1877F2','#EC4899','#9CA3AF'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:CHART_TX,font:{size:11,family:'Inter'},boxWidth:10,padding:8}}}},plugins:[gLabelPlugin]});
   },0);
 }
 
@@ -1428,9 +1443,13 @@ function renderOV(){
       dc('ov-c2',{type:'bar',data:{labels:topR.map(d=>snC(d.c,14)),datasets:[{label:'Receita',data:topR.map(d=>Math.round(d.rev)),backgroundColor:'rgba(16,185,129,.8)',borderRadius:5,barThickness:14},{label:'Gasto',data:topR.map(d=>Math.round(d.sp)),backgroundColor:'rgba(232,0,13,.6)',borderRadius:5,barThickness:14}]},options:Object.assign({},bo,{plugins:{legend:{display:true,labels:{color:CHART_TX,font:{size:11},boxWidth:8,padding:8}}},scales:{x:{ticks:{color:CHART_TX,font:{size:9},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:9},callback:v=>_simb()+(v/1000).toFixed(0)+'k'},grid:{color:CHART_GRID},border:{display:false}}}})});
     }else{
       document.getElementById('ov-c2t').textContent='Conversões por campanha';
-      document.getElementById('ov-c2s').textContent='WPP + Leads';
+      document.getElementById('ov-c2s').textContent='WPP + Leads · campanhas com resultado';
       dc('ov-c1',{type:'bar',data:{labels:['Meta Ads','Google Ads'],datasets:[{data:[mSp2,gSp2],backgroundColor:['rgba(24,119,242,.85)','rgba(234,67,53,.85)'],borderRadius:10,barThickness:52}]},options:Object.assign({},bo,{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:CHART_TX,font:{size:11},callback:v=>_simb()+(v/1000).toFixed(0)+'k'},grid:{color:CHART_GRID},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:13,weight:'600'}},grid:{display:false},border:{display:false}}}})});
-      dc('ov-c2',{type:'bar',data:{labels:mG.map(d=>snC(d.c,14)),datasets:[{label:'WhatsApp',data:mG.map(d=>d.wpp||0),backgroundColor:'rgba(232,0,13,.8)',borderRadius:4,barThickness:12},{label:'Leads',data:mG.map(d=>d.leads||0),backgroundColor:'rgba(16,185,129,.8)',borderRadius:4,barThickness:12}]},options:Object.assign({},bo,{plugins:{legend:{display:true,labels:{color:CHART_TX,font:{size:11},boxWidth:8,padding:8}}},scales:{x:{ticks:{color:CHART_TX,font:{size:9},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:9}},grid:{color:CHART_GRID},border:{display:false}}}})});
+      // Só campanhas que tiveram conversão (WPP ou Leads), ordenadas pelo total, top 10 — horizontal para legibilidade
+      const convC=mG.map(d=>({c:d.c,wpp:d.wpp||0,leads:d.leads||0,tot:(d.wpp||0)+(d.leads||0)})).filter(d=>d.tot>0).sort((a,b)=>b.tot-a.tot).slice(0,10);
+      const cwrap=document.getElementById('ov-c2').parentNode;
+      if(cwrap&&cwrap.classList.contains('cwrap'))cwrap.style.height=Math.max(200,convC.length*34+60)+'px';
+      dc('ov-c2',{type:'bar',data:{labels:convC.map(d=>snC(d.c,20)),datasets:[{label:'Leads',data:convC.map(d=>d.leads),backgroundColor:'rgba(16,185,129,.85)',borderRadius:5,barThickness:13},{label:'WhatsApp',data:convC.map(d=>d.wpp),backgroundColor:'rgba(232,0,13,.8)',borderRadius:5,barThickness:13}]},options:Object.assign({},bo,{indexAxis:'y',plugins:{legend:{display:true,labels:{color:CHART_TX,font:{size:11},boxWidth:8,padding:8}}},scales:{x:{ticks:{color:CHART_TX,font:{size:9}},grid:{color:CHART_GRID},border:{display:false}},y:{ticks:{color:CHART_TX,font:{size:10}},grid:{display:false},border:{display:false}}}})});
     }
   },0);
 }
