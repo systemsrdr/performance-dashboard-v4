@@ -10,7 +10,7 @@
   --bg:#F4F5F7;--card:#fff;--bg-soft:#F9FAFB;--brd:#E8EAED;--brd2:#D1D5DB;
   --tx:#1A1A2E;--tx2:#4B5563;--tx3:#9CA3AF;
   --red:#E8000D;--red2:#FEE2E2;--red3:#FECACA;
-  --grn:#10B981;--blu:#1877F2;--pur:#9333EA;--amb:#F59E0B;
+  --grn:#10B981;--blu:#1877F2;--pur:#9333EA;--amb:#F59E0B;--ink:#111014;
   --r:14px;--rs:10px;--shadow:0 4px 16px rgba(0,0,0,.06);--shadow-lg:0 20px 60px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -55,6 +55,7 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--tx);mi
 .tag.tiktok{background:#F3F4F6;color:#1A1A2E}
 .tag.type{background:#F3E8FF;color:var(--pur)}
 .tag.pais{background:#ECFDF5;color:#059669}
+.tag.fonte{background:#FEE2E2;color:var(--red)}
 .ccard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:4px}
 .ccard-slug{font-size:11px;color:var(--tx3);font-weight:600;font-family:ui-monospace,monospace}
 .ccard-arrow{font-size:12px;font-weight:700;color:var(--red)}
@@ -127,28 +128,28 @@ html,body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--tx);mi
 <script>
 // ══════════════════════════════════════════════════════
 // BASE DE CLIENTES — deve ser idêntica à do dashboard.html
-// (sem os campos pass/sheet, que ficam só no dashboard)
+// (sem os campos pass/sheet/funilSheet, que ficam só no dashboard)
+// funilSource é replicado aqui só para exibir a tag da fonte no card.
 // ══════════════════════════════════════════════════════
 const CLIENTS_DB = {
-  "aliancas": { nome:"CS Alianças", seg:"Joalheria · E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["2429115943910453"], googleIds:["670-426-5990"], tiktokIds:["7535219818488905746"] },
-  "hd-clinic": { nome:"HD Clinic Lisboa", seg:"Clínica Estética · Serviços", tipo:"is", moeda:"EUR", pais:"PT", metaIds:["551980310485773"], googleIds:[], tiktokIds:[] },
-  "bsc": { nome:"BSC Pickup Solutions", seg:"Logística · E-commerce B2B", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["1707098029742717","2114458526044587"], googleIds:["483-772-6517"], tiktokIds:[] },
-  "fanes-joias": { nome:"Fane's Joias", seg:"Joalheria", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["2296171467380179","474991624866547"], googleIds:[], tiktokIds:[] },
-  "magus": { nome:"Magus Industria", seg:"Indústria", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["1333183713911053"], googleIds:["855-603-9301"], tiktokIds:[] },
-  "bluefit-farol": { nome:"Bluefit Maceió Farol", seg:"Academia", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["941582737278806"], googleIds:[], tiktokIds:[] },
-  "bluefit-ponta-verde": { nome:"Bluefit Maceió Ponta Verde", seg:"Academia", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1176617220163908"], googleIds:[], tiktokIds:[] },
-  "flor-da-moda": { nome:"Boutique Flor da Moda", seg:"Moda · E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["1178022936335581","652884500240603"], googleIds:[], tiktokIds:[] },
-  "vestpe": { nome:"Vestpé Calçados", seg:"Calçados · E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["972829204592018","548624654529285"], googleIds:[], tiktokIds:[] },
-  "toalha-bandeja": { nome:"Toalha de Bandeja", seg:"E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["710165240805852"], googleIds:[], tiktokIds:[] },
-  "mcw": { nome:"MCW Oficina Mecânica", seg:"Automotivo · Serviços", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1434398517793607"], googleIds:[], tiktokIds:[] },
-  "gma-construtora": { nome:"GMA Construtora", seg:"Construção", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["768661894629116"], googleIds:[], tiktokIds:[] },
-  "fernando-miranda": { nome:"Fernando Miranda Advogados", seg:"Advocacia · Serviços", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1141811877992643"], googleIds:[], tiktokIds:[] },
-  "newgo": { nome:"NewGo", seg:"Serviços", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1866208866909956"], googleIds:[], tiktokIds:[] },
-  "proconph": { nome:"Proconph Sistemas", seg:"Software", tipo:"is", moeda:"BRL", pais:"BR", metaIds:[], googleIds:["905-299-0911"], tiktokIds:[] }
+  "aliancas": { nome:"CS Alianças", seg:"Joalheria · E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["2429115943910453"], googleIds:["670-426-5990"], tiktokIds:["7535219818488905746"], funilSource:"shopify" },
+  "hd-clinic": { nome:"HD Clinic Lisboa", seg:"Clínica Estética · Serviços", tipo:"is", moeda:"EUR", pais:"PT", metaIds:["551980310485773"], googleIds:[], tiktokIds:[], funilSource:null },
+  "bsc": { nome:"BSC Pickup Solutions", seg:"Logística · E-commerce B2B", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["1707098029742717","2114458526044587"], googleIds:["483-772-6517"], tiktokIds:[], funilSource:"tray" },
+  "fanes-joias": { nome:"Fane's Joias", seg:"Joalheria", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["2296171467380179","474991624866547"], googleIds:[], tiktokIds:[], funilSource:null },
+  "magus": { nome:"Magus Industria", seg:"Indústria", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["1333183713911053"], googleIds:["855-603-9301"], tiktokIds:[], funilSource:null },
+  "bluefit-farol": { nome:"Bluefit Maceió Farol", seg:"Academia", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["941582737278806"], googleIds:[], tiktokIds:[], funilSource:null },
+  "bluefit-ponta-verde": { nome:"Bluefit Maceió Ponta Verde", seg:"Academia", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1176617220163908"], googleIds:[], tiktokIds:[], funilSource:null },
+  "flor-da-moda": { nome:"Boutique Flor da Moda", seg:"Moda · E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["1178022936335581","652884500240603"], googleIds:[], tiktokIds:[], funilSource:null },
+  "vestpe": { nome:"Vestpé Calçados", seg:"Calçados · E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["972829204592018","548624654529285"], googleIds:[], tiktokIds:[], funilSource:null },
+  "toalha-bandeja": { nome:"Toalha de Bandeja", seg:"E-commerce", tipo:"ec", moeda:"BRL", pais:"BR", metaIds:["710165240805852"], googleIds:[], tiktokIds:[], funilSource:null },
+  "mcw": { nome:"MCW Oficina Mecânica", seg:"Automotivo · Serviços", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1434398517793607"], googleIds:[], tiktokIds:[], funilSource:"kommo" },
+  "gma-construtora": { nome:"GMA Construtora", seg:"Construção", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["768661894629116"], googleIds:[], tiktokIds:[], funilSource:null },
+  "fernando-miranda": { nome:"Fernando Miranda Advogados", seg:"Advocacia · Serviços", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1141811877992643"], googleIds:[], tiktokIds:[], funilSource:null },
+  "newgo": { nome:"NewGo", seg:"Serviços", tipo:"is", moeda:"BRL", pais:"BR", metaIds:["1866208866909956"], googleIds:[], tiktokIds:[], funilSource:null },
+  "proconph": { nome:"Proconph Sistemas", seg:"Software", tipo:"is", moeda:"BRL", pais:"BR", metaIds:[], googleIds:["905-299-0911"], tiktokIds:[], funilSource:null }
 };
 
 // Senha do gestor (home) + senha-mestra de admin.
-// AdminM abre tanto a home do gestor quanto qualquer dashboard de cliente.
 const GESTOR_PASS = "Painel7184";
 const ADMIN_PASS = "AdminM";
 const SESSION_KEY = "v4_gestor_auth";
@@ -182,6 +183,7 @@ function renderCards(){
 
   document.getElementById('count').textContent=entries.length+' de '+Object.keys(CLIENTS_DB).length+' clientes';
 
+  const fonteLbl={kommo:'Kommo',shopify:'Shopify',tray:'Tray'};
   grid.innerHTML=entries.map(([slug,c])=>{
     const col=colorFor(slug);
     const tags=[];
@@ -189,6 +191,7 @@ function renderCards(){
     if(c.googleIds&&c.googleIds.length)tags.push(`<span class="tag google">Google</span>`);
     if(c.tiktokIds&&c.tiktokIds.length)tags.push(`<span class="tag tiktok">TikTok</span>`);
     tags.push(`<span class="tag type">${c.tipo==='ec'?'E-commerce':'Inside Sales'}</span>`);
+    if(c.funilSource&&fonteLbl[c.funilSource])tags.push(`<span class="tag fonte">${fonteLbl[c.funilSource]}</span>`);
     if(c.pais&&c.pais!=='BR')tags.push(`<span class="tag pais">${c.pais}${c.moeda?' · '+c.moeda:''}</span>`);
     return `<a class="ccard" href="dashboard.html?cliente=${slug}">
       <div class="ccard-stripe" style="background:${col}"></div>
